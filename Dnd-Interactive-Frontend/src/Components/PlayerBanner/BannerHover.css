@@ -1,0 +1,7 @@
+.ImageOverlay {
+  opacity: 0;
+}
+
+.ImageOverlay:hover {
+  opacity: 0.35;
+}
