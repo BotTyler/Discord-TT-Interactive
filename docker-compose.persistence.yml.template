@@ -12,13 +12,13 @@ services:
     container_name: postgres-dev
     networks:
       - DndNetwork
-restart: unless-stopped
-environment:
-POSTGRES_PASSWORD: x
-volumes:
-- postgres-db:/var/lib/postgressql/data
-ports:
-- "5432:5432"
+    restart: unless-stopped
+    environment:
+        POSTGRES_PASSWORD: x
+    volumes:
+        - postgres-db:/var/lib/postgressql/data
+    ports:
+        - "5432:5432"
 pgadmin-dev:
   image: dpage/pgadmin4
   container_name: pgadmin-dev
