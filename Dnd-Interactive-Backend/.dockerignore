@@ -1,0 +1,23 @@
+# Node modules
+node_modules
+
+# Build output
+build
+
+# Log files
+npm-debug.log
+yarn-error.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment variables (if you are using .env files)
+.env
+
+# Version control
+.git
+.gitignore
+
+# Other files to ignore
+*.log
