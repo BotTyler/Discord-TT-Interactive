@@ -43,6 +43,7 @@ services:
       MINIO_ROOT_PASSWORD: x
     ports:
       - "9000:9000"
+      - "9001:9001"
     command: server /data --console-address ":9001"
     volumes:
       - miniofiles:/data
