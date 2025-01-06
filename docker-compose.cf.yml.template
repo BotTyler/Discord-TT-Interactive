@@ -1,0 +1,27 @@
+version: "3.3"
+
+# Public facing ports will be in the range of 1568x
+# front - 15680
+# back - 15681
+# db - 15682
+# minio - 15683
+# minioFront - 15684
+networks:
+  DndNetwork:
+    external: true
+services:
+  # Cloudflare Tunnel service
+  cloudflared-dev-frontend:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared-dev-frontend-prod
+    networks:
+      - DndNetwork
+    command: tunnel --url http://192.168.1.60:3000 # Points to your application service
+    restart: unless-stopped
+  cloudflared-dev-backend:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared-dev-backend-prod
+    networks:
+      - DndNetwork
+    command: tunnel --url http://192.168.1.60:2567 # Points to your application service
+    restart: unless-stopped

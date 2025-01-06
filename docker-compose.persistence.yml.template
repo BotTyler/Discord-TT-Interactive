@@ -1,47 +1,50 @@
-version: "1.0.0"
-
 networks:
   DndNetwork:
     external: true
 volumes:
   postgres-db:
-  minioFiles:
+  miniofiles:
+  pgadmin-data:
 services:
   postgres-dev:
     image: postgres
     container_name: postgres-dev
     networks:
       - DndNetwork
-    restart: unless-stopped
+    restart: always
     environment:
         POSTGRES_PASSWORD: x
     volumes:
         - postgres-db:/var/lib/postgressql/data
     ports:
         - "5432:5432"
-pgadmin-dev:
-  image: dpage/pgadmin4
-  container_name: pgadmin-dev
-  networks:
-    - DndNetwork
-  restart: unless-stopped
-  environment:
-    PGADMIN_DEFAULT_EMAIL: x
-    PGADMIN_DEFAULT_PASSWORD: x
-  volumes:
-    - pgadmin-data:/var/lib/pgadmin
-  ports:
-    - "5050:80"
+  pgadmin-dev:
+    image: dpage/pgadmin4
+    container_name: pgadmin-dev
+    networks:
+      - DndNetwork
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: x
+      PGADMIN_DEFAULT_PASSWORD: x
+      PGADMIN_LISTEN_PORT: 80
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres-dev
   minio:
     image: minio/minio
     container_name: minio
+    restart: always
     environment:
-      MINIO_ACCESS_KEY: x
-      MINIO_SECRET_KEY: x
+      MINIO_ROOT_USER: x
+      MINIO_ROOT_PASSWORD: x
     ports:
       - "9000:9000"
     command: server /data --console-address ":9001"
     volumes:
-      - minio_data:/data
+      - miniofiles:/data
     networks:
       - DndNetwork
