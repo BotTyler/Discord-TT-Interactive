@@ -1,0 +1,10 @@
+#RichTextOptions button {
+    height: 30px;
+    width: 35px;
+    margin: 1px;
+}
+
+RichTextOptions br {
+height: 1px;
+    border: 1px solid black;
+}

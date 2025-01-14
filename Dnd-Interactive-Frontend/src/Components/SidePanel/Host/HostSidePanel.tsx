@@ -7,6 +7,7 @@ import ChatBox from "../General/Chatbox/Chat";
 import AudioBox from "../General/AudioBox/AudioBox";
 import HealthDeathTrackerPanel from "./HealthDeathTracker/HealthDeathTrackerPanel";
 import HandoutsPanel from "./Handouts/HandoutsPanels";
+import { RichTextEditor } from "../../RichTextEditor/RichTextEditor";
 
 export default function HostSidePanel() {
   const contentList: { title: string; content: React.ReactNode }[] = [
@@ -16,6 +17,7 @@ export default function HostSidePanel() {
     { title: "Audio", content: <AudioBox /> },
     { title: "HP", content: <HealthDeathTrackerPanel /> },
     { title: "Handout", content: <HandoutsPanel /> },
+    { title: "Notes", content: <RichTextEditor /> },
   ];
   const [curContent, setContent] = React.useState<React.ReactNode>(contentList[0].content);
   return (
