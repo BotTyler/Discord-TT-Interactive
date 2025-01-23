@@ -1,21 +1,42 @@
-import { Ref, useRef } from "react";
-import RichTextInput from "./RichTextInput";
-import { RichTextOptionEnum, RichTextOptions } from "./RichTextOptions";
+import {LexicalComposer} from '@lexical/react/LexicalComposer';
+import {ContentEditable} from '@lexical/react/LexicalContentEditable';
+import {HistoryPlugin} from '@lexical/react/LexicalHistoryPlugin';
+import {LexicalErrorBoundary} from '@lexical/react/LexicalErrorBoundary';
+import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
+import Theme from './Theme';
+import { ListPlugin } from '@lexical/react/LexicalListPlugin';
+import { CheckListPlugin } from '@lexical/react/LexicalCheckListPlugin';
+import { TablePlugin } from '@lexical/react/LexicalTablePlugin';
+import { MarkdownShortcutPlugin } from '@lexical/react/LexicalMarkdownShortcutPlugin';
+import ToolbarPlugin from './plugins/ToolbarPlugin';
 
-export function RichTextEditor(){
-    const rtiRef:Ref<any> = useRef(null);
+// Catch any errors that occur during Lexical updates and log them
+// or throw them as needed. If you don't throw them, Lexical will
+// try to recover gracefully without losing user data.
+function onError(error: any) {
+    console.error(error);
+}
 
-    return <div className="w-100 h-100 d-flex flex-column">
-        <div className="h-auto w-100">
-            <RichTextOptions OnOptionClick={(option: RichTextOptionEnum)=>{
-                if(!rtiRef || !rtiRef.current) return
-                rtiRef.current.ApplyOption(option);
-            }} />
-        </div>
-        <div className="h-auto w-100" style={{flex: '1 1 auto'}}>
-            <RichTextInput ref={rtiRef} />
-        </div>
+export default function RichTextEditor() {
+    const initialConfig = {
+        namespace: 'RichTextEditor',
+        Theme,
+        onError,
+    };
 
-
-    </div>
+    return (
+        <LexicalComposer initialConfig={initialConfig}>
+            <ToolbarPlugin />
+            <RichTextPlugin
+                contentEditable={<ContentEditable />}
+                placeholder={<div>Enter some text...</div>}
+                ErrorBoundary={LexicalErrorBoundary}
+            />
+            <HistoryPlugin />
+            <ListPlugin />
+            <CheckListPlugin />
+            <TablePlugin />
+            <MarkdownShortcutPlugin />
+        </LexicalComposer>
+    );
 }

@@ -7,17 +7,17 @@ import ChatBox from "../General/Chatbox/Chat";
 import AudioBox from "../General/AudioBox/AudioBox";
 import HealthDeathTrackerPanel from "./HealthDeathTracker/HealthDeathTrackerPanel";
 import HandoutsPanel from "./Handouts/HandoutsPanels";
-import { RichTextEditor } from "../../RichTextEditor/RichTextEditor";
+import RichTextEditor from "../../RichTextEditor/RichTextEditor";
 
 export default function HostSidePanel() {
   const contentList: { title: string; content: React.ReactNode }[] = [
+    { title: "Notes", content: <RichTextEditor /> },
     { title: "Enemy List", content: <EnemyListPanel /> },
     { title: "Initiative Tracker", content: <InitiativeTrackerPanel /> },
     { title: "Chat", content: <ChatBox /> },
     { title: "Audio", content: <AudioBox /> },
     { title: "HP", content: <HealthDeathTrackerPanel /> },
     { title: "Handout", content: <HandoutsPanel /> },
-    { title: "Notes", content: <RichTextEditor /> },
   ];
   const [curContent, setContent] = React.useState<React.ReactNode>(contentList[0].content);
   return (
@@ -38,7 +38,7 @@ export default function HostSidePanel() {
           />
         </div>
         {/*  rest of content */}
-        <div className="w-100 container-fluid py-1 my-1 border rounded border-secondary overflow-auto" style={{ flex: "1 1 auto", height: "1px" }}>
+        <div className="w-100 my-1 border rounded border-secondary overflow-auto" style={{ flex: "1 1 auto", height: "1px" }}>
           {curContent}
         </div>
       </div>
