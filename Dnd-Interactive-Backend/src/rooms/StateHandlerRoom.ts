@@ -115,8 +115,24 @@ export class StateHandlerRoom extends Room<State> {
             } catch (error) {
                 console.error(error);
             }
+        });
 
-
+        this.onMessage("GetNote", (client, data) => {
+            try {
+                const inputList: ValidationInputType[] = [
+                    { name: "campaign_id", PostProcess: undefined, type: "string" },
+                ];
+                const validateParams: any = ValidateAllInputs(data, inputList);
+                const player = this.state._getPlayerBySessionId(client.sessionId);
+                if(!player) {
+                    console.error("Player not found");
+                    return;
+                }
+                // we have everything we need to save it in the database
+                NotesDB.getInstance().getExistingNote(player.userId, validateParams.campaign_id);
+            } catch (error) {
+                console.error(error);
+            }
         });
 
         // PLAYER MOVEMENT

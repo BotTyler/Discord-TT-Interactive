@@ -13,49 +13,56 @@ import { useAuthenticatedContext } from "../../../ContextProvider/useAuthenticat
  * @returns React Component used in the Interactive map of React-leaflet
  */
 export default function EnemyController({ enemy }: { enemy: Enemy }) {
-  const markerRef = React.useRef();
-  const mapContext = useGameState();
-  const authContext = useAuthenticatedContext();
-  const [position, setPosition] = React.useState<mLatLng>(mapContext.getEnemy(enemy.id + "")!.position);
-  const [size, setSize] = React.useState<number>(mapContext.getEnemy(enemy.id + "")!.size);
-  const [avatar, setAvatar] = React.useState<string>(mapContext.getEnemy(enemy.id + "")!.avatarUri);
+    const markerRef = React.useRef();
+    const mapContext = useGameState();
+    const authContext = useAuthenticatedContext();
+    const [name, setName] = React.useState<string>(mapContext.getEnemy(enemy.id + "")!.name);
+    const [position, setPosition] = React.useState<mLatLng>(mapContext.getEnemy(enemy.id + "")!.position);
+    const [size, setSize] = React.useState<number>(mapContext.getEnemy(enemy.id + "")!.size);
+    const [avatar, setAvatar] = React.useState<string>(mapContext.getEnemy(enemy.id + "")!.avatarUri);
 
-  const [update, setUpdate] = React.useState<boolean>(false);
+    const [update, setUpdate] = React.useState<boolean>(false);
 
-  React.useEffect(() => {
-    const updatePosition = (value: any) => {
-      setPosition(value.detail.val);
-    };
-    const updateSize = (value: any) => {
-      setSize(value.detail.val);
-    };
+    React.useEffect(() => {
+        const updateName = (value: any) => {
+            setName(value.detail.val);
+        }
 
-    const updateAvatar = (value: any) => {
-      setAvatar(value.detail.val);
-    };
+        const updatePosition = (value: any) => {
+            setPosition(value.detail.val);
+        };
+        const updateSize = (value: any) => {
+            setSize(value.detail.val);
+        };
 
-    window.addEventListener(`EnemyUpdate-${enemy.id}-position`, updatePosition);
-    window.addEventListener(`EnemyUpdate-${enemy.id}-size`, updateSize);
-    window.addEventListener(`EnemyUpdate-${enemy.id}-avatarUri`, updateAvatar);
+        const updateAvatar = (value: any) => {
+            setAvatar(value.detail.val);
+        };
 
-    const moveStatus = authContext.room.onMessage(`EnemyMovementConfirmation${enemy.id}`, (status: boolean) => {
-      if (status) return;
-      setUpdate((prev) => {
-        return !prev;
-      });
-    });
+        window.addEventListener(`EnemyUpdate-${enemy.id}-name`, updateName);
+        window.addEventListener(`EnemyUpdate-${enemy.id}-position`, updatePosition);
+        window.addEventListener(`EnemyUpdate-${enemy.id}-size`, updateSize);
+        window.addEventListener(`EnemyUpdate-${enemy.id}-avatarUri`, updateAvatar);
 
-    return () => {
-      moveStatus();
-      window.removeEventListener(`EnemyUpdate-${enemy.id}-position`, updatePosition);
-      window.removeEventListener(`EnemyUpdate-${enemy.id}-size`, updateSize);
-      window.removeEventListener(`EnemyUpdate-${enemy.id}-avatarUri`, updateAvatar);
-    };
-  }, []);
-  return (
-    <>
-      <EnemyMarker id={enemy.id} playerAvatar={avatar} size={size} position={L.latLng(position.lat, position.lng)} key={`EnemyMovementMarkerController-${enemy.id}`} />
-      {/* <DistanceLine MarkerRef={markerRef} size={size} color={"red"} key={`EnemyMovementLineController-${enemy.id}`} /> */}
-    </>
-  );
+        const moveStatus = authContext.room.onMessage(`EnemyMovementConfirmation${enemy.id}`, (status: boolean) => {
+            if (status) return;
+            setUpdate((prev) => {
+                return !prev;
+            });
+        });
+
+        return () => {
+            moveStatus();
+            window.removeEventListener(`EnemyUpdate-${enemy.id}-name`, updateName);
+            window.removeEventListener(`EnemyUpdate-${enemy.id}-position`, updatePosition);
+            window.removeEventListener(`EnemyUpdate-${enemy.id}-size`, updateSize);
+            window.removeEventListener(`EnemyUpdate-${enemy.id}-avatarUri`, updateAvatar);
+        };
+    }, []);
+    return (
+        <>
+            <EnemyMarker id={enemy.id} name={name} playerAvatar={avatar} size={size} position={L.latLng(position.lat, position.lng)} key={`EnemyMovementMarkerController-${enemy.id}`} />
+            {/* <DistanceLine MarkerRef={markerRef} size={size} color={"red"} key={`EnemyMovementLineController-${enemy.id}`} /> */}
+        </>
+    );
 }

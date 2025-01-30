@@ -25,7 +25,7 @@ export default function PlayArea() {
 
   const [mapData, setMapData] = React.useState<MapData | undefined>(gamestateContext.getMap());
   function displaySidePanel() {
-    const currentUserid = authContext.user.id;
+    //const currentUserid = authContext.user.id;
     //if (players.getPlayer(currentUserid) === undefined || gamestateContext.getMap() === undefined) return <Loading />;
      return <HostSidePanel />;
     if (players.getPlayer(currentUserid)!.isHost) return <HostSidePanel />;
