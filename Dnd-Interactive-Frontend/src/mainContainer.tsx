@@ -11,28 +11,31 @@ import { PlayersContextProvider } from "./ContextProvider/PlayersContext/Players
 import { GameStateContextProvider } from "./ContextProvider/GameStateContext/GameStateProvider";
 import { ErrorBoundary } from "react-error-boundary";
 import { AudioContextProvider } from "./ContextProvider/AudioContext/AudioProvider";
+import { NotesContextProvider } from "./ContextProvider/NotesContext/NotesContextProvider";
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
 root.render(
-  <>
-    {/* <React.StrictMode> */}
-    <ErrorBoundary
-      fallback={<div>Something went wrong</div>}
-      onError={(e) => {
-        console.error(e);
-      }}
-    >
-      <ErrorHandlerProvider>
-        <AuthenticatedContextProvider>
-          <AudioContextProvider>
-            <PlayersContextProvider>
-              <MessageContextProvider>
-                <GameStateContextProvider />
-              </MessageContextProvider>
-            </PlayersContextProvider>
-          </AudioContextProvider>
-        </AuthenticatedContextProvider>
-      </ErrorHandlerProvider>
-    </ErrorBoundary>
-    {/* </React.StrictMode> */}
-  </>
+    <>
+        {/* <React.StrictMode> */}
+        <ErrorBoundary
+            fallback={<div>Something went wrong</div>}
+            onError={(e) => {
+                console.error(e);
+            }}
+        >
+            <ErrorHandlerProvider>
+                <AuthenticatedContextProvider>
+                    <AudioContextProvider>
+                        <PlayersContextProvider>
+                            <MessageContextProvider>
+                                <NotesContextProvider>
+                                    <GameStateContextProvider />
+                                </NotesContextProvider>
+                            </MessageContextProvider>
+                        </PlayersContextProvider>
+                    </AudioContextProvider>
+                </AuthenticatedContextProvider>
+            </ErrorHandlerProvider>
+        </ErrorBoundary>
+        {/* </React.StrictMode> */}
+    </>
 );

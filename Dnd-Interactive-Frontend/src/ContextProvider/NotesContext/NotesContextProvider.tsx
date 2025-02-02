@@ -1,44 +1,54 @@
 import React, { createContext, useEffect } from "react";
-import { useAuthenticatedContext } from "../useAuthenticatedContext";
+import { NotesContextHandler } from "./NotesContextHandler";
 
 const NotesContext = createContext<NotesContextInterface>({
     getNotes: () => {
         console.error("NOT IMPLEMENTED");
-        return {};
+        return "";
     },
-    saveNotes: (notes: Object, campaign_id: number) => {
+    updateNote: (notes: string) => {
         console.error("NOT IMPLEMENTED");
+    },
+    status: () => {
+        return "Loading...";
     }
 
 });
 export function NotesContextProvider({ children }: { children: React.ReactNode }) {
-  const authContext = useAuthenticatedContext();
-  const notesRef = React.useRef<any>(null);
-  const [notesRefReady, setNotesRefReady] = React.useState<boolean>(false);
+    const notesRef = React.useRef<any>(null);
+    const [notesRefReady, setNotesRefReady] = React.useState<boolean>(false);
 
     useEffect(() => {
         setNotesRefReady(notesRef !== undefined);
     }, [notesRef]);
 
     const getNotes = () => {
-
-        return {};
+        if(!notesRefReady) return "";
+        return notesRef.current.getNotes();
     }
 
-    const saveNotes = (notes: Object, campaign_id: number) => {
-
+    const updateNote = (notes: string) => {
+        if(!notesRefReady) return;
+        notesRef.current.updateNote(notes);
     }
 
-  return (
-    <NotesContext.Provider value={{getNotes: getNotes, saveNotes: saveNotes}}>
-      {notesRefReady ? children : <p>Message Context Loading</p>}
-    </NotesContext.Provider>
-  );
+    const status = () => {
+        if(!notesRefReady) return "Loading";
+        return notesRef.current.saveStatus();
+    }
+
+    return (
+        <NotesContext.Provider value={{getNotes: getNotes, updateNote: updateNote, status: status}}>
+            <NotesContextHandler ref={notesRef} />
+            {notesRefReady ? children : <p>Message Context Loading</p>}
+        </NotesContext.Provider>
+    );
 }
 interface NotesContextInterface {
-    getNotes: () => Object;
-    saveNotes: (notes: Object, campaign_id: number) => void;
+    getNotes: () => string;
+    updateNote: (notes: string) => void;
+    status: () => string;
 }
 export function useNotesContext() {
-  return React.useContext(NotesContext);
+    return React.useContext(NotesContext);
 }

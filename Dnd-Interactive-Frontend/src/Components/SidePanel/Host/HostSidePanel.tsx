@@ -11,7 +11,7 @@ import RichTextEditor from "../../RichTextEditor/RichTextEditor";
 
 export default function HostSidePanel() {
   const contentList: { title: string; content: React.ReactNode }[] = [
-    { title: "Notes", content: <RichTextEditor /> },
+    //{ title: "Notes", content: <RichTextEditor /> },
     { title: "Enemy List", content: <EnemyListPanel /> },
     { title: "Initiative Tracker", content: <InitiativeTrackerPanel /> },
     { title: "Chat", content: <ChatBox /> },

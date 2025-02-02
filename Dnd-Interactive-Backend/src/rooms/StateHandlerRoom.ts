@@ -102,7 +102,7 @@ export class StateHandlerRoom extends Room<State> {
             try {
                 const inputList: ValidationInputType[] = [
                     { name: "campaign_id", PostProcess: undefined, type: "string" },
-                    { name: "note", PostProcess: undefined, type: "object" },
+                    { name: "note", PostProcess: undefined, type: "string" },
                 ];
                 const validateParams: any = ValidateAllInputs(data, inputList);
                 const player = this.state._getPlayerBySessionId(client.sessionId);
@@ -129,7 +129,7 @@ export class StateHandlerRoom extends Room<State> {
                     return;
                 }
                 // we have everything we need to save it in the database
-                NotesDB.getInstance().getExistingNote(player.userId, validateParams.campaign_id);
+                client.send("NoteResponse", NotesDB.getInstance().getExistingNote(player.userId, validateParams.campaign_id));
             } catch (error) {
                 console.error(error);
             }

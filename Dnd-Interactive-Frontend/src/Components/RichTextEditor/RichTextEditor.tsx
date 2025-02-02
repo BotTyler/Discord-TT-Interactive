@@ -14,8 +14,7 @@ import { ListNode, ListItemNode } from '@lexical/list'
 import { HeadingNode } from '@lexical/rich-text'
 import { useEffect, useState } from 'react';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { useAuthenticatedContext } from '../../ContextProvider/useAuthenticatedContext';
-import { useGameState } from '../../ContextProvider/GameStateContext/GameStateProvider';
+import { useNotesContext } from '../../ContextProvider/NotesContext/NotesContextProvider';
 
 
 // Catch any errors that occur during Lexical updates and log them
@@ -47,7 +46,7 @@ export default function RichTextEditor() {
                                 className='editor-input overflow-auto'
                                 aria-placeholder={'Enter some text...'}
                                 placeholder={<div className='editor-placeholder'>Enter some text...</div>} />}
-                                ErrorBoundary={LexicalErrorBoundary}
+                        ErrorBoundary={LexicalErrorBoundary}
                     />
                     <HistoryPlugin />
                     <ListPlugin />
@@ -62,55 +61,50 @@ export default function RichTextEditor() {
 
 function AutoSavePlugin(){
     const [editor] = useLexicalComposerContext();
-    const [saveStatus, setSaveStatus] = useState<string>("Saved");
-    const authContext = useAuthenticatedContext();
-    //const mapContext = useGameState();
+    const notesContext = useNotesContext();
+    const [status, setStatus] = useState<string>(notesContext.status());
+    const [test, setTest] = useState<boolean>(false);
 
     useEffect(() => {
-        // Auto save.
-        // Every 5 seconds of inactivity save
-        let autoSaveTimer = -1;
-        const autoSaveInterval = setInterval(()=>{
-            console.log(autoSaveTimer);
-
-            if(autoSaveTimer > 0) {
-                setSaveStatus("Saving...");
-                autoSaveTimer--;
+        const handleStatusChange = (val: any) => {
+            setStatus(val.detail.val);
+        }
+        addEventListener("ChangeNoteStatus", handleStatusChange);
+        editor.update(() => {
+            try{
+                const state = editor.parseEditorState(notesContext.getNotes());
+                editor.setEditorState(state);
+            }catch(e){
+                console.error(`Something happened when setting editor state.\n\t${e}`);
             }
-            else if(autoSaveTimer === 0){
-                // save
-                const contentJSON = editor.toJSON();
-                const saveObject = {
-                    note: contentJSON,
-                    campaign_id: '46'
+        });
+        setTest(true);
+        return () => {
+            removeEventListener("ChangeNoteStatus", handleStatusChange);
+        }
+    }, []);
 
-                }
-                authContext.room.send("SaveNote", saveObject);
-
-                setSaveStatus("Saved");
-                autoSaveTimer--;
-            }
-
-        }, 1000)
+    useEffect(() => {
+        if(!test) return;
         // Listen to the key presses, after a second of inactivity initiate a save;
 
-        const updateListener = editor.registerUpdateListener(({editorState}) => {
+        const updateListener = editor.registerUpdateListener(() => {
             // The latest EditorState can be found as `editorState`.
             // To read the contents of the EditorState, use the following API:
-            autoSaveTimer = 5;
+            const contentJson: string = JSON.stringify(editor.getEditorState().toJSON());
+            notesContext.updateNote(contentJson);
 
         });
 
 
         return () => {
             updateListener();
-            clearInterval(autoSaveInterval);
         }
 
-    }, [editor]);
+    }, [editor, test]);
 
 
     return <div className='position-absolute' style={{bottom: '5px', right: '5px'}}>
-        <p className='m-0' style={{color: "black", fontSize: 'xx-small'}}>{saveStatus}</p>
+        <p className='m-0' style={{color: "black", fontSize: 'xx-small'}}>{status}</p>
     </div>
 }
