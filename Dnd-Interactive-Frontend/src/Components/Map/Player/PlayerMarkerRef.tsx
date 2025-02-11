@@ -65,7 +65,7 @@ export default function PlayerMarker({ name, playerId, size, playerAvatar, posit
 */
     const icon = new DivIcon({
         html: `
-<div class="w-100 h-100 position-relative">
+<div class="w-100 h-100 position-relative marker-container">
 <img
 src="${_avatar}"
 alt="marker-icon"
@@ -75,7 +75,7 @@ class="rounded-circle "
 <div class="position-absolute" style="top: 0; left: 0; right: 0; bottom: 0; background: transparent">
 </div>
 <div class="position-absolute text-center icon-text">
-<p class="w-100 h-auto">
+<p class="markerNameTag text-nowrap">
 ${_name}
 </p>
 </div>
@@ -111,9 +111,6 @@ ${_name}
                 key={`PlayerController-${playerId}-marker`}
             />
             {toPosition !== undefined ? <DistanceLine start={_position} end={toPosition} size={rawSize} color={"red"} key={`MovementLineController-${playerId}`} /> : ""}
-            <div>
-                {_name}
-            </div>
         </>
     );
 }

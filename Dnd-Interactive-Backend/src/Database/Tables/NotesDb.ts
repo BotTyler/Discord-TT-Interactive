@@ -4,22 +4,22 @@ import { DAO, DatabaseBase } from "../Interface/DatabaseObjectInterface";
 export class NotesDAO extends DAO {
     private id?: number;
     private player_id: string;
-    private campaign_id: string;
-    private note: XMLDocument;
+    private note_title: string;
+    private note: string;
 
-    constructor(player_id: string, campaign_id: string, note: XMLDocument, id?: number) {
+    constructor(player_id: string, note_title: string, note: string, id?: number) {
         super();
         this.id = id;
         this.player_id = player_id;
-        this.campaign_id = campaign_id;
         this.note = note;
+        this.note_title = note_title;
     }
 
     getKeys(): string[] {
-        return ["player_id", "campaign_id", "note"];
+        return ["player_id", "note", "note_title"];
     }
     getValues(): any[] {
-        return [this.player_id, this.campaign_id, this.note];
+        return [this.player_id, this.note, this.note_title];
     }
     getIdName(): string {
         return "note_id";
@@ -38,29 +38,29 @@ export class NotesDB extends DatabaseBase<NotesDAO> {
         if (NotesDB.instance === undefined) NotesDB.instance = new NotesDB();
         return NotesDB.instance;
     }
-    async create(data: NotesDAO): Promise<number | undefined> {
-        // If Id is available we need to update the rows
-        // check to make sure a row for the campaign_id and player_id exist;
-        const dataValues: any[] = data.getValues();
+    //async create(data: NotesDAO): Promise<number | undefined> {
+    //    // If Id is available we need to update the rows
+    //    // check to make sure a row for the campaign_id and player_id exist;
+    //    const dataValues: any[] = data.getValues();
+    //
+    //    const existingId: number | undefined = await this.getExistingNoteId(dataValues[0]);
+    //    console.log(existingId);
+    //    if(existingId){
+    //        data.setIdValue(existingId);
+    //        const result: number | undefined = await super.update(data);
+    //        return result;
+    //    }else{
+    //        const result: number | undefined = await super.create(data);
+    //        return result;
+    //    }
+    //
+    //}
 
-        const existingId: number | undefined = await this.getExistingNoteId(dataValues[0], dataValues[1]);
-        console.log(existingId);
-        if(existingId){
-            data.setIdValue(existingId);
-            const result: number | undefined = await super.update(data);
-            return result;
-        }else{
-            const result: number | undefined = await super.create(data);
-            return result;
-        }
 
-    }
+    async getNoteFromId(player_id: string, noteId: number): Promise<string | undefined> {
 
-
-    async getExistingNote(player_id: string, campaign_id: string): Promise<Object | undefined> {
-
-        const query: string = `SELECT note FROM public."Notes" WHERE player_id = $1 AND campaign_id = $2;`;
-        const args: Object[] = [player_id, campaign_id];
+        const query: string = `SELECT note FROM public."Notes" WHERE player_id = $1 AND note_id = $2;`;
+        const args: Object[] = [player_id, noteId];
 
         console.log(query);
         const returnValue = await Database.getInstance()
@@ -74,10 +74,10 @@ export class NotesDB extends DatabaseBase<NotesDAO> {
         return undefined;
     }
 
-    async getExistingNoteId(player_id: string, campaign_id: string): Promise<number | undefined> {
+    async getExistingNoteIds(player_id: string): Promise<number[]> {
 
-        const query: string = `SELECT note_id FROM public."Notes" WHERE player_id = $1 AND campaign_id = $2;`;
-        const args: Object[] = [player_id, campaign_id];
+        const query: string = `SELECT note_id FROM public."Notes" WHERE player_id = $1;`;
+        const args: Object[] = [player_id];
 
         console.log(query);
         const returnValue = await Database.getInstance()
@@ -87,8 +87,8 @@ export class NotesDB extends DatabaseBase<NotesDAO> {
                 return undefined;
             });
 
-        if(returnValue && returnValue.rows[0]) return returnValue.rows[0].note_id;
-        return undefined;
+        if(returnValue) return returnValue.rows;
+        return [];
     }
     constructor() {
         super("Notes");

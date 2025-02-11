@@ -98,10 +98,32 @@ export class StateHandlerRoom extends Room<State> {
         });
 
         // NOTES
+        this.onMessage("AddNote", (client, data) => {
+            try {
+                const inputList: ValidationInputType[] = [
+                    { name: "note_title", PostProcess: undefined, type: "string" },
+                ];
+                const validateParams: any = ValidateAllInputs(data, inputList);
+                const player = this.state._getPlayerBySessionId(client.sessionId);
+                if(!player) {
+                    console.error("Player not found");
+                    return;
+                }
+                // we have everything we need to save it in the database
+                NotesDB.getInstance().create(new NotesDAO(player.userId, validateParams.note_title, validateParams.note)).then((index:number | undefined) => {
+                    if(!index) return;
+                    client.send("AddNote", index);
+                });
+            } catch (error) {
+                console.error(error);
+            }
+        });
+
         this.onMessage("SaveNote", (client, data) => {
             try {
                 const inputList: ValidationInputType[] = [
-                    { name: "campaign_id", PostProcess: undefined, type: "string" },
+                    { name: "note_id", PostProcess: undefined, type: "number" },
+                    { name: "note_title", PostProcess: undefined, type: "string" },
                     { name: "note", PostProcess: undefined, type: "string" },
                 ];
                 const validateParams: any = ValidateAllInputs(data, inputList);
@@ -111,7 +133,7 @@ export class StateHandlerRoom extends Room<State> {
                     return;
                 }
                 // we have everything we need to save it in the database
-                NotesDB.getInstance().create(new NotesDAO(player.userId, validateParams.campaign_id, validateParams.note));
+                NotesDB.getInstance().update(new NotesDAO(player.userId, validateParams.note_title, validateParams.note, validateParams.note_id));
             } catch (error) {
                 console.error(error);
             }
@@ -120,7 +142,7 @@ export class StateHandlerRoom extends Room<State> {
         this.onMessage("GetNote", (client, data) => {
             try {
                 const inputList: ValidationInputType[] = [
-                    { name: "campaign_id", PostProcess: undefined, type: "string" },
+                    { name: "note_id", PostProcess: undefined, type: "number" },
                 ];
                 const validateParams: any = ValidateAllInputs(data, inputList);
                 const player = this.state._getPlayerBySessionId(client.sessionId);
@@ -129,10 +151,23 @@ export class StateHandlerRoom extends Room<State> {
                     return;
                 }
                 // we have everything we need to save it in the database
-                client.send("NoteResponse", NotesDB.getInstance().getExistingNote(player.userId, validateParams.campaign_id));
-            } catch (error) {
-                console.error(error);
+                client.send("GetNoteResponse", NotesDB.getInstance().getNoteFromId(player.userId, validateParams.note_id));
+
+            }catch(e){
+                console.error(e);
             }
+        });
+
+
+        this.onMessage("GetAllNoteIds", (client, _data) => {
+            const player = this.state._getPlayerBySessionId(client.sessionId);
+            if(!player) {
+                console.error("Player not found");
+                return;
+            }
+            NotesDB.getInstance().getExistingNoteIds(player.userId).then((index: number[]) => {
+                client.send("GetAllNoteIdsResponse", index);
+            });
         });
 
         // PLAYER MOVEMENT
@@ -927,6 +962,7 @@ delete from Public."Map" where player_id = 'temp';
 
         //EXTRA
         this.onMessage("*", (client, data) => {
+            console.log(data);
             console.log("No message with that type found");
         });
     }

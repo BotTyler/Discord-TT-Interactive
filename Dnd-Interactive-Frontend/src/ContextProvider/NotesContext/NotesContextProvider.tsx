@@ -1,20 +1,23 @@
 import React, { createContext, useEffect } from "react";
-import { NotesContextHandler } from "./NotesContextHandler";
+import { NotebookHandler } from "./NotebookContextHandler";
+import { Note, NoteBook } from "dnd-interactive-shared";
+import { useAuthenticatedContext } from "../useAuthenticatedContext";
 
 const NotesContext = createContext<NotesContextInterface>({
-    getNotes: () => {
+    getNotebook: (): NoteBook | undefined => {
         console.error("NOT IMPLEMENTED");
-        return "";
+        return undefined;
     },
-    updateNote: (notes: string) => {
+    saveNote: (notes: Note) => {
         console.error("NOT IMPLEMENTED");
     },
-    status: () => {
-        return "Loading...";
+    addNote: (title: string) => {
+        console.error("NOT IMPLEMENTED");
     }
 
 });
 export function NotesContextProvider({ children }: { children: React.ReactNode }) {
+    const authContext = useAuthenticatedContext();
     const notesRef = React.useRef<any>(null);
     const [notesRefReady, setNotesRefReady] = React.useState<boolean>(false);
 
@@ -22,32 +25,31 @@ export function NotesContextProvider({ children }: { children: React.ReactNode }
         setNotesRefReady(notesRef !== undefined);
     }, [notesRef]);
 
-    const getNotes = () => {
-        if(!notesRefReady) return "";
-        return notesRef.current.getNotes();
+    const getNotebook = (): NoteBook | undefined => {
+        if(!notesRefReady) return undefined;
+        return notesRef.current.getNotebook();
     }
 
-    const updateNote = (notes: string) => {
+    const saveNote = (notes: Note): void => {
         if(!notesRefReady) return;
-        notesRef.current.updateNote(notes);
+        notesRef.current.saveNote(notes);
     }
 
-    const status = () => {
-        if(!notesRefReady) return "Loading";
-        return notesRef.current.saveStatus();
+    const addNote = (title: string): void => {
+        authContext.room.send("AddNote", {title: title});
     }
 
     return (
-        <NotesContext.Provider value={{getNotes: getNotes, updateNote: updateNote, status: status}}>
-            <NotesContextHandler ref={notesRef} />
+        <NotesContext.Provider value={{getNotebook: getNotebook, saveNote: saveNote, addNote: addNote}}>
+            <NotebookHandler />
             {notesRefReady ? children : <p>Message Context Loading</p>}
         </NotesContext.Provider>
     );
 }
 interface NotesContextInterface {
-    getNotes: () => string;
-    updateNote: (notes: string) => void;
-    status: () => string;
+    getNotebook: () => NoteBook | undefined;
+    saveNote: (notes: Note) => void;
+    addNote: (title: string) => void;
 }
 export function useNotesContext() {
     return React.useContext(NotesContext);

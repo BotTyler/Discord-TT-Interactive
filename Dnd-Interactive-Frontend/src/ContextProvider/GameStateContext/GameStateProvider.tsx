@@ -84,7 +84,7 @@ export function GameStateContextProvider() {
     }
     const player = playerContext.getPlayer(authenticatedContext.user.id);
     if (!player) return <p>not authenticated</p>;
-    //return <PlayArea />;
+    return <PlayArea />;
     switch (gameState) {
       case GameStateEnum.MAINMENU:
         return <MainMenu />;

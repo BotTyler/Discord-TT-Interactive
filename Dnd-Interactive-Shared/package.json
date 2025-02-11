@@ -1,6 +1,6 @@
 {
   "name": "dnd-interactive-shared",
-  "version": "1.0.23",
+  "version": "1.0.24",
   "description": "npm repo with shared resources for server and client.",
   "main": "dist/index.js",
   "scripts": {

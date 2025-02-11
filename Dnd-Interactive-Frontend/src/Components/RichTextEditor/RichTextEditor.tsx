@@ -62,8 +62,7 @@ export default function RichTextEditor() {
 function AutoSavePlugin(){
     const [editor] = useLexicalComposerContext();
     const notesContext = useNotesContext();
-    const [status, setStatus] = useState<string>(notesContext.status());
-    const [test, setTest] = useState<boolean>(false);
+    const [status, setStatus] = useState<string>("IDK");
 
     useEffect(() => {
         const handleStatusChange = (val: any) => {
@@ -72,27 +71,25 @@ function AutoSavePlugin(){
         addEventListener("ChangeNoteStatus", handleStatusChange);
         editor.update(() => {
             try{
-                const state = editor.parseEditorState(notesContext.getNotes());
-                editor.setEditorState(state);
+                //const state = editor.parseEditorState(notesContext.getNotes());
+                //editor.setEditorState(state);
             }catch(e){
                 console.error(`Something happened when setting editor state.\n\t${e}`);
             }
         });
-        setTest(true);
         return () => {
             removeEventListener("ChangeNoteStatus", handleStatusChange);
         }
     }, []);
 
     useEffect(() => {
-        if(!test) return;
-        // Listen to the key presses, after a second of inactivity initiate a save;
 
+        // Listen to the key presses, after a second of inactivity initiate a save;
         const updateListener = editor.registerUpdateListener(() => {
             // The latest EditorState can be found as `editorState`.
             // To read the contents of the EditorState, use the following API:
             const contentJson: string = JSON.stringify(editor.getEditorState().toJSON());
-            notesContext.updateNote(contentJson);
+            //notesContext.updateNote(contentJson);
 
         });
 
@@ -101,7 +98,7 @@ function AutoSavePlugin(){
             updateListener();
         }
 
-    }, [editor, test]);
+    }, [editor]);
 
 
     return <div className='position-absolute' style={{bottom: '5px', right: '5px'}}>

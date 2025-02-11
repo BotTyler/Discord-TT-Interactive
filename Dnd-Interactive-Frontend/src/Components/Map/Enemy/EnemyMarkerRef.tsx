@@ -49,28 +49,19 @@ export default function EnemyMarker({ name, id, size, playerAvatar, position }: 
             map.off("zoomend", zoomEnd);
         };
     }, [map, _size]);
-    /*
-  var svgIcon = new Icon({
-    iconUrl: `/colyseus/getImage/${_avatar}`,
-    iconSize: [_size[1], _size[1]],
-    iconAnchor: [_size[1] / 2, _size[1] / 2],
-    // iconSize: [size, size],
-    // iconAnchor: [size / 2, size / 2],
-  });
-  */
     const svgIcon = new DivIcon({
         html: `
-<div class="w-100 h-100 position-relative">
+<div class="w-100 h-100 position-relative marker-container">
 <img
 src="/colyseus/getImage/${_avatar}"
 alt="marker-icon"
 style="width: 100%; height: 100%; object-fit: cover; border: 3px solid red; "
-class="rounded-circle "
+class="rounded-circle marker-image"
 />
 <div class="position-absolute" style="top: 0; left: 0; right: 0; bottom: 0; background: transparent">
 </div>
 <div class="position-absolute text-center icon-text">
-<p class="w-100 h-auto">
+<p class="markerNameTag text-nowrap">
 ${_name}
 </p>
 </div>
