@@ -7,11 +7,9 @@ import ChatBox from "../General/Chatbox/Chat";
 import AudioBox from "../General/AudioBox/AudioBox";
 import HealthDeathTrackerPanel from "./HealthDeathTracker/HealthDeathTrackerPanel";
 import HandoutsPanel from "./Handouts/HandoutsPanels";
-import NotesPanel from "../General/Notes/NotesPanel";
 
 export default function HostSidePanel() {
   const contentList: { title: string; content: React.ReactNode }[] = [
-    { title: "Notes", content: <NotesPanel /> },
     { title: "Enemy List", content: <EnemyListPanel /> },
     { title: "Initiative Tracker", content: <InitiativeTrackerPanel /> },
     { title: "Chat", content: <ChatBox /> },

@@ -11,7 +11,6 @@ import { PlayersContextProvider } from "./ContextProvider/PlayersContext/Players
 import { GameStateContextProvider } from "./ContextProvider/GameStateContext/GameStateProvider";
 import { ErrorBoundary } from "react-error-boundary";
 import { AudioContextProvider } from "./ContextProvider/AudioContext/AudioProvider";
-import { NotesContextProvider } from "./ContextProvider/NotesContext/NotesContextProvider";
 
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
 root.render(
@@ -28,9 +27,7 @@ root.render(
                     <AudioContextProvider>
                         <PlayersContextProvider>
                             <MessageContextProvider>
-                                <NotesContextProvider>
-                                    <GameStateContextProvider />
-                                </NotesContextProvider>
+                                <GameStateContextProvider />
                             </MessageContextProvider>
                         </PlayersContextProvider>
                     </AudioContextProvider>

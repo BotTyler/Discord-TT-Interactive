@@ -14,7 +14,6 @@ import { AudioCatalogDAO, AudioCatalogDB } from "../Database/Tables/AudioCatalog
 import { ExportDataInterface } from "dnd-interactive-shared";
 import { sanitize, ValidateAllInputs, ValidationInputType } from "../Util/Utils";
 import * as crypto from "crypto";
-import { NotesDAO, NotesDB } from "../Database/Tables/NotesDb";
 
 export class StateHandlerRoom extends Room<State> {
     maxClients = 1000;
@@ -95,79 +94,6 @@ export class StateHandlerRoom extends Room<State> {
             } catch (error) {
                 console.error(error);
             }
-        });
-
-        // NOTES
-        this.onMessage("AddNote", (client, data) => {
-            try {
-                const inputList: ValidationInputType[] = [
-                    { name: "note_title", PostProcess: undefined, type: "string" },
-                ];
-                const validateParams: any = ValidateAllInputs(data, inputList);
-                const player = this.state._getPlayerBySessionId(client.sessionId);
-                if(!player) {
-                    console.error("Player not found");
-                    return;
-                }
-                // we have everything we need to save it in the database
-                NotesDB.getInstance().create(new NotesDAO(player.userId, validateParams.note_title, validateParams.note)).then((index:number | undefined) => {
-                    if(!index) return;
-                    client.send("AddNote", index);
-                });
-            } catch (error) {
-                console.error(error);
-            }
-        });
-
-        this.onMessage("SaveNote", (client, data) => {
-            try {
-                const inputList: ValidationInputType[] = [
-                    { name: "note_id", PostProcess: undefined, type: "number" },
-                    { name: "note_title", PostProcess: undefined, type: "string" },
-                    { name: "note", PostProcess: undefined, type: "string" },
-                ];
-                const validateParams: any = ValidateAllInputs(data, inputList);
-                const player = this.state._getPlayerBySessionId(client.sessionId);
-                if(!player) {
-                    console.error("Player not found");
-                    return;
-                }
-                // we have everything we need to save it in the database
-                NotesDB.getInstance().update(new NotesDAO(player.userId, validateParams.note_title, validateParams.note, validateParams.note_id));
-            } catch (error) {
-                console.error(error);
-            }
-        });
-
-        this.onMessage("GetNote", (client, data) => {
-            try {
-                const inputList: ValidationInputType[] = [
-                    { name: "note_id", PostProcess: undefined, type: "number" },
-                ];
-                const validateParams: any = ValidateAllInputs(data, inputList);
-                const player = this.state._getPlayerBySessionId(client.sessionId);
-                if(!player) {
-                    console.error("Player not found");
-                    return;
-                }
-                // we have everything we need to save it in the database
-                client.send("GetNoteResponse", NotesDB.getInstance().getNoteFromId(player.userId, validateParams.note_id));
-
-            }catch(e){
-                console.error(e);
-            }
-        });
-
-
-        this.onMessage("GetAllNoteIds", (client, _data) => {
-            const player = this.state._getPlayerBySessionId(client.sessionId);
-            if(!player) {
-                console.error("Player not found");
-                return;
-            }
-            NotesDB.getInstance().getExistingNoteIds(player.userId).then((index: number[]) => {
-                client.send("GetAllNoteIdsResponse", index);
-            });
         });
 
         // PLAYER MOVEMENT

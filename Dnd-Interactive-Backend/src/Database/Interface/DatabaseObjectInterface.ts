@@ -1,7 +1,7 @@
 import { QueryResult } from "pg";
 import Database from "../Database";
 
-const ALLOWED_TABLES = new Set(["Enemy", "Enemy_Movement_History", "Fog", "Fog_State_History", "Image", "Map", "Player", "Player_Movement_History", "Save_History", "Initiative_History", "Image_Catalog", "Audio_Catalog", "Notes"]);
+const ALLOWED_TABLES = new Set(["Enemy", "Enemy_Movement_History", "Fog", "Fog_State_History", "Image", "Map", "Player", "Player_Movement_History", "Save_History", "Initiative_History", "Image_Catalog", "Audio_Catalog"]);
 export abstract class DatabaseBase<T extends DAO> {
     protected tableName: string;
     constructor(tableName: string) {

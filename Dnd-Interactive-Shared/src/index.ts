@@ -8,4 +8,3 @@ export { Player, TPlayerOptions } from "./Player";
 export { mLatLng } from "./PositionInterface";
 export { GameStateEnum, IState, State } from "./State";
 export { CubeDrawing, ArcDrawing, CircleDrawing } from "./DrawingInterface";
-export { NoteBook, Note } from "./Notebook";
