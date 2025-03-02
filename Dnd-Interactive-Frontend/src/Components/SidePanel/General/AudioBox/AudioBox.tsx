@@ -1,12 +1,12 @@
 import React from "react";
-import { useAudio } from "../../../../ContextProvider/AudioContext/AudioProvider";
 import AudioBoxInputs from "./AudioBoxInputs";
 import AudioBoxItem from "./AudioBoxItem";
 import { getFileNameFromMinioString } from "../../../../Util/Util";
 import { useAuthenticatedContext } from "../../../../ContextProvider/useAuthenticatedContext";
+import { useSettings } from "../../../../ContextProvider/AudioContext/SettingsProvider";
 
 export default function AudioBox() {
-  const audioContext = useAudio();
+  const audioContext = useSettings();
   const authContext = useAuthenticatedContext();
   const [queue, setQueue] = React.useState<string[]>(audioContext.getQueue());
   const [currentIndex, setCurrentIndex] = React.useState<number>(audioContext.getCurrentIndex());

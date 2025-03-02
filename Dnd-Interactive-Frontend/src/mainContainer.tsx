@@ -10,7 +10,7 @@ import { AuthenticatedContextProvider, useAuthenticatedContext } from "./Context
 import { PlayersContextProvider } from "./ContextProvider/PlayersContext/PlayersContext";
 import { GameStateContextProvider } from "./ContextProvider/GameStateContext/GameStateProvider";
 import { ErrorBoundary } from "react-error-boundary";
-import { AudioContextProvider } from "./ContextProvider/AudioContext/AudioProvider";
+import { SettingsProvider } from "./ContextProvider/AudioContext/SettingsProvider";
 
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
 root.render(
@@ -24,13 +24,13 @@ root.render(
         >
             <ErrorHandlerProvider>
                 <AuthenticatedContextProvider>
-                    <AudioContextProvider>
+                    <SettingsProvider>
                         <PlayersContextProvider>
                             <MessageContextProvider>
                                 <GameStateContextProvider />
                             </MessageContextProvider>
                         </PlayersContextProvider>
-                    </AudioContextProvider>
+                    </SettingsProvider>
                 </AuthenticatedContextProvider>
             </ErrorHandlerProvider>
         </ErrorBoundary>
