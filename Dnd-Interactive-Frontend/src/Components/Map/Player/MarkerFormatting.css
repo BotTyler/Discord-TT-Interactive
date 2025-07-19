@@ -1,33 +1,36 @@
 .icon-text {
-    font-size: large;
-    font-weight: 700;
-    color: black;
-    text-shadow: -1px -1px 0 white, 1px -1px 0 white, 1px 1px 0 white,
-        1px 1px 0 white;
-    /*left: -1000%;*/
-    /*right: -1000%;*/
-    top: 110%;
-    width: auto;
-    height: auto;
-    user-select: none;
-    pointer-events: none;
+  font-size: large;
+  font-weight: 700;
+  color: black;
+  text-shadow:
+    -1px -1px 0 white,
+    1px -1px 0 white,
+    1px 1px 0 white,
+    1px 1px 0 white;
+  /*left: -1000%;*/
+  /*right: -1000%;*/
+  top: 110%;
+  width: auto;
+  height: auto;
+  user-select: none;
+  pointer-events: none;
 }
 
 .marker-container {
-    display: flex;
-    justify-content: center;
+  display: flex;
+  justify-content: center;
 }
 
 .markerNameTag {
-    width: auto;
-    height: auto;
-    padding: 0;
-    margin: 0;
-    user-select: none;
-    pointer-events: none;
+  width: auto;
+  height: auto;
+  padding: 0;
+  margin: 0;
+  user-select: none;
+  pointer-events: none;
 }
 
 .marker-imager {
-    user-select: none;
-    pointer-events: none;
+  user-select: none;
+  pointer-events: none;
 }

@@ -1,12 +1,11 @@
-import * as React from "react";
 import { Client, Room } from "colyseus.js";
+import * as React from "react";
 
-import { State } from "dnd-interactive-shared";
-import { GAME_NAME } from "dnd-interactive-shared";
+import { GAME_NAME, State } from "dnd-interactive-shared";
 
-import { discordSdk } from "./discordSdk";
-import { getUserAvatarUrl } from "../Util/getUserAvatarUrl";
 import Loading from "../Components/Loading";
+import { getUserAvatarUrl } from "../Util/getUserAvatarUrl";
+import { discordSdk } from "./discordSdk";
 
 import type { IGuildsMembersRead, TAuthenticatedContext } from "../Types/types";
 import { getUserDisplayName } from "../Util/getUserDisplayName";

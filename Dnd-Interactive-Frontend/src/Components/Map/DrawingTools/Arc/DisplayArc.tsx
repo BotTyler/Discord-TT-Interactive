@@ -1,9 +1,9 @@
+import { ArcDrawing, Player } from "dnd-interactive-shared";
 import { LatLng } from "leaflet";
 import { useEffect, useState } from "react";
 import { Tools, useGameToolContext } from "../../../../ContextProvider/GameToolProvider";
-import { ArcDrawing, CircleDrawing, Player } from "dnd-interactive-shared";
-import { useAuthenticatedContext } from "../../../../ContextProvider/useAuthenticatedContext";
 import { usePlayers } from "../../../../ContextProvider/PlayersContext/PlayersContext";
+import { useAuthenticatedContext } from "../../../../ContextProvider/useAuthenticatedContext";
 import Arc from "./Arc";
 
 /**

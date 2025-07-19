@@ -1,6 +1,6 @@
-import { IGuildsMembersRead } from "../Types/types";
 import { Types } from "@discord/embedded-app-sdk";
 import { discordSdk } from "../ContextProvider/discordSdk";
+import { IGuildsMembersRead } from "../Types/types";
 interface GetUserAvatarArgs {
   guildMember: IGuildsMembersRead | null;
   user: Partial<Types.User> & Pick<Types.User, "id">;

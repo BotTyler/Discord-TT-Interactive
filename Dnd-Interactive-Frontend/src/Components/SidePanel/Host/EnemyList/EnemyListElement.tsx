@@ -1,9 +1,8 @@
+import { Enemy, mLatLng } from "dnd-interactive-shared";
 import React from "react";
-import { Enemy } from "dnd-interactive-shared";
-import { mLatLng } from "dnd-interactive-shared";
+import { useGameState } from "../../../../ContextProvider/GameStateContext/GameStateProvider";
 import { useAuthenticatedContext } from "../../../../ContextProvider/useAuthenticatedContext";
 import EditEnemyModal from "../EditEnemyModal";
-import { useGameState } from "../../../../ContextProvider/GameStateContext/GameStateProvider";
 
 interface ParamInputs {
   enemy: Enemy;

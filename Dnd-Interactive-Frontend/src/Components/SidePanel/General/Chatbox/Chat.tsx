@@ -1,8 +1,8 @@
 import React from "react";
+import { useMessageContext } from "../../../../ContextProvider/Messages/MessageContextProvider";
 import { MessageInterface } from "../../../../ContextProvider/Messages/MessageHandler";
 import ChatInput from "./ChatInput";
 import MessageBubble from "./MessageBubble";
-import { useMessageContext } from "../../../../ContextProvider/Messages/MessageContextProvider";
 
 export default function ChatBox() {
   const messageContext = useMessageContext();

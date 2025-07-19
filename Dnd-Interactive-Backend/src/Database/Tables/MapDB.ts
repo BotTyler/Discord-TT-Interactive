@@ -1,7 +1,7 @@
-import { QueryResult } from "pg";
-import { DAO, DatabaseBase } from "../Interface/DatabaseObjectInterface";
-import Database from "../Database";
 import { LoadCampaign } from "dnd-interactive-shared";
+import { QueryResult } from "pg";
+import Database from "../Database";
+import { DAO, DatabaseBase } from "../Interface/DatabaseObjectInterface";
 
 export class MapDAO extends DAO {
   public readonly id?: number;

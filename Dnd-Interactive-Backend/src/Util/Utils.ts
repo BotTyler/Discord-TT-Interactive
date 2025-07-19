@@ -27,8 +27,19 @@ export function sanitize(message: string): string {
  * The type parameter has an optional type NOVERIFY, which will bypass the type check and only make sure the value is present.
  * Some of the more complicated types are "object", "array", these will need to be handled separately.
  */
-export type ExpectedTypes = "string" | "number" | "boolean" | "bigint" | "object" | "array" | "NOVERIFY";
-export type ValidationInputType = { name: string; type: ExpectedTypes; PostProcess: ((val: any) => any) | undefined };
+export type ExpectedTypes =
+  | "string"
+  | "number"
+  | "boolean"
+  | "bigint"
+  | "object"
+  | "array"
+  | "NOVERIFY";
+export type ValidationInputType = {
+  name: string;
+  type: ExpectedTypes;
+  PostProcess: ((val: any) => any) | undefined;
+};
 /**
  *
  * @param reqInputs The inputs provided by the initial request.
@@ -39,7 +50,10 @@ export type ValidationInputType = { name: string; type: ExpectedTypes; PostProce
  *
  * @returns If passed validation, a record of values will be returned that are sanitized, otherwise undefined will be returned.
  */
-export function ValidateAllInputs(reqInputs: Record<string, any>, validInputs: ValidationInputType[]): Object {
+export function ValidateAllInputs(
+  reqInputs: Record<string, any>,
+  validInputs: ValidationInputType[],
+): Object {
   console.log(reqInputs);
   const validatedRecord: Record<string, any> = {};
   for (const field of validInputs) {
@@ -52,8 +66,12 @@ export function ValidateAllInputs(reqInputs: Record<string, any>, validInputs: V
     }
 
     if (!ValidateTypes(reqValue, field.type)) {
-      console.error(`Value is not of the right type. Value: ${reqValue} Type: ${typeof reqValue} Expected: ${field.type}`);
-      throw new Error(`Value is not of the right type. Value: ${reqValue} Type: ${typeof reqValue} Expected: ${field.type}`);
+      console.error(
+        `Value is not of the right type. Value: ${reqValue} Type: ${typeof reqValue} Expected: ${field.type}`,
+      );
+      throw new Error(
+        `Value is not of the right type. Value: ${reqValue} Type: ${typeof reqValue} Expected: ${field.type}`,
+      );
     }
     // The value should be here, lets add it to the final record and santize the input if supported.
     if (field.PostProcess) validatedRecord[field.name] = field.PostProcess(reqValue);

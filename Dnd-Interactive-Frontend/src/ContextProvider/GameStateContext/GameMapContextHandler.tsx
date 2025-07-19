@@ -1,12 +1,10 @@
+import { Enemy, GameStateEnum, MapData, MapFogPolygon } from "dnd-interactive-shared";
 import React, { useImperativeHandle } from "react";
 import { useAuthenticatedContext } from "../useAuthenticatedContext";
-import { GameStateEnum } from "dnd-interactive-shared";
-import { MapData, MapFogPolygon } from "dnd-interactive-shared";
-import { Enemy } from "dnd-interactive-shared";
 import EnemyContextElement from "./EnemyContextElement";
 import FogContextElement from "./FogContextElement";
 
-export const GameMapContextHandler = React.forwardRef(function GameMapContextHandler({}: {}, ref: any) {
+export const GameMapContextHandler = React.forwardRef(function GameMapContextHandler({ }: {}, ref: any) {
   const authenticatedContext = useAuthenticatedContext();
   const [currentGameState, setGameState] = React.useState<GameStateEnum>(GameStateEnum.MAINMENU);
   const [map, setMap] = React.useState<MapData | undefined>(getBaseMapFromAuthContext());

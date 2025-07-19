@@ -1,10 +1,10 @@
+import { Player } from "dnd-interactive-shared";
 import { LatLng, LeafletMouseEvent } from "leaflet";
 import { useEffect, useState } from "react";
 import { useMapEvents } from "react-leaflet";
-import Line from "./Line";
-import { Player } from "dnd-interactive-shared";
-import { useAuthenticatedContext } from "../../../../ContextProvider/useAuthenticatedContext";
 import { DrawingTools, useDrawingGameToolContext } from "../../../../ContextProvider/GameDrawingProvider";
+import { useAuthenticatedContext } from "../../../../ContextProvider/useAuthenticatedContext";
+import Line from "./Line";
 
 /**
  * This component will handle the drawing of lines and syncronization with the colyseus server.
@@ -59,7 +59,7 @@ export default function DrawLine({ player }: { player: Player }) {
 
   return (
     <>
-      <Line key={"CurrentLine"} positions={current ?? []} color={color} removeCallback={() => {}} />
+      <Line key={"CurrentLine"} positions={current ?? []} color={color} removeCallback={() => { }} />
     </>
   );
 }

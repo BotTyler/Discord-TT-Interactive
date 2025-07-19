@@ -1,8 +1,8 @@
 import React from "react";
-import { ToastListHandler } from "./ToastListHandler";
 import { useAuthenticatedContext } from "../useAuthenticatedContext";
-import { MessageHandler, MessageInterface } from "./MessageHandler";
 import HandoutHandler from "./HandoutHandler";
+import { MessageHandler, MessageInterface } from "./MessageHandler";
+import { ToastListHandler } from "./ToastListHandler";
 
 /**
  * Context component that will allow other component to call methods and add a toast to the screen.

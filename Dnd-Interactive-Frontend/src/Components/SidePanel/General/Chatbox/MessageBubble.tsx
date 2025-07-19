@@ -1,4 +1,3 @@
-import React from "react";
 import { MessageInterface } from "../../../../ContextProvider/Messages/MessageHandler";
 import { useAuthenticatedContext } from "../../../../ContextProvider/useAuthenticatedContext";
 

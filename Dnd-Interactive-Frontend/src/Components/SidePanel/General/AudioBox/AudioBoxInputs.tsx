@@ -48,7 +48,6 @@ export default function AudioBoxInputs() {
       </div>
 
       <div className="input-group w-100 h-auto">
-        {/* <textarea className="form-control" aria-label="With textarea"></textarea> */}
         {isNewSelected ? (
           <input
             type="text"

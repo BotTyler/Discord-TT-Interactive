@@ -1,8 +1,6 @@
+import { Enemy, mLatLng } from "dnd-interactive-shared";
 import React from "react";
-import { Enemy } from "dnd-interactive-shared";
-import { mLatLng } from "dnd-interactive-shared";
 import { useAuthenticatedContext } from "../useAuthenticatedContext";
-import _ from "lodash";
 
 export default function EnemyContextElement({ enemy, onValueChanged }: { enemy: Enemy; onValueChanged: (field: string, value: unknown) => void }) {
   const [id, setId] = React.useState<number>(enemy.id);

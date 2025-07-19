@@ -1,7 +1,7 @@
-import { QueryResult } from "pg";
 import { mLatLng } from "dnd-interactive-shared";
-import { DAO, DatabaseBase } from "../Interface/DatabaseObjectInterface";
+import { QueryResult } from "pg";
 import Database from "../Database";
+import { DAO, DatabaseBase } from "../Interface/DatabaseObjectInterface";
 
 export class PlayerMovementHistoryDAO extends DAO {
   public readonly pmh_id?: number;
@@ -15,7 +15,17 @@ export class PlayerMovementHistoryDAO extends DAO {
   public readonly deathSaves: number;
   public readonly lifeSaves: number;
 
-  constructor(history_id: number, player_id: string, position: mLatLng, initiative: number, health: number, totalHealth: number, deathSaves: number, lifeSaves: number, id?: number) {
+  constructor(
+    history_id: number,
+    player_id: string,
+    position: mLatLng,
+    initiative: number,
+    health: number,
+    totalHealth: number,
+    deathSaves: number,
+    lifeSaves: number,
+    id?: number,
+  ) {
     super();
     this.pmh_id = id;
     this.history_id = history_id;
@@ -30,10 +40,30 @@ export class PlayerMovementHistoryDAO extends DAO {
   }
 
   getKeys(): string[] {
-    return ["history_id", "player_id", "position_lat", "position_lng", "initiative", "health", "total_health", "death_saves", "life_saves"];
+    return [
+      "history_id",
+      "player_id",
+      "position_lat",
+      "position_lng",
+      "initiative",
+      "health",
+      "total_health",
+      "death_saves",
+      "life_saves",
+    ];
   }
   getValues(): any[] {
-    return [this.history_id, this.player_id, this.position_lat, this.position_lng, this.initiative, this.health, this.totalHealth, this.deathSaves, this.lifeSaves];
+    return [
+      this.history_id,
+      this.player_id,
+      this.position_lat,
+      this.position_lng,
+      this.initiative,
+      this.health,
+      this.totalHealth,
+      this.deathSaves,
+      this.lifeSaves,
+    ];
   }
   getIdName(): string {
     return "pmh_id";
@@ -46,7 +76,8 @@ export class PlayerMovementHistoryDAO extends DAO {
 export class PlayerMovementHistoryDB extends DatabaseBase<PlayerMovementHistoryDAO> {
   private static instance: PlayerMovementHistoryDB | undefined = undefined;
   public static getInstance(): PlayerMovementHistoryDB {
-    if (PlayerMovementHistoryDB.instance === undefined) PlayerMovementHistoryDB.instance = new PlayerMovementHistoryDB();
+    if (PlayerMovementHistoryDB.instance === undefined)
+      PlayerMovementHistoryDB.instance = new PlayerMovementHistoryDB();
     return PlayerMovementHistoryDB.instance;
   }
   constructor() {

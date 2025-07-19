@@ -1,5 +1,4 @@
 // method to create a cube on a react-leaflet map
-
 import { LatLng, LatLngBoundsExpression } from "leaflet";
 import { Rectangle } from "react-leaflet";
 import { Tools, useGameToolContext } from "../../../../ContextProvider/GameToolProvider";
@@ -34,5 +33,5 @@ export default function Cube({ center, radius, color, removeCallback }: { center
         console.log("No Methods found");
     }
   };
-  return <Rectangle bounds={calcLatLng()} color={mColor} eventHandlers={{ click: handleClick }} key={`LineColor-${mColor}`}/>;
+  return <Rectangle bounds={calcLatLng()} color={mColor} eventHandlers={{ click: handleClick }} key={`LineColor-${mColor}`} />;
 }

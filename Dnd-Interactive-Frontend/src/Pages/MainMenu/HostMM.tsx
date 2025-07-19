@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
-import { useAuthenticatedContext } from "../../ContextProvider/useAuthenticatedContext";
 import { GameStateEnum, LoadCampaign, LoadSaveHistory, MapData, Player } from "dnd-interactive-shared";
-import { useGameState } from "../../ContextProvider/GameStateContext/GameStateProvider";
+import { useEffect, useState } from "react";
 import InteractiveMap from "../../Components/Map/InteractiveMap";
-import PlayerBanner from "../../Components/PlayerBanner/PlayerBanner";
 import MapUpload, { ClientMapDataInterface } from "../../Components/Map/MapUpload";
+import PlayerBanner from "../../Components/PlayerBanner/PlayerBanner";
+import { useGameState } from "../../ContextProvider/GameStateContext/GameStateProvider";
+import { useAuthenticatedContext } from "../../ContextProvider/useAuthenticatedContext";
 export default function HostMM({ otherPlayers }: { otherPlayers: Player[] }) {
   const authContext = useAuthenticatedContext();
   function removeHost() {
@@ -267,7 +267,7 @@ export function HostPlayerListComponent({ players }: { players: Player[] }) {
       {playerList.map((val) => {
         return (
           <li className="list-group-item" style={{ maxHeight: "200px" }} key={`HostMM-PlayerBanner-li-${val.userId}`}>
-            <PlayerBanner hostOnClick={() => {}} isMain={false} player={val} key={`HostMM-PlayerBanner-Banner-${val.userId}`} />
+            <PlayerBanner hostOnClick={() => { }} isMain={false} player={val} key={`HostMM-PlayerBanner-Banner-${val.userId}`} />
           </li>
         );
       })}

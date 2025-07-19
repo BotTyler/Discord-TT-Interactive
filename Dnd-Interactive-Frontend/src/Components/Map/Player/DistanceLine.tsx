@@ -1,6 +1,6 @@
-import { latLng, LatLng, LeafletMouseEvent } from "leaflet";
+import { latLng, LatLng } from "leaflet";
 import React, { useEffect } from "react";
-import { Polyline, Tooltip, useMap, useMapEvents } from "react-leaflet";
+import { Polyline, Tooltip, useMap } from "react-leaflet";
 /**
  * Component that will handle the distance measurement when a player is being dragged. The distance is based on the cell size of an image that is determined when a map upload happens.
  */

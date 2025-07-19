@@ -1,11 +1,12 @@
-import { useEffect, useState } from "react";
 import { LatLng, LeafletMouseEvent } from "leaflet";
-import { useAuthenticatedContext } from "../../../../ContextProvider/useAuthenticatedContext";
-import { DrawingTools, useDrawingGameToolContext } from "../../../../ContextProvider/GameDrawingProvider";
+import { useEffect, useState } from "react";
 import { useMap, useMapEvents } from "react-leaflet";
-import DistanceLine from "../../Player/DistanceLine";
+import { DrawingTools, useDrawingGameToolContext } from "../../../../ContextProvider/GameDrawingProvider";
 import { useGameState } from "../../../../ContextProvider/GameStateContext/GameStateProvider";
+import { useAuthenticatedContext } from "../../../../ContextProvider/useAuthenticatedContext";
+import DistanceLine from "../../Player/DistanceLine";
 import Circle from "./Circle";
+
 export default function DrawCircle() {
   const authContext = useAuthenticatedContext();
   const mapContext = useGameState();
@@ -68,7 +69,7 @@ export default function DrawCircle() {
 
   return drawingReady() ? (
     <>
-      <Circle center={circleCenter!} radius={circleRadius!} color="#fff" key={`CurrentCircle`} removeCallback={() => {}} />
+      <Circle center={circleCenter!} radius={circleRadius!} color="#fff" key={`CurrentCircle`} removeCallback={() => { }} />
       <DistanceLine start={circleCenter!} end={new LatLng(circleCenter!.lat, circleCenter!.lng + circleRadius!)} size={playerSize} color={"red"} key={`CurrentCircleCreationDistanceLine`} />
     </>
   ) : (

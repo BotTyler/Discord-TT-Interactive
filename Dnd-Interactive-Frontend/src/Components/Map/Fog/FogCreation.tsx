@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState } from "react";
-import Fog from "./Fog";
-import { LatLng, LeafletMouseEvent } from "leaflet";
-import { Tools, useGameToolContext } from "../../../ContextProvider/GameToolProvider";
-import { useMapEvents } from "react-leaflet";
-import { useAuthenticatedContext } from "../../../ContextProvider/useAuthenticatedContext";
 import { mLatLng } from "dnd-interactive-shared";
+import { LatLng, LeafletMouseEvent } from "leaflet";
+import { useEffect, useState } from "react";
+import { useMapEvents } from "react-leaflet";
+import { Tools, useGameToolContext } from "../../../ContextProvider/GameToolProvider";
+import { useAuthenticatedContext } from "../../../ContextProvider/useAuthenticatedContext";
+import Fog from "./Fog";
 
 /**
  * This function will handle fog creation on a leaflet interactive map.

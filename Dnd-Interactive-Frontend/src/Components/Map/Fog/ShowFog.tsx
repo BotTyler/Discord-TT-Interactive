@@ -1,8 +1,8 @@
+import { MapFogPolygon } from "dnd-interactive-shared";
 import { useEffect, useState } from "react";
 import { useGameState } from "../../../ContextProvider/GameStateContext/GameStateProvider";
-import Fog from "./Fog";
 import { useAuthenticatedContext } from "../../../ContextProvider/useAuthenticatedContext";
-import { MapFogPolygon } from "dnd-interactive-shared";
+import Fog from "./Fog";
 
 /**
  * This React component is used to show all fogs that are registered with the server.

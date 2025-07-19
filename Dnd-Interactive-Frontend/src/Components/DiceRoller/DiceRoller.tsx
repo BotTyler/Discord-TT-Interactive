@@ -2,11 +2,11 @@ import React, { useImperativeHandle } from "react";
 // @ts-ignore
 import DiceBox from "@3d-dice/dice-box";
 // @ts-ignore
+import { useMessageContext } from "../../ContextProvider/Messages/MessageContextProvider";
+import { usePlayers } from "../../ContextProvider/PlayersContext/PlayersContext";
+import { useAuthenticatedContext } from "../../ContextProvider/useAuthenticatedContext";
 import "./diceBox.css";
 import DicePickerComponent from "./DicePickerComponent";
-import { useAuthenticatedContext } from "../../ContextProvider/useAuthenticatedContext";
-import { usePlayers } from "../../ContextProvider/PlayersContext/PlayersContext";
-import { useMessageContext } from "../../ContextProvider/Messages/MessageContextProvider";
 
 export const DiceRoller = React.forwardRef(function DiceRoller({ fullScreen }: { fullScreen: boolean }, ref: any) {
   const diceBoxRef = React.useRef(null);
@@ -51,7 +51,6 @@ export const DiceRoller = React.forwardRef(function DiceRoller({ fullScreen }: {
             addValues.push(dice.value);
           });
         });
-        // ${notation.join(" + ")}
         const body = `${addValues.join(" + ")} = ${sum}`;
         // Roll is now complete, I am going to send the message depending on the status of the user;
         const me = playerContext.getPlayer(authContext.user.id)!; // Force unwrap is ok as it should be the current player.

@@ -1,11 +1,10 @@
+import { mLatLng, Player } from "dnd-interactive-shared";
 import L from "leaflet";
 import { useEffect, useState } from "react";
 import { Tools, useGameToolContext } from "../../../../ContextProvider/GameToolProvider";
-import Line from "./Line";
-import { Player } from "dnd-interactive-shared";
-import { useAuthenticatedContext } from "../../../../ContextProvider/useAuthenticatedContext";
-import { mLatLng } from "dnd-interactive-shared";
 import { usePlayers } from "../../../../ContextProvider/PlayersContext/PlayersContext";
+import { useAuthenticatedContext } from "../../../../ContextProvider/useAuthenticatedContext";
+import Line from "./Line";
 
 /**
  * React Component that displays all lines from a player that are registered with the server.

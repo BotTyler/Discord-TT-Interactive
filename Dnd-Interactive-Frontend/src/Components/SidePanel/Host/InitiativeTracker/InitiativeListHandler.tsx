@@ -1,11 +1,10 @@
-import { Enemy } from "dnd-interactive-shared";
-import { Player } from "dnd-interactive-shared";
-import { useGameState } from "../../../../ContextProvider/GameStateContext/GameStateProvider";
+import { Enemy, Player } from "dnd-interactive-shared";
 import React from "react";
+import { useGameState } from "../../../../ContextProvider/GameStateContext/GameStateProvider";
 import { usePlayers } from "../../../../ContextProvider/PlayersContext/PlayersContext";
 import { useAuthenticatedContext } from "../../../../ContextProvider/useAuthenticatedContext";
 
-export default function InitiativeListHandler({}: {}) {
+export default function InitiativeListHandler({ }: {}) {
   const players = usePlayers();
   const gameStateContext = useGameState();
   const authContext = useAuthenticatedContext();

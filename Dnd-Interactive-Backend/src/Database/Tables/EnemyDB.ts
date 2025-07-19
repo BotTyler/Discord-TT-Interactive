@@ -1,10 +1,17 @@
-import { DAO, DatabaseBase } from "../Interface/DatabaseObjectInterface";
+import {
+  DAO,
+  DatabaseBase,
+} from "../Interface/DatabaseObjectInterface";
 
 export class EnemyDAO extends DAO {
   private enemy_id?: number;
   private image_id: number;
   private name: string;
-  constructor(image_id: number, name: string, enemy_id?: number) {
+  constructor(
+    image_id: number,
+    name: string,
+    enemy_id?: number,
+  ) {
     super();
     this.enemy_id = enemy_id;
     this.image_id = image_id;
@@ -28,9 +35,11 @@ export class EnemyDAO extends DAO {
 }
 
 export class EnemyDB extends DatabaseBase<EnemyDAO> {
-  private static instance: EnemyDB | undefined = undefined;
+  private static instance: EnemyDB | undefined =
+    undefined;
   public static getInstance(): EnemyDB {
-    if (EnemyDB.instance === undefined) EnemyDB.instance = new EnemyDB();
+    if (EnemyDB.instance === undefined)
+      EnemyDB.instance = new EnemyDB();
     return EnemyDB.instance;
   }
   constructor() {

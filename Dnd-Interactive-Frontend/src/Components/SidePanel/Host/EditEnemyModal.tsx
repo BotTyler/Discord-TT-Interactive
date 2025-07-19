@@ -1,6 +1,5 @@
-import { useRef, useState, ChangeEvent } from "react";
+import { ChangeEvent, useRef, useState } from "react";
 import Modal from "../../Modal/Modal";
-import { useAuthenticatedContext } from "../../../ContextProvider/useAuthenticatedContext";
 import { NewLoadImage } from "../../NewLoadImage/NewLoadImage";
 
 /**

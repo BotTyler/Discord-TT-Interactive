@@ -1,9 +1,8 @@
+import { Enemy, Player } from "dnd-interactive-shared";
 import { useEffect, useState } from "react";
+import { useAuthenticatedContext } from "../../../../ContextProvider/useAuthenticatedContext";
 import DeathComponent from "./DeathComponent";
 import HealthComponent from "./HealthComponent";
-import { Player } from "dnd-interactive-shared";
-import { Enemy } from "dnd-interactive-shared";
-import { useAuthenticatedContext } from "../../../../ContextProvider/useAuthenticatedContext";
 
 export default function HealthDeathTrackerElement({ item, isPlayer }: { item: Player | Enemy; isPlayer: boolean }) {
   const [name, setName] = useState<string>(item.name);

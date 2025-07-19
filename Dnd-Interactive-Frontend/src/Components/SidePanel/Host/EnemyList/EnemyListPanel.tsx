@@ -1,12 +1,10 @@
 import React from "react";
-import { v4 as uuidv4 } from "uuid";
 
-import EnemyListElement from "./EnemyListElement";
-import { Enemy } from "dnd-interactive-shared";
+import { Enemy, mLatLng } from "dnd-interactive-shared";
 import { useGameState } from "../../../../ContextProvider/GameStateContext/GameStateProvider";
-import { mLatLng } from "dnd-interactive-shared";
 import { useAuthenticatedContext } from "../../../../ContextProvider/useAuthenticatedContext";
 import EditEnemyModal from "../EditEnemyModal";
+import EnemyListElement from "./EnemyListElement";
 import PlayerSizeInput from "./PlayerSizeInput";
 
 /**

@@ -1,6 +1,6 @@
 import { QueryResult } from "pg";
-import { DAO, DatabaseBase } from "../Interface/DatabaseObjectInterface";
 import Database from "../Database";
+import { DAO, DatabaseBase } from "../Interface/DatabaseObjectInterface";
 
 export class PlayerDAO extends DAO {
   private id: string;

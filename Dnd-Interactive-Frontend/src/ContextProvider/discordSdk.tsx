@@ -34,21 +34,5 @@ function getOverrideOrRandomSessionValue(queryParam: `${SessionStorageQueryParam
   return randomString;
 }
 
-// function setupProxy() {
-//   // TODO hide client id
-//   patchUrlMappings([
-//     {
-//       prefix: "https://1262169825308971068.discordsays.com/",
-//       target: "https://1262169825308971068.discordsays.com/.proxy/",
-//     },
-//   ]);
-//   // patchUrlMappings([
-//   //   {
-//   //     prefix: "/",
-//   //     target: "/.proxy/",
-//   //   },
-//   // ]);
-// }
-
 // // setupProxy();
 export { discordSdk };

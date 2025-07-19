@@ -1,14 +1,14 @@
 import { usePlayers } from "../../ContextProvider/PlayersContext/PlayersContext";
 
 import { Player } from "dnd-interactive-shared";
+import React from "react";
+import Background from "../../Components/Background/Background";
+import Loading from "../../Components/Loading";
+import { useGameState } from "../../ContextProvider/GameStateContext/GameStateProvider";
 import { useAuthenticatedContext } from "../../ContextProvider/useAuthenticatedContext";
 import { TAuthenticatedContext } from "../../Types/types";
-import Background from "../../Components/Background/Background";
-import { useGameState } from "../../ContextProvider/GameStateContext/GameStateProvider";
-import React from "react";
 import HostMM from "./HostMM";
 import PlayerMM from "./PlayerMM";
-import Loading from "../../Components/Loading";
 
 /**
  * Component the represents the main menu. The user will be loading into this when the activity starts

@@ -1,6 +1,6 @@
 import { QueryResult } from "pg";
-import { DAO, DatabaseBase } from "../Interface/DatabaseObjectInterface";
 import Database from "../Database";
+import { DAO, DatabaseBase } from "../Interface/DatabaseObjectInterface";
 
 export class FogStateHistoryDAO extends DAO {
   private id?: number;
@@ -33,7 +33,8 @@ export class FogStateHistoryDAO extends DAO {
 export class FogStateHistoryDB extends DatabaseBase<FogStateHistoryDAO> {
   private static instance: FogStateHistoryDB | undefined = undefined;
   public static getInstance(): FogStateHistoryDB {
-    if (FogStateHistoryDB.instance === undefined) FogStateHistoryDB.instance = new FogStateHistoryDB();
+    if (FogStateHistoryDB.instance === undefined)
+      FogStateHistoryDB.instance = new FogStateHistoryDB();
     return FogStateHistoryDB.instance;
   }
   constructor() {

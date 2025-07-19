@@ -1,9 +1,8 @@
 import { Player } from "dnd-interactive-shared";
-import HealthDeathTrackerElement from "../../General/HealthDeathTracker/HealthDeathTrackerElement";
+import { throttle } from "lodash";
 import { useCallback, useEffect, useState } from "react";
 import { useAuthenticatedContext } from "../../../../ContextProvider/useAuthenticatedContext";
 import TextToInput from "../../../TextToInput/TextToInput";
-import { throttle } from "lodash";
 import { HealDamageComponent } from "../../General/HealthDeathTracker/HealthComponent";
 
 export default function PlayerStatsPanelComponent({ player }: { player: Player }) {

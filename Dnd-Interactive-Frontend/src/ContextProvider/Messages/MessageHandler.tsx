@@ -1,7 +1,6 @@
-import React from "react";
-import { forwardRef, useImperativeHandle } from "react";
-import { useAuthenticatedContext } from "../useAuthenticatedContext";
+import React, { forwardRef, useImperativeHandle } from "react";
 import { usePlayers } from "../PlayersContext/PlayersContext";
+import { useAuthenticatedContext } from "../useAuthenticatedContext";
 export interface MessageInterface {
   userId: string;
   displayName: string;
@@ -10,7 +9,7 @@ export interface MessageInterface {
   type: string;
 }
 
-export const MessageHandler = forwardRef(function MessageHandler({}: {}, ref: any) {
+export const MessageHandler = forwardRef(function MessageHandler({ }: {}, ref: any) {
   const [allMessage, setAllMessages] = React.useState<MessageInterface[]>([]);
   const authContext = useAuthenticatedContext();
   const playersContext = usePlayers();

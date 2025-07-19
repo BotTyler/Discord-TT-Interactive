@@ -1,6 +1,5 @@
-import React, { useState } from "react";
-import { ArcDrawing, CircleDrawing, CubeDrawing, Player } from "dnd-interactive-shared";
-import { mLatLng } from "dnd-interactive-shared";
+import { ArcDrawing, CircleDrawing, CubeDrawing, mLatLng, Player } from "dnd-interactive-shared";
+import React from "react";
 import { useAuthenticatedContext } from "../useAuthenticatedContext";
 
 // this class def can be simpler

@@ -1,8 +1,7 @@
-import e from "express";
 import { mLatLng } from "dnd-interactive-shared";
-import { DAO, DatabaseBase } from "../Interface/DatabaseObjectInterface";
 import { QueryResult } from "pg";
 import Database from "../Database";
+import { DAO, DatabaseBase } from "../Interface/DatabaseObjectInterface";
 
 export class EnemyMovementHistoryDAO extends DAO {
   private id?: number;
@@ -17,7 +16,18 @@ export class EnemyMovementHistoryDAO extends DAO {
   private deathSaves: number;
   private lifeSaves: number;
 
-  constructor(history_id: number, enemy_id: number, size: number, position: mLatLng, initiative: number, health: number, totalHealth: number, deathsaves: number, lifeSaves: number, id?: number) {
+  constructor(
+    history_id: number,
+    enemy_id: number,
+    size: number,
+    position: mLatLng,
+    initiative: number,
+    health: number,
+    totalHealth: number,
+    deathsaves: number,
+    lifeSaves: number,
+    id?: number,
+  ) {
     super();
     this.id = id;
     this.history_id = history_id;
@@ -33,10 +43,32 @@ export class EnemyMovementHistoryDAO extends DAO {
   }
 
   getKeys(): string[] {
-    return ["history_id", "enemy_id", "size", "position_lat", "position_lng", "initiative", "health", "total_health", "death_saves", "life_saves"];
+    return [
+      "history_id",
+      "enemy_id",
+      "size",
+      "position_lat",
+      "position_lng",
+      "initiative",
+      "health",
+      "total_health",
+      "death_saves",
+      "life_saves",
+    ];
   }
   getValues(): any[] {
-    return [this.history_id, this.enemy_id, this.size, this.position_lat, this.position_lng, this.initiaitive, this.health, this.totalHealth, this.deathSaves, this.lifeSaves];
+    return [
+      this.history_id,
+      this.enemy_id,
+      this.size,
+      this.position_lat,
+      this.position_lng,
+      this.initiaitive,
+      this.health,
+      this.totalHealth,
+      this.deathSaves,
+      this.lifeSaves,
+    ];
   }
   getIdName(): string {
     return "id";
@@ -49,7 +81,8 @@ export class EnemyMovementHistoryDAO extends DAO {
 export class EnemyMovementHistoryDB extends DatabaseBase<EnemyMovementHistoryDAO> {
   private static instance: EnemyMovementHistoryDB | undefined = undefined;
   public static getInstance(): EnemyMovementHistoryDB {
-    if (EnemyMovementHistoryDB.instance === undefined) EnemyMovementHistoryDB.instance = new EnemyMovementHistoryDB();
+    if (EnemyMovementHistoryDB.instance === undefined)
+      EnemyMovementHistoryDB.instance = new EnemyMovementHistoryDB();
     return EnemyMovementHistoryDB.instance;
   }
   constructor() {

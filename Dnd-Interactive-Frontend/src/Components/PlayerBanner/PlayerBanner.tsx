@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
-import Modal from "../Modal/Modal";
 import { Player } from "dnd-interactive-shared";
-import { useAuthenticatedContext } from "../../ContextProvider/useAuthenticatedContext";
+import { useEffect, useState } from "react";
 import { useGameState } from "../../ContextProvider/GameStateContext/GameStateProvider";
+import { useAuthenticatedContext } from "../../ContextProvider/useAuthenticatedContext";
+import Modal from "../Modal/Modal";
 import "./BannerHover.css";
 
 /**

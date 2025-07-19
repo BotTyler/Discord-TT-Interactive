@@ -1,5 +1,5 @@
-import React from "react";
 import { Enemy } from "dnd-interactive-shared";
+import React from "react";
 import { useGameState } from "../../../ContextProvider/GameStateContext/GameStateProvider";
 import EnemyController from "./EnemyController";
 

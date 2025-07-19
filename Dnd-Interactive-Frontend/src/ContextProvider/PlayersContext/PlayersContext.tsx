@@ -1,5 +1,5 @@
-import * as React from "react";
 import { Player } from "dnd-interactive-shared";
+import * as React from "react";
 
 import { useAuthenticatedContext } from "../useAuthenticatedContext";
 import { PlayersListHandler } from "./PlayersListHandler";

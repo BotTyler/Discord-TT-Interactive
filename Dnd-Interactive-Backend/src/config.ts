@@ -117,10 +117,14 @@ export default config({
         const bucket = process.env.MINIO_BUCKET!;
 
         if (!fileName) return res.status(400).json({ error: "File name is required" });
-        if (!MinioClient.getInstance().bucketExists(bucket)) return res.status(400).json({ error: "BUCKET DOES NOT EXIST" });
+        if (!MinioClient.getInstance().bucketExists(bucket))
+          return res.status(400).json({ error: "BUCKET DOES NOT EXIST" });
 
         // call out to minio to grab the image
-        const stream = await MinioClient.getInstance().getObject(`${bucket}`, `${userId}/images/${fileName}`);
+        const stream = await MinioClient.getInstance().getObject(
+          `${bucket}`,
+          `${userId}/images/${fileName}`,
+        );
         stream.pipe(res);
       } catch (e: any) {
         console.error(e);
@@ -135,14 +139,17 @@ export default config({
         const bucket = process.env.MINIO_BUCKET!;
         const userId = req.params.userId;
         if (!req.file) return res.status(400).send("No file uploaded.");
-        if (!(await MinioClient.getInstance().bucketExists(bucket))) return res.status(400).json({ error: "BUCKET DOES NOT EXIST" });
+        if (!(await MinioClient.getInstance().bucketExists(bucket)))
+          return res.status(400).json({ error: "BUCKET DOES NOT EXIST" });
 
         const file = req.file;
         const fileName = `${userId}/images/${Date.now()}-${file.originalname}`;
         const fileStream = file.buffer;
         const { width, height } = await sharp(fileStream).metadata();
 
-        await ImageCatalogDB.getInstance().create(new ImageCatalogDAO(userId, fileName, width!, height!));
+        await ImageCatalogDB.getInstance().create(
+          new ImageCatalogDAO(userId, fileName, width!, height!),
+        );
         await MinioClient.getInstance().putObject(bucket, `${fileName}`, fileStream, file.size);
 
         const response = {
@@ -161,10 +168,14 @@ export default config({
         const userId = req.params.userId;
         const bucket = process.env.MINIO_BUCKET!;
         if (!audioName) return res.status(400).json({ error: "File name is required" });
-        if (!MinioClient.getInstance().bucketExists(bucket)) return res.status(400).json({ error: "BUCKET DOES NOT EXIST" });
+        if (!MinioClient.getInstance().bucketExists(bucket))
+          return res.status(400).json({ error: "BUCKET DOES NOT EXIST" });
 
         // call out to minio to grab the image
-        const stream = await MinioClient.getInstance().getObject(`${bucket}`, `${userId}/audio/${audioName}`);
+        const stream = await MinioClient.getInstance().getObject(
+          `${bucket}`,
+          `${userId}/audio/${audioName}`,
+        );
         stream.pipe(res);
       } catch (e) {
         console.error(`Something went wrong with getAudio`);
@@ -176,7 +187,8 @@ export default config({
       const bucket = process.env.MINIO_BUCKET!;
       const userId = req.params.userId;
       if (!req.file) return res.status(400).send("No file uploaded");
-      if (!(await MinioClient.getInstance().bucketExists(bucket))) return res.status(400).json({ error: "BUCKET DOES NOT EXIST" });
+      if (!(await MinioClient.getInstance().bucketExists(bucket)))
+        return res.status(400).json({ error: "BUCKET DOES NOT EXIST" });
 
       const file = req.file;
       const fileName = `${userId}/audio/${Date.now()}-${file.originalname}`;
@@ -196,7 +208,8 @@ export default config({
         const youtubeUrl = req.body.link;
         const bucket = process.env.MINIO_BUCKET!;
 
-        if (!(await MinioClient.getInstance().bucketExists(bucket))) return res.status(400).json({ error: "BUCKET DOES NOT EXIST" });
+        if (!(await MinioClient.getInstance().bucketExists(bucket)))
+          return res.status(400).json({ error: "BUCKET DOES NOT EXIST" });
         if (youtubeUrl === undefined) return res.status(400).json({ error: "No URL provided." });
 
         // get basic youtube information

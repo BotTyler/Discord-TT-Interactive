@@ -14,7 +14,6 @@ export class FogDAO extends DAO {
     return ["polygon"];
   }
   getValues(): any[] {
-    // TODO: fix the polygon to match the format expected in the database
     const polygonString = `(${this.polygon
       .map((points) => {
         return `(${points.lat},${points.lng})`;

@@ -1,12 +1,12 @@
 import React from "react";
-import ImportExport from "./ImportExport";
-import EnemyListPanel from "./EnemyList/EnemyListPanel";
 import SimpleNavbar from "../../SimpleNavbar/SimpleNavbar";
-import InitiativeTrackerPanel from "./InitiativeTracker/InitiativeTrackerPanel";
-import ChatBox from "../General/Chatbox/Chat";
 import AudioBox from "../General/AudioBox/AudioBox";
-import HealthDeathTrackerPanel from "./HealthDeathTracker/HealthDeathTrackerPanel";
+import ChatBox from "../General/Chatbox/Chat";
+import EnemyListPanel from "./EnemyList/EnemyListPanel";
 import HandoutsPanel from "./Handouts/HandoutsPanels";
+import HealthDeathTrackerPanel from "./HealthDeathTracker/HealthDeathTrackerPanel";
+import ImportExport from "./ImportExport";
+import InitiativeTrackerPanel from "./InitiativeTracker/InitiativeTrackerPanel";
 
 export default function HostSidePanel() {
   const contentList: { title: string; content: React.ReactNode }[] = [

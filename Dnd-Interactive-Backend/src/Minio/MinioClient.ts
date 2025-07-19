@@ -16,6 +16,8 @@ export default class MinioClient {
   }
 
   constructor() {
-    console.warn("This class should not be initialized manually, please use the MinioClient.getInstance() method.");
+    console.warn(
+      "This class should not be initialized manually, please use the MinioClient.getInstance() method.",
+    );
   }
 }

@@ -1,8 +1,8 @@
+import { mLatLng } from "dnd-interactive-shared";
 import L from "leaflet";
+import React from "react";
 import { Polygon } from "react-leaflet";
 import { Tools, useGameToolContext } from "../../../ContextProvider/GameToolProvider";
-import { mLatLng } from "dnd-interactive-shared";
-import React from "react";
 
 /**
  * This class is responsible for rendering a polygon on screen that will represent fog in the game.

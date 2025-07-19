@@ -1,10 +1,10 @@
-import { ReactElement, useEffect, useRef, useState } from "react";
-import { useAuthenticatedContext } from "../../../../ContextProvider/useAuthenticatedContext";
-import { NewLoadImage } from "../../../NewLoadImage/NewLoadImage";
-import Modal from "../../../Modal/Modal";
-import { usePlayers } from "../../../../ContextProvider/PlayersContext/PlayersContext";
-import PlayerBanner from "../../../PlayerBanner/PlayerBanner";
 import { Player } from "dnd-interactive-shared";
+import { useEffect, useRef, useState } from "react";
+import { usePlayers } from "../../../../ContextProvider/PlayersContext/PlayersContext";
+import { useAuthenticatedContext } from "../../../../ContextProvider/useAuthenticatedContext";
+import Modal from "../../../Modal/Modal";
+import { NewLoadImage } from "../../../NewLoadImage/NewLoadImage";
+import PlayerBanner from "../../../PlayerBanner/PlayerBanner";
 
 export default function HandoutsPanel() {
   const authContext = useAuthenticatedContext();

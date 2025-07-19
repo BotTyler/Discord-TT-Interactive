@@ -1,5 +1,5 @@
-import { IGuildsMembersRead } from "../Types/types";
 import { Types } from "@discord/embedded-app-sdk";
+import { IGuildsMembersRead } from "../Types/types";
 
 interface GetUserDisplayNameArgs {
   guildMember: IGuildsMembersRead | null;

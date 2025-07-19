@@ -1,6 +1,6 @@
 import { QueryResult } from "pg";
-import { DAO, DatabaseBase } from "../Interface/DatabaseObjectInterface";
 import Database from "../Database";
+import { DAO, DatabaseBase } from "../Interface/DatabaseObjectInterface";
 
 export class SaveHistoryDAO extends DAO {
   public readonly id?: number;
@@ -60,7 +60,9 @@ export class SaveHistoryDB extends DatabaseBase<SaveHistoryDAO> {
     const result: QueryResult<SaveHistoryDAO> | undefined = await Database.getInstance()
       .query(query, [campaign_id])
       .catch((e) => {
-        console.error(`Could not ***select**** Campaign Id: ${campaign_id} from (${this.tableName})`);
+        console.error(
+          `Could not ***select**** Campaign Id: ${campaign_id} from (${this.tableName})`,
+        );
         return undefined;
       });
 

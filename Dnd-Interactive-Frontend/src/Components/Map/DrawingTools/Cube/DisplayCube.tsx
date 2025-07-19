@@ -1,10 +1,9 @@
-import L, { LatLng, latLng } from "leaflet";
+import { CubeDrawing, Player } from "dnd-interactive-shared";
+import { LatLng } from "leaflet";
 import { useEffect, useState } from "react";
 import { Tools, useGameToolContext } from "../../../../ContextProvider/GameToolProvider";
-import { CubeDrawing, Player } from "dnd-interactive-shared";
-import { useAuthenticatedContext } from "../../../../ContextProvider/useAuthenticatedContext";
-import { mLatLng } from "dnd-interactive-shared";
 import { usePlayers } from "../../../../ContextProvider/PlayersContext/PlayersContext";
+import { useAuthenticatedContext } from "../../../../ContextProvider/useAuthenticatedContext";
 import Cube from "./Cube";
 
 /**

@@ -1,6 +1,6 @@
+import { GameStateEnum } from "dnd-interactive-shared";
 import React from "react";
 import { useAuthenticatedContext } from "../../../ContextProvider/useAuthenticatedContext";
-import { GameStateEnum } from "dnd-interactive-shared";
 
 /**
  * Component that will handle the import and export of a map

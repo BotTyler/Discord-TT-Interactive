@@ -1,10 +1,9 @@
+import { Enemy, Player } from "dnd-interactive-shared";
 import { useEffect, useState } from "react";
 import { useGameState } from "../../../../ContextProvider/GameStateContext/GameStateProvider";
 import { usePlayers } from "../../../../ContextProvider/PlayersContext/PlayersContext";
-import { Enemy } from "dnd-interactive-shared";
-import { Player } from "dnd-interactive-shared";
-import HealthDeathTrackerElement from "../../General/HealthDeathTracker/HealthDeathTrackerElement";
 import { useAuthenticatedContext } from "../../../../ContextProvider/useAuthenticatedContext";
+import HealthDeathTrackerElement from "../../General/HealthDeathTracker/HealthDeathTrackerElement";
 
 export default function HealthDeathTrackerPanel() {
   const mapContext = useGameState();

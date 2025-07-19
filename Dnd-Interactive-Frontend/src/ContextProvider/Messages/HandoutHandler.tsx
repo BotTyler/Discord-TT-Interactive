@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { useAuthenticatedContext } from "../useAuthenticatedContext";
 import PopupWindow from "../../Components/PopupWindow/PopupWindows";
+import { useAuthenticatedContext } from "../useAuthenticatedContext";
 
 interface HandoutInterface {
   id: string;
@@ -60,7 +60,7 @@ export default function HandoutHandler() {
         return (
           <PopupWindow
             width={500}
-            height={ 500}
+            height={500}
             resizeable={true}
             startx={getRandomX()}
             starty={getRandomY()}

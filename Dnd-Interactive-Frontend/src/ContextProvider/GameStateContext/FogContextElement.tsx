@@ -1,6 +1,5 @@
+import { MapFogPolygon, mLatLng } from "dnd-interactive-shared";
 import React from "react";
-import { mLatLng } from "dnd-interactive-shared";
-import { MapFogPolygon } from "dnd-interactive-shared";
 import { useAuthenticatedContext } from "../useAuthenticatedContext";
 
 export default function FogContextElement({ fog, onValueChanged }: { fog: MapFogPolygon; onValueChanged: (field: string, value: unknown) => void }) {

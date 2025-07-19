@@ -1,12 +1,10 @@
+import { Enemy, GameStateEnum, MapData, MapFogPolygon } from "dnd-interactive-shared";
 import React from "react";
-import { GameStateEnum } from "dnd-interactive-shared";
-import { useAuthenticatedContext } from "../useAuthenticatedContext";
+import Error from "../../Pages/Error/Error";
 import MainMenu from "../../Pages/MainMenu/MainMenu";
 import PlayArea from "../../Pages/PlayArea/PlayArea";
 import { usePlayers } from "../PlayersContext/PlayersContext";
-import Error from "../../Pages/Error/Error";
-import { MapData, MapFogPolygon } from "dnd-interactive-shared";
-import { Enemy } from "dnd-interactive-shared";
+import { useAuthenticatedContext } from "../useAuthenticatedContext";
 import { GameMapContextHandler } from "./GameMapContextHandler";
 
 export interface GameStateInterface {

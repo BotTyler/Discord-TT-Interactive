@@ -1,7 +1,7 @@
 import { LatLng } from "leaflet";
+import { useEffect, useState } from "react";
 import { Polyline } from "react-leaflet";
 import { Tools, useGameToolContext } from "../../../../ContextProvider/GameToolProvider";
-import { useEffect, useState } from "react";
 
 /**
  * Component that will display a line on a leaflet map.

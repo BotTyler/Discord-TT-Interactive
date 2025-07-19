@@ -1,18 +1,18 @@
-import { useAuthenticatedContext } from "../../ContextProvider/useAuthenticatedContext";
-import Toolbar from "../../Components/Map/Toolbar/Toolbar";
-import { usePlayers } from "../../ContextProvider/PlayersContext/PlayersContext";
-import InteractiveMap from "../../Components/Map/InteractiveMap";
-import PlayerSidePanel from "../../Components/SidePanel/Player/PlayerSidePanel";
-import Loading from "../../Components/Loading";
+import { MapData } from "dnd-interactive-shared";
+import React from "react";
+import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { DiceRoller } from "../../Components/DiceRoller/DiceRoller";
+import Loading from "../../Components/Loading";
+import InteractiveMap from "../../Components/Map/InteractiveMap";
+import DrawingToolbar from "../../Components/Map/Toolbar/DrawingToolbar";
+import Toolbar from "../../Components/Map/Toolbar/Toolbar";
+import HostSidePanel from "../../Components/SidePanel/Host/HostSidePanel";
+import PlayerSidePanel from "../../Components/SidePanel/Player/PlayerSidePanel";
+import { GameDrawingProvider } from "../../ContextProvider/GameDrawingProvider";
 import { useGameState } from "../../ContextProvider/GameStateContext/GameStateProvider";
 import { GameToolProvider } from "../../ContextProvider/GameToolProvider";
-import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
-import React from "react";
-import HostSidePanel from "../../Components/SidePanel/Host/HostSidePanel";
-import { MapData } from "dnd-interactive-shared";
-import { GameDrawingProvider } from "../../ContextProvider/GameDrawingProvider";
-import DrawingToolbar from "../../Components/Map/Toolbar/DrawingToolbar";
+import { usePlayers } from "../../ContextProvider/PlayersContext/PlayersContext";
+import { useAuthenticatedContext } from "../../ContextProvider/useAuthenticatedContext";
 
 /**
  * Component that represents the entire game area.
@@ -27,7 +27,7 @@ export default function PlayArea() {
   function displaySidePanel() {
     const currentUserid = authContext.user.id;
     if (players.getPlayer(currentUserid) === undefined || gamestateContext.getMap() === undefined) return <Loading />;
-     //return <HostSidePanel />;
+    //return <HostSidePanel />;
     if (players.getPlayer(currentUserid)!.isHost) return <HostSidePanel />;
     return <PlayerSidePanel />;
   }

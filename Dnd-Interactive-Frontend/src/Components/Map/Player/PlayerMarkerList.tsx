@@ -1,11 +1,11 @@
+import { Player } from "dnd-interactive-shared";
 import React from "react";
 import { usePlayers } from "../../../ContextProvider/PlayersContext/PlayersContext";
-import { Player } from "dnd-interactive-shared";
+import DisplayArc from "../DrawingTools/Arc/DisplayArc";
+import DisplayCircle from "../DrawingTools/Circle/DisplayCircle";
+import DisplayCube from "../DrawingTools/Cube/DisplayCube";
 import DisplayLines from "../DrawingTools/Lines/DisplayLines";
 import PlayerController from "./PlayerController";
-import DisplayCube from "../DrawingTools/Cube/DisplayCube";
-import DisplayCircle from "../DrawingTools/Circle/DisplayCircle";
-import DisplayArc from "../DrawingTools/Arc/DisplayArc";
 
 export default function PlayerMarkerList() {
   const playerContext = usePlayers();

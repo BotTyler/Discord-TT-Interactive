@@ -17,6 +17,7 @@
     "bootstrap-icons": "^1.11.3",
     "colyseus.js": "^0.15.18",
     "eslint": "^8.18.0",
+    "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^4.6.0",
     "leaflet": "^1.9.4",
     "lexical": "^0.23.1",
@@ -39,6 +40,5 @@
     "vite": "^5.2.9"
   },
   "eslintConfig": {
-    "extends": "plugin:react-hooks/recommended"
-  }
+        "extends": "plugin:react-hooks/recommended"
 }

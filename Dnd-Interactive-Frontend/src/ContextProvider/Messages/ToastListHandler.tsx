@@ -1,8 +1,7 @@
-import React from "react";
-import { forwardRef, useImperativeHandle } from "react";
+import React, { forwardRef, useImperativeHandle } from "react";
 import Toast from "./Toast";
 
-export const ToastListHandler = forwardRef(function ToastListHandler({}: {}, ref: any) {
+export const ToastListHandler = forwardRef(function ToastListHandler({ }: {}, ref: any) {
   const [toast, setToast] = React.useState<{ title: string; message: string }[]>([]);
   useImperativeHandle(ref, () => ({
     addToast(title: string, message: string) {

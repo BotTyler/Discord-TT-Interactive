@@ -1,9 +1,9 @@
 import React from "react";
+import { useSettings } from "../../../../ContextProvider/AudioContext/SettingsProvider";
+import { useAuthenticatedContext } from "../../../../ContextProvider/useAuthenticatedContext";
+import { getFileNameFromMinioString } from "../../../../Util/Util";
 import AudioBoxInputs from "./AudioBoxInputs";
 import AudioBoxItem from "./AudioBoxItem";
-import { getFileNameFromMinioString } from "../../../../Util/Util";
-import { useAuthenticatedContext } from "../../../../ContextProvider/useAuthenticatedContext";
-import { useSettings } from "../../../../ContextProvider/AudioContext/SettingsProvider";
 
 export default function AudioBox() {
   const audioContext = useSettings();

@@ -1,11 +1,13 @@
-import { useEffect, useState } from "react";
 import { LatLng, LeafletMouseEvent } from "leaflet";
-import { useAuthenticatedContext } from "../../../../ContextProvider/useAuthenticatedContext";
+import { useEffect, useState } from "react";
+import { useMapEvents } from "react-leaflet";
 import { DrawingTools, useDrawingGameToolContext } from "../../../../ContextProvider/GameDrawingProvider";
-import { useMap, useMapEvents } from "react-leaflet";
-import DistanceLine from "../../Player/DistanceLine";
 import { useGameState } from "../../../../ContextProvider/GameStateContext/GameStateProvider";
+import { useAuthenticatedContext } from "../../../../ContextProvider/useAuthenticatedContext";
+import DistanceLine from "../../Player/DistanceLine";
 import Arc from "./Arc";
+
+
 export default function DrawArc() {
   const authContext = useAuthenticatedContext();
   const mapContext = useGameState();
@@ -66,7 +68,7 @@ export default function DrawArc() {
 
   return drawingReady() ? (
     <>
-      <Arc center={arcCenter!} angle={45} toLocation={toLocation!} color="#fff" key={`CurrentArc`} removeCallback={() => {}} />
+      <Arc center={arcCenter!} angle={45} toLocation={toLocation!} color="#fff" key={`CurrentArc`} removeCallback={() => { }} />
       <DistanceLine start={arcCenter!} end={toLocation!} size={playerSize} color={"red"} key={`CurrentArcCreationDistanceLine`} />
     </>
   ) : (

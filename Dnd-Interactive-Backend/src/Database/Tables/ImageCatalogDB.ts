@@ -1,6 +1,6 @@
 import { QueryResult } from "pg";
-import { DAO, DatabaseBase } from "../Interface/DatabaseObjectInterface";
 import Database from "../Database";
+import { DAO, DatabaseBase } from "../Interface/DatabaseObjectInterface";
 
 export class ImageCatalogDAO extends DAO {
   public readonly img_catalog_id?: number;
@@ -8,7 +8,14 @@ export class ImageCatalogDAO extends DAO {
   public readonly image_name: string;
   public readonly width: number;
   public readonly height: number;
-  constructor(player_id: string, image_name: string, width: number, height: number, img_catalog_id?: number) {
+
+  constructor(
+    player_id: string,
+    image_name: string,
+    width: number,
+    height: number,
+    img_catalog_id?: number,
+  ) {
     super();
     this.img_catalog_id = img_catalog_id;
     this.player_id = player_id;
@@ -70,7 +77,6 @@ export class ImageCatalogDB extends DatabaseBase<ImageCatalogDAO> {
 
       // if the id is null I need to query the database to get the original ID
       const query = `SELECT img_catalog_id as id from public."Image_Catalog" where image_name = $1;`;
-      console.log(query);
 
       const result: QueryResult<{ id: number }> | undefined = await Database.getInstance()
         .query(query, [data.image_name])

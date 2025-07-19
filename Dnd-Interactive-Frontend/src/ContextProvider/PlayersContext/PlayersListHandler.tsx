@@ -1,9 +1,9 @@
-import React, { useImperativeHandle } from "react";
 import { Player } from "dnd-interactive-shared";
+import React, { useImperativeHandle } from "react";
 import { useAuthenticatedContext } from "../useAuthenticatedContext";
 import PlayerElementHandler from "./PlayerElementHandler";
 
-export const PlayersListHandler = React.forwardRef(function PlayersListHandler({}: {}, ref: any) {
+export const PlayersListHandler = React.forwardRef(function PlayersListHandler({ }: {}, ref: any) {
   const [players, setPlayers] = React.useState<{ [key: string]: Player }>({});
   const [connectedPlayers, setConnectedPlayers] = React.useState<{ [key: string]: string }>({});
   const authenticatedContext = useAuthenticatedContext();

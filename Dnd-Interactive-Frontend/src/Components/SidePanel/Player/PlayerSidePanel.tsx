@@ -1,9 +1,9 @@
 import React from "react";
+import { usePlayers } from "../../../ContextProvider/PlayersContext/PlayersContext";
+import { useAuthenticatedContext } from "../../../ContextProvider/useAuthenticatedContext";
 import SimpleNavbar from "../../SimpleNavbar/SimpleNavbar";
 import ChatBox from "../General/Chatbox/Chat";
 import PlayerStatsPanelComponent from "./PlayerStats/PlayerStatsPanelComponent";
-import { useAuthenticatedContext } from "../../../ContextProvider/useAuthenticatedContext";
-import { usePlayers } from "../../../ContextProvider/PlayersContext/PlayersContext";
 
 export default function PlayerSidePanel() {
   const authContext = useAuthenticatedContext();

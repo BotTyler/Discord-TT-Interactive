@@ -1,6 +1,6 @@
 import { QueryResult } from "pg";
-import { DAO, DatabaseBase } from "../Interface/DatabaseObjectInterface";
 import Database from "../Database";
+import { DAO, DatabaseBase } from "../Interface/DatabaseObjectInterface";
 
 export class InitiativeHistoryDAO extends DAO {
   public readonly id?: number;
@@ -31,7 +31,8 @@ export class InitiativeHistoryDAO extends DAO {
 export class InitiativeHistoryDB extends DatabaseBase<InitiativeHistoryDAO> {
   private static instance: InitiativeHistoryDB | undefined = undefined;
   public static getInstance(): InitiativeHistoryDB {
-    if (InitiativeHistoryDB.instance === undefined) InitiativeHistoryDB.instance = new InitiativeHistoryDB();
+    if (InitiativeHistoryDB.instance === undefined)
+      InitiativeHistoryDB.instance = new InitiativeHistoryDB();
     return InitiativeHistoryDB.instance;
   }
   constructor() {
