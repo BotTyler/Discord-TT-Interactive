@@ -12,7 +12,6 @@ export default function HandoutHandler() {
   const [handouts, setHandouts] = useState<HandoutInterface[]>([]);
   useEffect(() => {
     const HandoutListener = authContext.room.onMessage("HandoutAdd", (data: { id: string; imageUrl: string }) => {
-      console.log("got handout");
       setHandouts((prev) => {
         return [...prev, { id: data.id, imageUrl: data.imageUrl }];
       });
@@ -32,7 +31,6 @@ export default function HandoutHandler() {
     const randomX = Math.floor(Math.random() * width);
     const padding = sidePadding ?? width * 0.25;
 
-    console.log(`${width}:${randomX}:${padding}`);
     if (randomX > width - padding) {
       return randomX - padding;
     } else if (randomX < padding) {

@@ -102,7 +102,6 @@ const SettingsContainer = forwardRef(function SettingsContainer({ embeddedRefRea
     >
       <i style={{ fontSize: "30px" }} className="bi bi-gear-wide-connected"
         onClick={() => {
-          console.log("onclick proess icon");
           setShowSettingsPanel((prev) => {
             return !prev;
           });
