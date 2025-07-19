@@ -16,7 +16,6 @@
     "bootstrap": "^5.3.3",
     "bootstrap-icons": "^1.11.3",
     "colyseus.js": "^0.15.18",
-    "dnd-interactive-shared": "^1.0.22",
     "eslint": "^8.18.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "leaflet": "^1.9.4",
