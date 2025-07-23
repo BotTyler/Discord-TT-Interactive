@@ -1,4 +1,4 @@
-import { LoadCampaign } from "dnd-interactive-shared";
+import { LoadCampaign } from "../../../../Dnd-Interactive-Frontend/shared/src/LoadDataInterfaces";
 import { QueryResult } from "pg";
 import Database from "../Database";
 import { DAO, DatabaseBase } from "../Interface/DatabaseObjectInterface";
