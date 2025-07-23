@@ -1,4 +1,7 @@
-import { GameStateEnum, LoadCampaign, LoadSaveHistory, MapData, Player } from "dnd-interactive-shared";
+import { GameStateEnum } from "../../../shared/src/State";
+import { LoadCampaign, LoadSaveHistory } from "../../../shared/src/LoadDataInterfaces";
+import { MapData } from "../../../shared/src/Map";
+import { Player } from "../../../shared/src/Player";
 import { useEffect, useState } from "react";
 import InteractiveMap from "../../Components/Map/InteractiveMap";
 import MapUpload, { ClientMapDataInterface } from "../../Components/Map/MapUpload";

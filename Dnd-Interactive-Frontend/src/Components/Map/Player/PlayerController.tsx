@@ -1,4 +1,4 @@
-import { Player } from "dnd-interactive-shared";
+import { Player } from "../../../../shared/src/Player";
 import L, { LatLng } from "leaflet";
 import { useEffect, useState } from "react";
 import { useGameState } from "../../../ContextProvider/GameStateContext/GameStateProvider";

@@ -1,4 +1,5 @@
-import { Enemy, Player } from "dnd-interactive-shared";
+import { Enemy } from "../../../../../shared/src/Enemy"
+import { Player } from "../../../../../shared/src/Player"
 import { useEffect, useState } from "react";
 import { useGameState } from "../../../../ContextProvider/GameStateContext/GameStateProvider";
 import { usePlayers } from "../../../../ContextProvider/PlayersContext/PlayersContext";

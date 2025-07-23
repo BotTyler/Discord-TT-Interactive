@@ -1,7 +1,8 @@
 import { LatLng } from "leaflet";
 import { useEffect, useState } from "react";
 import { Tools, useGameToolContext } from "../../../../ContextProvider/GameToolProvider";
-import { CircleDrawing, Player } from "dnd-interactive-shared";
+import { CircleDrawing } from "../../../../../shared/src/DrawingInterface";
+import { Player } from "../../../../../shared/src/Player";
 import { useAuthenticatedContext } from "../../../../ContextProvider/useAuthenticatedContext";
 import { usePlayers } from "../../../../ContextProvider/PlayersContext/PlayersContext";
 import Circle from "./Circle";

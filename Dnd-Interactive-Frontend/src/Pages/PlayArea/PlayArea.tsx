@@ -1,4 +1,4 @@
-import { MapData } from "dnd-interactive-shared";
+import { MapData } from "../../../shared/src/Map"
 import React from "react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { DiceRoller } from "../../Components/DiceRoller/DiceRoller";

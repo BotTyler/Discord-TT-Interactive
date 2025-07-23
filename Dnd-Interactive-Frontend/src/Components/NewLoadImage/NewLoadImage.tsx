@@ -1,4 +1,4 @@
-import { LoadImage } from "dnd-interactive-shared";
+import { LoadImage } from "../../../shared/src/LoadDataInterfaces";
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useState } from "react";
 import { useAuthenticatedContext } from "../../ContextProvider/useAuthenticatedContext";
 import { getFileNameFromMinioString } from "../../Util/Util";

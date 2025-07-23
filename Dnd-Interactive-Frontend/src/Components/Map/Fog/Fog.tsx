@@ -1,4 +1,4 @@
-import { mLatLng } from "dnd-interactive-shared";
+import { mLatLng } from "../../../../shared/src/PositionInterface";
 import L from "leaflet";
 import React from "react";
 import { Polygon } from "react-leaflet";

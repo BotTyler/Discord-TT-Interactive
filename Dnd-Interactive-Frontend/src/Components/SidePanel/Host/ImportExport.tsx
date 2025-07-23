@@ -1,4 +1,4 @@
-import { GameStateEnum } from "dnd-interactive-shared";
+import { GameStateEnum } from "../../../../shared/src/State";
 import React from "react";
 import { useAuthenticatedContext } from "../../../ContextProvider/useAuthenticatedContext";
 

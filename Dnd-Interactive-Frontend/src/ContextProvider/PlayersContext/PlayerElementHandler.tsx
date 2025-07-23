@@ -1,4 +1,6 @@
-import { ArcDrawing, CircleDrawing, CubeDrawing, mLatLng, Player } from "dnd-interactive-shared";
+import { ArcDrawing, CircleDrawing, CubeDrawing } from "../../../shared/src/DrawingInterface";
+import { mLatLng } from "../../../shared/src/PositionInterface";
+import { Player } from "../../../shared/src/Player";
 import React from "react";
 import { useAuthenticatedContext } from "../useAuthenticatedContext";
 

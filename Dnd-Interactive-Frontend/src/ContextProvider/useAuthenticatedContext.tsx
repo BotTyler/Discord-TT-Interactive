@@ -1,7 +1,8 @@
 import { Client, Room } from "colyseus.js";
 import * as React from "react";
 
-import { GAME_NAME, State } from "dnd-interactive-shared";
+import { GAME_NAME } from "../../shared/src/Constants";
+import { State } from "../../shared/src/State";
 
 import Loading from "../Components/Loading";
 import { getUserAvatarUrl } from "../Util/getUserAvatarUrl";
