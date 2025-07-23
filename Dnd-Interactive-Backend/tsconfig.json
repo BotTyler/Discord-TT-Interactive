@@ -10,6 +10,6 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
   },
-  "include": ["src/**/*.ts", "./environment.d.ts", "../Dnd-Interactive-Shared/src/LoadDataInterfaces.ts", "../Dnd-Interactive-Shared/src/PositionInterface.ts"],
+  "include": ["src/**/*.ts", "./environment.d.ts", "./src/shared/LoadDataInterfaces.ts", "./src/shared/PositionInterface.ts"],
   "exclude": ["node_modules"]
 }

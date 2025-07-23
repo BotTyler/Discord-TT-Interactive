@@ -1,6 +1,6 @@
-import { ArcDrawing, CircleDrawing, CubeDrawing } from "../../../shared/src/DrawingInterface";
-import { mLatLng } from "../../../shared/src/PositionInterface";
-import { Player } from "../../../shared/src/Player";
+import { ArcDrawing, CircleDrawing, CubeDrawing } from "../../../src/shared/DrawingInterface";
+import { mLatLng } from "../../../src/shared/PositionInterface";
+import { Player } from "../../../src/shared/Player";
 import React from "react";
 import { useAuthenticatedContext } from "../useAuthenticatedContext";
 

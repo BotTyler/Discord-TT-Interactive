@@ -1,4 +1,4 @@
-import { Enemy } from "../../../../shared/src/Enemy";
+import { Enemy } from "../../../../src/shared/Enemy";
 import React from "react";
 import { useGameState } from "../../../ContextProvider/GameStateContext/GameStateProvider";
 import EnemyController from "./EnemyController";

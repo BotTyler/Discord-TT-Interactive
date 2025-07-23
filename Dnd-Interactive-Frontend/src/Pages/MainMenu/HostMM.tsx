@@ -1,7 +1,7 @@
-import { GameStateEnum } from "../../../shared/src/State";
-import { LoadCampaign, LoadSaveHistory } from "../../../shared/src/LoadDataInterfaces";
-import { MapData } from "../../../shared/src/Map";
-import { Player } from "../../../shared/src/Player";
+import { GameStateEnum } from "../../../src/shared/State";
+import { LoadCampaign, LoadSaveHistory } from "../../../src/shared/LoadDataInterfaces";
+import { MapData } from "../../../src/shared/Map";
+import { Player } from "../../../src/shared/Player";
 import { useEffect, useState } from "react";
 import InteractiveMap from "../../Components/Map/InteractiveMap";
 import MapUpload, { ClientMapDataInterface } from "../../Components/Map/MapUpload";

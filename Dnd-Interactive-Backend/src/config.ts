@@ -12,7 +12,7 @@ import sharp from "sharp";
 import ytdl from "@distube/ytdl-core";
 import { ImageCatalogDAO, ImageCatalogDB } from "./Database/Tables/ImageCatalogDB";
 import { AudioCatalogDAO, AudioCatalogDB } from "./Database/Tables/AudioCatalogDB";
-import { GAME_NAME } from "../../Dnd-Interactive-Frontend/shared/src/Constants";
+import { GAME_NAME } from "./shared/Constants";
 
 export default config({
   options: {

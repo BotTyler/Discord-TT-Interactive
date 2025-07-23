@@ -2,8 +2,8 @@ import React from "react";
 import { useAuthenticatedContext } from "../../ContextProvider/useAuthenticatedContext";
 import BootstrapSelect from "../SelectBootstrap/BootstrapSelect";
 import MapUpload, { ClientMapDataInterface } from "../Map/MapUpload";
-import { LoadSaveHistory } from "../../../shared/src/LoadDataInterfaces"
-import { GameStateEnum } from "../../../shared/src/State"
+import { LoadSaveHistory } from "../../../src/shared/LoadDataInterfaces"
+import { GameStateEnum } from "../../../src/shared/State"
 import { useMessageContext } from "../../ContextProvider/Messages/MessageContextProvider";
 
 export default function VersionHistory() {

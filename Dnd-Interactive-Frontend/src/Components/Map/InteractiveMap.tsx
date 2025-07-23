@@ -1,4 +1,4 @@
-import { MapData } from "../../../shared/src/Map";
+import { MapData } from "../../../src/shared/Map";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import React, { useEffect, useState } from "react";

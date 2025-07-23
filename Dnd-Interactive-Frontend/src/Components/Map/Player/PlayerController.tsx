@@ -1,4 +1,4 @@
-import { Player } from "../../../../shared/src/Player";
+import { Player } from "../../../../src/shared/Player";
 import L, { LatLng } from "leaflet";
 import { useEffect, useState } from "react";
 import { useGameState } from "../../../ContextProvider/GameStateContext/GameStateProvider";

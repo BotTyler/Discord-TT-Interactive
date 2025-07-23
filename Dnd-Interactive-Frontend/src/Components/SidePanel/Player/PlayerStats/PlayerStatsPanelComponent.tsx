@@ -1,4 +1,4 @@
-import { Player } from "../../../../../shared/src/Player"
+import { Player } from "../../../../../src/shared/Player"
 import { throttle } from "lodash";
 import { useCallback, useEffect, useState } from "react";
 import { useAuthenticatedContext } from "../../../../ContextProvider/useAuthenticatedContext";

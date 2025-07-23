@@ -1,4 +1,4 @@
-import { mLatLng } from "../../../../shared/src/PositionInterface";
+import { mLatLng } from "../../../../src/shared/PositionInterface";
 import { LatLng, LeafletMouseEvent } from "leaflet";
 import { useEffect, useState } from "react";
 import { useMapEvents } from "react-leaflet";

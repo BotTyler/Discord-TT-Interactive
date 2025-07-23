@@ -1,5 +1,5 @@
-import { Player } from "../../../../../shared/src/Player";
-import { Enemy } from "../../../../../shared/src/Enemy";
+import { Player } from "../../../../../src/shared/Player";
+import { Enemy } from "../../../../../src/shared/Enemy";
 import { useEffect, useState } from "react";
 import { useAuthenticatedContext } from "../../../../ContextProvider/useAuthenticatedContext";
 import DeathComponent from "./DeathComponent";

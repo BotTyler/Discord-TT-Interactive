@@ -1,5 +1,5 @@
-import { Enemy } from "../../../../shared/src/Enemy";
-import { mLatLng } from "../../../../shared/src/PositionInterface";
+import { Enemy } from "../../../../src/shared/Enemy";
+import { mLatLng } from "../../../../src/shared/PositionInterface";
 import L from "leaflet";
 import * as React from "react";
 import { useGameState } from "../../../ContextProvider/GameStateContext/GameStateProvider";

@@ -1,8 +1,8 @@
 import { Client, Room } from "colyseus";
 import * as crypto from "crypto";
-import { ExportDataInterface } from "../../../Dnd-Interactive-Frontend/shared/src/ExportDataInterface";
-import { GameStateEnum, IState, State} from "../../../Dnd-Interactive-Frontend/shared/src/State";
-import { LoadCampaign, LoadImage, LoadSaveHistory} from "../../../Dnd-Interactive-Frontend/shared/src/LoadDataInterfaces";
+import { ExportDataInterface } from "../shared/ExportDataInterface";
+import { GameStateEnum, IState, State} from "../shared/State";
+import { LoadCampaign, LoadImage, LoadSaveHistory} from "../shared/LoadDataInterfaces";
 import { AudioCatalogDAO, AudioCatalogDB } from "../Database/Tables/AudioCatalogDB";
 import { EnemyDAO, EnemyDB } from "../Database/Tables/EnemyDB";
 import {

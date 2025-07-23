@@ -1,4 +1,4 @@
-import { LoadImage } from "../../../shared/src/LoadDataInterfaces";
+import { LoadImage } from "../../../src/shared/LoadDataInterfaces";
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useState } from "react";
 import { useAuthenticatedContext } from "../../ContextProvider/useAuthenticatedContext";
 import { getFileNameFromMinioString } from "../../Util/Util";

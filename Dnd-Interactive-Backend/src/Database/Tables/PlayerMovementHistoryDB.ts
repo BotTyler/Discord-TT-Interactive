@@ -1,4 +1,4 @@
-import { mLatLng } from "../../../../Dnd-Interactive-Frontend/shared/src/PositionInterface";
+import { mLatLng } from "../../shared/PositionInterface";
 import { QueryResult } from "pg";
 import Database from "../Database";
 import { DAO, DatabaseBase } from "../Interface/DatabaseObjectInterface";

@@ -1,4 +1,4 @@
-import { Player } from "../../../../../shared/src/Player"
+import { Player } from "../../../../../src/shared/Player"
 import { useEffect, useRef, useState } from "react";
 import { usePlayers } from "../../../../ContextProvider/PlayersContext/PlayersContext";
 import { useAuthenticatedContext } from "../../../../ContextProvider/useAuthenticatedContext";

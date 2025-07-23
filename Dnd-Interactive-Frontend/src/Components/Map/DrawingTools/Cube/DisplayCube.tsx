@@ -1,5 +1,5 @@
-import { CubeDrawing } from "../../../../../shared/src/DrawingInterface";
-import { Player } from "../../../../../shared/src/Player";
+import { CubeDrawing } from "../../../../../src/shared/DrawingInterface";
+import { Player } from "../../../../../src/shared/Player";
 import { LatLng } from "leaflet";
 import { useEffect, useState } from "react";
 import { Tools, useGameToolContext } from "../../../../ContextProvider/GameToolProvider";

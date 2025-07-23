@@ -1,8 +1,8 @@
 import { Client, Room } from "colyseus.js";
 import * as React from "react";
 
-import { GAME_NAME } from "../../shared/src/Constants";
-import { State } from "../../shared/src/State";
+import { GAME_NAME } from "../../src/shared/Constants";
+import { State } from "../../src/shared/State";
 
 import Loading from "../Components/Loading";
 import { getUserAvatarUrl } from "../Util/getUserAvatarUrl";

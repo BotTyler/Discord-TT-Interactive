@@ -1,5 +1,5 @@
-import { mLatLng } from "../../../../../shared/src/PositionInterface";
-import { Player } from "../../../../../shared/src/Player";
+import { mLatLng } from "../../../../../src/shared/PositionInterface";
+import { Player } from "../../../../../src/shared/Player";
 import L from "leaflet";
 import { useEffect, useState } from "react";
 import { Tools, useGameToolContext } from "../../../../ContextProvider/GameToolProvider";

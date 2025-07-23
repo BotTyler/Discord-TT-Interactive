@@ -1,4 +1,4 @@
-import { Player } from "../../../../shared/src/Player";
+import { Player } from "../../../../src/shared/Player";
 import React from "react";
 import { usePlayers } from "../../../ContextProvider/PlayersContext/PlayersContext";
 import DisplayArc from "../DrawingTools/Arc/DisplayArc";

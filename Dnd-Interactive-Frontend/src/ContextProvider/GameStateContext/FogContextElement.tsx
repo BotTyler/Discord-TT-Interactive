@@ -1,5 +1,5 @@
-import { MapFogPolygon } from "../../../shared/src/Map"
-import { mLatLng } from "../../../shared/src/PositionInterface"
+import { MapFogPolygon } from "../../../src/shared/Map"
+import { mLatLng } from "../../../src/shared/PositionInterface"
 import React from "react";
 import { useAuthenticatedContext } from "../useAuthenticatedContext";
 

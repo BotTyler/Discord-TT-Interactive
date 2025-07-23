@@ -1,4 +1,4 @@
-import { mLatLng } from "../../../../Dnd-Interactive-Frontend/shared/src/PositionInterface";
+import { mLatLng } from "../../shared/PositionInterface";
 import { DAO, DatabaseBase } from "../Interface/DatabaseObjectInterface";
 
 export class FogDAO extends DAO {

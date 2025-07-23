@@ -1,4 +1,4 @@
-import { Player } from "../../../shared/src/Player"
+import { Player } from "../../../src/shared/Player"
 import React, { useImperativeHandle } from "react";
 import { useAuthenticatedContext } from "../useAuthenticatedContext";
 import PlayerElementHandler from "./PlayerElementHandler";

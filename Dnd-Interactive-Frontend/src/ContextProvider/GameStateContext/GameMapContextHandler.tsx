@@ -1,6 +1,6 @@
-import { Enemy } from "../../../shared/src/Enemy";
-import { GameStateEnum } from "../../../shared/src/State";
-import { MapData, MapFogPolygon } from "../../../shared/src/Map";
+import { Enemy } from "../../../src/shared/Enemy";
+import { GameStateEnum } from "../../../src/shared/State";
+import { MapData, MapFogPolygon } from "../../../src/shared/Map";
 import React, { useImperativeHandle } from "react";
 import { useAuthenticatedContext } from "../useAuthenticatedContext";
 import EnemyContextElement from "./EnemyContextElement";

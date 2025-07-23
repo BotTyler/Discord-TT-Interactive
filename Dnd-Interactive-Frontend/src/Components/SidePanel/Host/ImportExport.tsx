@@ -1,4 +1,4 @@
-import { GameStateEnum } from "../../../../shared/src/State";
+import { GameStateEnum } from "../../../../src/shared/State";
 import React from "react";
 import { useAuthenticatedContext } from "../../../ContextProvider/useAuthenticatedContext";
 

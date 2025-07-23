@@ -1,5 +1,5 @@
-import { Enemy } from "../../../../../shared/src/Enemy"
-import { Player } from "../../../../../shared/src/Player"
+import { Enemy } from "../../../../../src/shared/Enemy"
+import { Player } from "../../../../../src/shared/Player"
 import React from "react";
 import { useGameState } from "../../../../ContextProvider/GameStateContext/GameStateProvider";
 import { usePlayers } from "../../../../ContextProvider/PlayersContext/PlayersContext";
