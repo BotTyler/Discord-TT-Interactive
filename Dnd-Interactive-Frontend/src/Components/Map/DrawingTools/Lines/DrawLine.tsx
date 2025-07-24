@@ -1,4 +1,4 @@
-import { Player } from "dnd-interactive-shared";
+import { Player } from "../../../../../src/shared/Player";
 import { LatLng, LeafletMouseEvent } from "leaflet";
 import { useEffect, useState } from "react";
 import { useMapEvents } from "react-leaflet";

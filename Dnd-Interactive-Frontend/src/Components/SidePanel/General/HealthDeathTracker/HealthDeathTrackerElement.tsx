@@ -1,4 +1,5 @@
-import { Enemy, Player } from "dnd-interactive-shared";
+import { Player } from "../../../../../src/shared/Player";
+import { Enemy } from "../../../../../src/shared/Enemy";
 import { useEffect, useState } from "react";
 import { useAuthenticatedContext } from "../../../../ContextProvider/useAuthenticatedContext";
 import DeathComponent from "./DeathComponent";

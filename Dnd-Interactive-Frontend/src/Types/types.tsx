@@ -1,6 +1,6 @@
 import type { CommandResponse } from "@discord/embedded-app-sdk";
 import { Client, Room } from "colyseus.js";
-import { State } from "dnd-interactive-shared";
+import { State } from "../../src/shared/State"
 
 export interface IColyseus {
   room: Room<State>;

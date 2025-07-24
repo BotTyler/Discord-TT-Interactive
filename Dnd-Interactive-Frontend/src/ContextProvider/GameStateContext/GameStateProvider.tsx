@@ -1,4 +1,6 @@
-import { Enemy, GameStateEnum, MapData, MapFogPolygon } from "dnd-interactive-shared";
+import { Enemy } from "../../../src/shared/Enemy";
+import { GameStateEnum } from "../../../src/shared/State";
+import { MapData, MapFogPolygon } from "../../../src/shared/Map";
 import React from "react";
 import Error from "../../Pages/Error/Error";
 import MainMenu from "../../Pages/MainMenu/MainMenu";

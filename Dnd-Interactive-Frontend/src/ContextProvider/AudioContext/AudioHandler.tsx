@@ -1,4 +1,4 @@
-import { Audio } from "dnd-interactive-shared";
+import { Audio } from "../../../src/shared/Audio"
 import React, { useImperativeHandle } from "react";
 import { useAuthenticatedContext } from "../useAuthenticatedContext";
 

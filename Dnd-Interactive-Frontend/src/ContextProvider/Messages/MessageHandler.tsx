@@ -10,7 +10,14 @@ export interface MessageInterface {
 }
 
 export const MessageHandler = forwardRef(function MessageHandler({ }: {}, ref: any) {
-  const [allMessage, setAllMessages] = React.useState<MessageInterface[]>([]);
+  const defaultMessage: MessageInterface = {
+    created: new Date(),
+    displayName: "System",
+    message: "Welcome to the chat! Feel free to chat just amongst the party or with everyone(use /all before the message).",
+    type: "System",
+    userId: "System",
+  }
+  const [allMessage, setAllMessages] = React.useState<MessageInterface[]>([defaultMessage]);
   const authContext = useAuthenticatedContext();
   const playersContext = usePlayers();
   useImperativeHandle(ref, () => ({

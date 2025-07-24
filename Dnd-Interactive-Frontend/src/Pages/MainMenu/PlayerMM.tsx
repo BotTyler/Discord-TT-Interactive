@@ -1,4 +1,4 @@
-import { Player } from "dnd-interactive-shared";
+import { Player } from "../../../src/shared/Player"
 import React, { useEffect, useState } from "react";
 import PlayerBanner from "../../Components/PlayerBanner/PlayerBanner";
 import { useAuthenticatedContext } from "../../ContextProvider/useAuthenticatedContext";

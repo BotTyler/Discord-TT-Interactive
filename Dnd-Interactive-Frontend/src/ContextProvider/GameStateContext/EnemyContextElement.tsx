@@ -1,4 +1,5 @@
-import { Enemy, mLatLng } from "dnd-interactive-shared";
+import { Enemy } from "../../../src/shared/Enemy"
+import { mLatLng } from "../../../src/shared/PositionInterface"
 import React from "react";
 import { useAuthenticatedContext } from "../useAuthenticatedContext";
 

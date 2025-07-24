@@ -1,4 +1,5 @@
-import { mLatLng, Player } from "dnd-interactive-shared";
+import { mLatLng } from "../../../../../src/shared/PositionInterface";
+import { Player } from "../../../../../src/shared/Player";
 import L from "leaflet";
 import { useEffect, useState } from "react";
 import { Tools, useGameToolContext } from "../../../../ContextProvider/GameToolProvider";

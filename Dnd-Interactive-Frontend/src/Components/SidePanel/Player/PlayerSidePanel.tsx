@@ -11,8 +11,8 @@ export default function PlayerSidePanel() {
 
   const contentList: { title: string; content: React.ReactNode }[] = [
     // Force unwrapping should be fine as it should be the current player, if they are not found we have other issues :).
-    { title: "Player", content: <PlayerStatsPanelComponent player={playerContext.getPlayer(authContext.user.id)!} /> },
     { title: "Chat", content: <ChatBox /> },
+    { title: "Player", content: <PlayerStatsPanelComponent player={playerContext.getPlayer(authContext.user.id)!} /> },
   ];
   const [curContent, setContent] = React.useState<React.ReactNode>(contentList[0].content);
   return (

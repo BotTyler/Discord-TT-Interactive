@@ -1,4 +1,5 @@
-import { MapFogPolygon, mLatLng } from "dnd-interactive-shared";
+import { MapFogPolygon } from "../../../src/shared/Map"
+import { mLatLng } from "../../../src/shared/PositionInterface"
 import React from "react";
 import { useAuthenticatedContext } from "../useAuthenticatedContext";
 

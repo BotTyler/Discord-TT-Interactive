@@ -1,6 +1,6 @@
 import { usePlayers } from "../../ContextProvider/PlayersContext/PlayersContext";
 
-import { Player } from "dnd-interactive-shared";
+import { Player } from "../../../src/shared/Player"
 import React from "react";
 import Background from "../../Components/Background/Background";
 import Loading from "../../Components/Loading";

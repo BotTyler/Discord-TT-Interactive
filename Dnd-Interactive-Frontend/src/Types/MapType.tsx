@@ -1,4 +1,5 @@
-import { Enemy, Player } from "dnd-interactive-shared";
+import { Enemy } from "../../src/shared/Enemy"
+import { Player } from "../../src/shared/Player"
 
 export interface MapDataInterface {
   mapName: string;

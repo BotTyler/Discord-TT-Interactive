@@ -1,4 +1,5 @@
-import { CubeDrawing, Player } from "dnd-interactive-shared";
+import { CubeDrawing } from "../../../../../src/shared/DrawingInterface";
+import { Player } from "../../../../../src/shared/Player";
 import { LatLng } from "leaflet";
 import { useEffect, useState } from "react";
 import { Tools, useGameToolContext } from "../../../../ContextProvider/GameToolProvider";

@@ -1,4 +1,4 @@
-import { MapFogPolygon } from "dnd-interactive-shared";
+import { MapFogPolygon } from "../../../../src/shared/Map";
 import { useEffect, useState } from "react";
 import { useGameState } from "../../../ContextProvider/GameStateContext/GameStateProvider";
 import { useAuthenticatedContext } from "../../../ContextProvider/useAuthenticatedContext";

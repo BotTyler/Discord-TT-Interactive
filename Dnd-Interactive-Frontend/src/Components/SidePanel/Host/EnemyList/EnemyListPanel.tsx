@@ -1,6 +1,7 @@
 import React from "react";
 
-import { Enemy, mLatLng } from "dnd-interactive-shared";
+import { Enemy } from "../../../../../src/shared/Enemy"
+import { mLatLng } from "../../../../../src/shared/PositionInterface"
 import { useGameState } from "../../../../ContextProvider/GameStateContext/GameStateProvider";
 import { useAuthenticatedContext } from "../../../../ContextProvider/useAuthenticatedContext";
 import EditEnemyModal from "../EditEnemyModal";
