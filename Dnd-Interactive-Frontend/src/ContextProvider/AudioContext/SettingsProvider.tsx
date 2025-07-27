@@ -1,8 +1,9 @@
 import { createContext, forwardRef, useContext, useEffect, useImperativeHandle, useRef, useState } from "react";
-import { Accordion, Col, Image, Offcanvas, Row } from "react-bootstrap";
+import { Accordion, Button, Col, Image, Offcanvas, Row } from "react-bootstrap";
 import { getFileNameFromMinioString } from "../../Util/Util";
 import { useAuthenticatedContext } from "../useAuthenticatedContext";
 import { AudioHandler } from "./AudioHandler";
+import "./ButtonHover.css";
 
 export interface SettingsProviderInterface {
   getQueue: () => string[];
@@ -123,9 +124,9 @@ const SettingsContainer = forwardRef(function SettingsContainer({ embeddedRefRea
               <AudioDisplayer />
             </Accordion.Body>
           </Accordion.Item>
-          <Accordion.Item eventKey="1" className="d-flex flex-column" style={{ maxHeight: '750px' }}>
+          <Accordion.Item eventKey="1" className="d-flex flex-column" style={{ maxHeight: '80%' }}>
             <Accordion.Header>Asset Manager</Accordion.Header>
-            <Accordion.Body className="overflow-auto" style={{ flex: '1 1 auto', height: '1px' }}>
+            <Accordion.Body className="overflow-auto" style={{ flex: '1 1 auto', height: '85%' }}>
               <AssetManager />
             </Accordion.Body>
           </Accordion.Item>
@@ -160,16 +161,18 @@ function AssetManager() {
   return <div className="w-100 h-auto">
     <Row direction="horizontal" gap={3}>
       {imgList ? imgList.map((imgUrl) => {
-        return <Col key={`Image-${imgUrl}`} bsPrefix="col-4" className="my-1 border-bottom">
-          <Image src={`/colyseus/getImage/${imgUrl}`} loading="lazy" fluid />
-          <p className="p-0 m-0 mb-1 text-center">{getFileNameFromMinioString(imgUrl)}</p>
+        return <Col key={`Image-${imgUrl}`} bsPrefix="col-4" className="my-1">
+          <div className="imageContainer">
+            <Image height="100%" width="100%" src={`/colyseus/getImage/${imgUrl}`} loading="lazy"/>
+            <button type="button" className="hiddenButton"><i className="bi bi-trash-fill"></i></button>
+          </div>
+          <p className="p-0 m-0 mb-1 text-left">{getFileNameFromMinioString(imgUrl)}</p>
         </Col>
       }) : <p>loading</p>}
     </Row>
   </div>
 
 }
-
 
 function AudioDisplayer() {
 
