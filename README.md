@@ -34,15 +34,31 @@ There are several Docker commands that are used during the setup, building, and 
 application. This section will list some of the common ones that are used and what they are used
 for. The commands listed in this section will need to be run from the root directory of the repo
 unless otherwise specified.
+
+To start up the persistent storages(DB, S3 bucket, and admin pages) for the app run
+''' docker-compose docker-compose.persistence.yml up -d'''
+
+To shut down the persistent storages(DB, S3 bucket, and admin pages) for the app run
+''' docker-compose docker-compose.persistence.yml down '''
+
 To check the current status of docker containers that are running you can run:
 ''' docker ps '''
 
-To pull down the containers run
+docker-compose.cf.yml is used for a cloudflare tunnel and is how you can access the application remotely.
+
+To stop and remove the cloudflare containers
 ''' docker-compose -f docker-compose.cf.yml down '''
 
-To pull down the containers run
-''' docker-compose -f docker-compose.cf.yml up '''
+To start and run the containers
+''' docker-compose -f docker-compose.cf.yml up -d '''
+
+To display the URL that needs to be added to discord developer.
+''' docker logs cloudflared-dev-frontend '''
+
+To display the URL that needs to be added to discord developer. This one is for the '/colyseus' endpoint
+''' docker logs cloudflared-dev-backend '''
+
+
 
 ## Discord Developer
-
 
