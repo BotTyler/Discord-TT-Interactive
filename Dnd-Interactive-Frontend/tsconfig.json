@@ -3,7 +3,11 @@
     "target": "ESNext",
     "module": "ESNext",
     "useDefineForClassFields": false,
-    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ESNext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": false,
@@ -16,6 +20,5 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "experimentalDecorators": true
-
   }
 }
