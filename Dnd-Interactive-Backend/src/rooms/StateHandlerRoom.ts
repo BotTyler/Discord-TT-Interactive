@@ -1,7 +1,7 @@
 import { Client, Room } from "colyseus";
 import * as crypto from "crypto";
 import { ExportDataInterface } from "../shared/ExportDataInterface";
-import { GameStateEnum, IState, State} from "../shared/State";
+import { GameStateEnum, IState, MapMovementType, State} from "../shared/State";
 import { LoadCampaign, LoadImage, LoadSaveHistory} from "../shared/LoadDataInterfaces";
 import { AudioCatalogDAO, AudioCatalogDB } from "../Database/Tables/AudioCatalogDB";
 import { EnemyDAO, EnemyDB } from "../Database/Tables/EnemyDB";
@@ -104,7 +104,6 @@ export class StateHandlerRoom extends Room<State> {
     });
 
     // PLAYER MOVEMENT
-    // validation will be done in the state for these functions
     this.onMessage("updatePosition", (client, data) => {
       try {
         const inputList: ValidationInputType[] = [
@@ -120,6 +119,26 @@ export class StateHandlerRoom extends Room<State> {
 
         const status = this.state.updatePosition(client.sessionId, validateParams);
         client.send(`MovementConfirmation${data.clientToChange}`, status);
+      } catch (error) {
+        console.error(error);
+      }
+    });
+
+    this.onMessage("updatePlayerGhostPosition", (client, data) => {
+      try {
+        const inputList: ValidationInputType[] = [
+          { name: "pos", type: "object", PostProcess: undefined },
+          { name: "clientToChange", type: "string", PostProcess: undefined },
+        ];
+        const validateParams: any = ValidateAllInputs(data, inputList);
+
+        if (!this.softAuthenticate(client.sessionId, validateParams.clientToChange)) {
+          client.send(`PlayerGhostMovementConfirmation${validateParams.clientToChange}`, false);
+          return;
+        }
+
+        const status = this.state.updatePosition(client.sessionId, validateParams);
+        client.send(`PlayerGhostMovementConfirmation${data.clientToChange}`, status);
       } catch (error) {
         console.error(error);
       }
@@ -771,6 +790,30 @@ export class StateHandlerRoom extends Room<State> {
       if (!this.authenticateHostAction(client.sessionId)) return;
 
       this.state.clearMap(client.sessionId);
+    });
+
+    this.onMessage("SetMapMovementType", (client, data) => {
+      // input validation
+      try {
+        if(!this.authenticateHostAction(client.sessionId)) return;
+        const inputList: ValidationInputType[] = [
+          { name: "mapMovement", PostProcess: (val: string): MapMovementType => {
+            switch(val){
+              case "free":
+                return "free";
+              case "grid":
+                return "grid";
+              default:
+                return "free";
+            }
+          }, type: "string" },
+        ];
+        const validateParams: any = ValidateAllInputs(data, inputList);
+        this.state.setMapMovement(validateParams.mapMovement);
+
+      } catch (error) {
+        console.error(error);
+      }
     });
 
     this.onMessage("nextInitiativeIndex", (client, _data) => {
