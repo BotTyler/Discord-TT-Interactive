@@ -224,6 +224,18 @@ export class State extends Schema {
     if (player === undefined || enemyToMove === undefined) return false; // Player does not exist
 
     enemyToMove.position = new mLatLng(position.pos.lat, position.pos.lng);
+    enemyToMove.toPosition = undefined; // Enemy replacing the ghost.
+    return true;
+  }
+  updateEnemyGhostPosition(sessionId: string, position: { pos: mLatLng; clientToChange: string }): boolean {
+    // I need to make some checks that the person moving this object is the right person or the host.
+    if (this.map === undefined) return false;
+    const player = this._getPlayerBySessionId(sessionId);
+    const enemyToMove = this.map.enemy.get(position.clientToChange);
+
+    if (player === undefined || enemyToMove === undefined) return false; // Player does not exist
+
+    enemyToMove.toPosition = new mLatLng(position.pos.lat, position.pos.lng);
     return true;
   }
   //#endregion

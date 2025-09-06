@@ -164,6 +164,26 @@ export class StateHandlerRoom extends Room<State> {
       }
     });
 
+    this.onMessage("updateEnemyGhostPosition", (client, data) => {
+      try {
+        const inputList: ValidationInputType[] = [
+          { name: "pos", type: "object", PostProcess: undefined },
+          { name: "clientToChange", type: "string", PostProcess: undefined },
+        ];
+
+        const validateParams: any = ValidateAllInputs(data, inputList);
+        if (!this.authenticateHostAction(client.sessionId)) {
+          client.send(`EnemyGhostMovementConfirmation${validateParams.clientToChange}`, false);
+          return;
+        }
+
+        const status = this.state.updateEnemyPosition(client.sessionId, validateParams);
+        client.send(`EnemyGhostMovementConfirmation${validateParams.clientToChange}`, status);
+      } catch (error) {
+        console.error(error);
+      }
+    });
+
     this.onMessage("changePlayerColor", (client, data) => {
       try {
         const inputList: ValidationInputType[] = [

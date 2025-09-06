@@ -67,7 +67,7 @@ export default function PlayerElementHandler({ player, onValueChanged }: { playe
     emitFieldChangeEvent("position", position);
   }, [position]);
   React.useEffect(() => {
-    emitFieldChangeEvent("toPosition", position);
+    emitFieldChangeEvent("toPosition", toPosition);
   }, [toPosition]);
   React.useEffect(() => {
     emitFieldChangeEvent("drawings", drawings);
@@ -164,6 +164,7 @@ export default function PlayerElementHandler({ player, onValueChanged }: { playe
       colorListener();
       initiativeListener();
       positionListener();
+      toPositionListener();
       healthListener();
       totalHealthListener();
       deathSavesListener();

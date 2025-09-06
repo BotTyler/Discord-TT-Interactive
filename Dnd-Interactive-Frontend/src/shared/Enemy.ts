@@ -19,6 +19,12 @@ export class Enemy extends Schema {
   @type(mLatLng)
   public position: mLatLng;
 
+  // This will be the position of the "ghost" player.
+  // When this value is undefined the player is not wanting to move.
+  // If this value is present the player is looking to move.
+  @type(mLatLng)
+  public toPosition: mLatLng | undefined = undefined;
+
   @type("number")
   public initiative: number;
 
