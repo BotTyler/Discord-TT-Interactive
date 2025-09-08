@@ -7,6 +7,7 @@ import HandoutsPanel from "./Handouts/HandoutsPanels";
 import HealthDeathTrackerPanel from "./HealthDeathTracker/HealthDeathTrackerPanel";
 import ImportExport from "./ImportExport";
 import InitiativeTrackerPanel from "./InitiativeTracker/InitiativeTrackerPanel";
+import SettingsPanel from "./Settings/SettingsPanel";
 
 export default function HostSidePanel() {
   const contentList: { title: string; content: React.ReactNode }[] = [
@@ -16,6 +17,7 @@ export default function HostSidePanel() {
     { title: "Audio", content: <AudioBox /> },
     { title: "HP", content: <HealthDeathTrackerPanel /> },
     { title: "Handout", content: <HandoutsPanel /> },
+    { title: "Settings", content: <SettingsPanel /> },
   ];
   const [curContent, setContent] = React.useState<React.ReactNode>(contentList[0].content);
   return (

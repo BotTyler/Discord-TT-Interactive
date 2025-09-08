@@ -9,10 +9,10 @@ import DrawArc from "./DrawingTools/Arc/DrawArc";
 import DrawCircle from "./DrawingTools/Circle/DrawCircle";
 import DrawCube from "./DrawingTools/Cube/DrawCube";
 import DrawLine from "./DrawingTools/Lines/DrawLine";
-import EnemyMarkerList from "./Enemy/EnemyMarkerList";
+import EnemyMarkerList from "./PlayableMarkers/Enemy/EnemyMarkerList";
 import FogCreation from "./Fog/FogCreation";
 import ShowFog from "./Fog/ShowFog";
-import PlayerMarkerList from "./Player/PlayerMarkerList";
+import PlayerMarkerList from "./PlayableMarkers/Player/PlayerMarkerList";
 
 /**
  * Component responsible for rendering an interactive map. This will contain everything necessary for an interactive map.

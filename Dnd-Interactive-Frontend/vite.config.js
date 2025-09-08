@@ -11,6 +11,12 @@ export default defineConfig({
   plugins: [react()],
   envDir: "./",
   server: {
+    allowedHosts: [
+      "localhost",
+      "127.0.0.1",
+      "192.168.1.79",
+      "bye-fragrance-cardiac-subcommittee.trycloudflare.com"
+    ],
     host: "0.0.0.0",
     port: 3000,
     hmr: true,

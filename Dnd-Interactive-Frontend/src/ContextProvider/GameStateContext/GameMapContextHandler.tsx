@@ -38,6 +38,9 @@ export const GameMapContextHandler = React.forwardRef(function GameMapContextHan
       getMap(): MapData | undefined {
         return map;
       },
+      getMapMovement(): MapMovementType {
+        return mapMovement;
+      },
       getCurrentHostId(): string | undefined {
         return curHostId;
       },
@@ -63,7 +66,7 @@ export const GameMapContextHandler = React.forwardRef(function GameMapContextHan
         return initiativeIndex;
       },
     }),
-    [map, curHostId, currentGameState, enemies, fogs, iconHeight, initiativeIndex]
+    [map, mapMovement, curHostId, currentGameState, enemies, fogs, iconHeight, initiativeIndex]
   );
 
   const emitFieldChangeEvent = (field: string, value: any) => {

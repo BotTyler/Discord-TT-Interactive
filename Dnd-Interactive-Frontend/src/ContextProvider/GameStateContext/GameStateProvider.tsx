@@ -1,5 +1,5 @@
 import { Enemy } from "../../../src/shared/Enemy";
-import { GameStateEnum } from "../../../src/shared/State";
+import { GameStateEnum, MapMovementType } from "../../../src/shared/State";
 import { MapData, MapFogPolygon } from "../../../src/shared/Map";
 import React from "react";
 import Error from "../../Pages/Error/Error";
@@ -14,6 +14,7 @@ export interface GameStateInterface {
   // curHostId: string | undefined;
   // enemies: Record<string, Enemy>;
   getMap: () => MapData | undefined;
+  getMapMovement: () => MapMovementType;
   getCurrentHostId(): string | undefined;
   getCurrentGameState: () => GameStateEnum;
   getEnemies: () => { [key: string]: Enemy };
@@ -26,6 +27,9 @@ export interface GameStateInterface {
 const GameStateContext = React.createContext<GameStateInterface>({
   getMap: (): MapData | undefined => {
     return undefined;
+  },
+  getMapMovement: (): MapMovementType => {
+    return "free";
   },
   getCurrentHostId: (): string | undefined => {
     return undefined;
@@ -102,6 +106,10 @@ export function GameStateContextProvider() {
     if (gameStateContextRef.current == null) return undefined;
     return gameStateContextRef.current.getMap();
   };
+  const getMapMovement = (): MapMovementType => {
+    if (gameStateContextRef.current == null) return "free";
+    return gameStateContextRef.current.getMapMovement();
+  };
   const getCurrentHostId = (): string | undefined => {
     if (gameStateContextRef.current == null) return undefined;
     return gameStateContextRef.current.getCurrentHostId();
@@ -136,6 +144,7 @@ export function GameStateContextProvider() {
   };
   const providerValue: GameStateInterface = {
     getMap: getMap,
+    getMapMovement: getMapMovement,
     getCurrentHostId: getCurrentHostId,
     getCurrentGameState: getGameState,
     getEnemies: getEnemies,
