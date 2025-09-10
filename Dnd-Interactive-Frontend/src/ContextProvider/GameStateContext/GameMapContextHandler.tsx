@@ -26,6 +26,10 @@ export const GameMapContextHandler = React.forwardRef(function GameMapContextHan
   // Init index
   const [initiativeIndex, setInitiative] = React.useState<number>(0);
 
+  // Grid values
+  const [gridColor, setGridColor] = React.useState<string>("");
+  const [gridShowing, setGridShowing] = React.useState<boolean>(true);
+
   function getBaseMapFromAuthContext(): MapData | undefined {
     const mMap = authenticatedContext.room.state.map;
 
@@ -65,8 +69,14 @@ export const GameMapContextHandler = React.forwardRef(function GameMapContextHan
       getInitiativeIndex(): number {
         return initiativeIndex;
       },
+      getGridColor(): string {
+        return gridColor;
+      },
+      getGridShowing(): boolean {
+        return gridShowing;
+      }
     }),
-    [map, mapMovement, curHostId, currentGameState, enemies, fogs, iconHeight, initiativeIndex]
+    [map, mapMovement, curHostId, currentGameState, enemies, fogs, iconHeight, initiativeIndex, gridColor, gridShowing]
   );
 
   const emitFieldChangeEvent = (field: string, value: any) => {
@@ -104,6 +114,12 @@ export const GameMapContextHandler = React.forwardRef(function GameMapContextHan
   React.useEffect(()=>{
     emitFieldChangeEvent("MapMovementChanged", mapMovement);
   }, [mapMovement]);
+  React.useEffect(()=>{
+    emitFieldChangeEvent("GridDisplayChange", gridShowing);
+  }, [gridShowing]);
+  React.useEffect(()=>{
+    emitFieldChangeEvent("GridColorChange", gridColor);
+  }, [gridColor]);
 
   React.useEffect(() => {
     const GameStateCallback = authenticatedContext.room.state.listen("gameState", (value: any) => {
@@ -129,12 +145,20 @@ export const GameMapContextHandler = React.forwardRef(function GameMapContextHan
     const mapMovementListener = authenticatedContext.room.state.listen("mapMovement", (value: MapMovementType) => {
       setMapMovement(value);
     })
+    const gridColorListener = authenticatedContext.room.state.listen("gridColor", (value: string) => {
+      setGridColor(value);
+    })
+    const gridShowingListener = authenticatedContext.room.state.listen("gridShowing", (value: boolean) => {
+      setGridShowing(value);
+    })
 
     return () => {
       GameStateCallback();
       mapCallback();
       hostIdListener();
       mapMovementListener();
+      gridColorListener();
+      gridShowingListener();
     };
   }, [authenticatedContext.room]);
 

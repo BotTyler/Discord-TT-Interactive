@@ -14,7 +14,7 @@ export default function PlayerElementHandler({ player, onValueChanged }: { playe
   const [color, setColor] = React.useState<string>(player.color);
   const [initiative, setInitiative] = React.useState<number>(player.initiative);
   const [position, setPosition] = React.useState<mLatLng>(player.position);
-  const [toPosition, setToPosition] = React.useState<mLatLng | undefined>(player.position);
+  const [toPosition, setToPosition] = React.useState<mLatLng[]>([]);
   const [health, setHealth] = React.useState<number>(player.health);
   const [totalHealth, setTotalHealth] = React.useState<number>(player.totalHealth);
   const [deathSaves, setDeathSaves] = React.useState<number>(player.deathSaves);
@@ -123,7 +123,7 @@ export default function PlayerElementHandler({ player, onValueChanged }: { playe
     const positionListener = player.listen("position", (value: mLatLng) => {
       setPosition(value);
     });
-    const toPositionListener = player.listen("toPosition", (value: mLatLng | undefined) => {
+    const toPositionListener = player.listen("toPosition", (value: mLatLng[]) => {
       setToPosition(value);
     });
     const healthListener = player.listen("health", (value: number) => {

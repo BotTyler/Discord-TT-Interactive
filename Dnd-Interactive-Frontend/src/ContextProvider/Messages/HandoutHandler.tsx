@@ -22,10 +22,6 @@ export default function HandoutHandler() {
     };
   }, [authContext.room]);
 
-  useEffect(() => {
-    console.log(handouts);
-  }, [handouts]);
-
   const getRandomX = (sidePadding?: number): number => {
     const width = window.innerWidth;
     const randomX = Math.floor(Math.random() * width);

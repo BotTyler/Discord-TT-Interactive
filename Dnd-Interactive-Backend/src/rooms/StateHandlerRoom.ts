@@ -28,6 +28,43 @@ export class StateHandlerRoom extends Room<State> {
   onCreate(options: IState) {
     this.setState(new State(options));
 
+    // Grid
+    this.onMessage("ChangeGridColor", (client, data) => {
+      // input validation
+      try {
+        const inputList: ValidationInputType[] = [
+          { name: "gridColor", PostProcess: sanitize, type: "string" },
+        ];
+        const validateParams: any = ValidateAllInputs(data, inputList);
+
+        // validation complete lets send the message to all the clients
+        if(!this.authenticateHostAction(client.sessionId)) return;
+
+        this.state.setGridColor(client.sessionId, validateParams.gridColor);
+
+      } catch (error) {
+        console.error(error);
+      }
+    });
+
+    this.onMessage("GridDisplay", (client, data) => {
+      // input validation
+      try {
+        const inputList: ValidationInputType[] = [
+          { name: "gridShowing", PostProcess: undefined, type: "boolean" },
+        ];
+        const validateParams: any = ValidateAllInputs(data, inputList);
+
+        // validation complete lets send the message to all the clients
+        if(!this.authenticateHostAction(client.sessionId)) return;
+
+        this.state.setGridShowing(client.sessionId, validateParams.gridShowing);
+
+      } catch (error) {
+        console.error(error);
+      }
+    });
+
     // MESSAGES
     this.onMessage("BroadcastMessage", (client, data) => {
       // input validation
@@ -113,12 +150,10 @@ export class StateHandlerRoom extends Room<State> {
         const validateParams: any = ValidateAllInputs(data, inputList);
 
         if (!this.softAuthenticate(client.sessionId, validateParams.clientToChange)) {
-          client.send(`MovementConfirmation${validateParams.clientToChange}`, false);
           return;
         }
 
         const status = this.state.updatePosition(client.sessionId, validateParams);
-        client.send(`MovementConfirmation${data.clientToChange}`, status);
       } catch (error) {
         console.error(error);
       }
@@ -133,12 +168,10 @@ export class StateHandlerRoom extends Room<State> {
         const validateParams: any = ValidateAllInputs(data, inputList);
 
         if (!this.softAuthenticate(client.sessionId, validateParams.clientToChange)) {
-          client.send(`PlayerGhostMovementConfirmation${validateParams.clientToChange}`, false);
           return;
         }
 
-        const status = this.state.updatePosition(client.sessionId, validateParams);
-        client.send(`PlayerGhostMovementConfirmation${data.clientToChange}`, status);
+        const status = this.state.setPlayerGhostPosition(client.sessionId, validateParams);
       } catch (error) {
         console.error(error);
       }
@@ -153,12 +186,10 @@ export class StateHandlerRoom extends Room<State> {
 
         const validateParams: any = ValidateAllInputs(data, inputList);
         if (!this.authenticateHostAction(client.sessionId)) {
-          client.send(`EnemyMovementConfirmation${validateParams.clientToChange}`, false);
           return;
         }
 
         const status = this.state.updateEnemyPosition(client.sessionId, validateParams);
-        client.send(`EnemyMovementConfirmation${validateParams.clientToChange}`, status);
       } catch (error) {
         console.error(error);
       }
@@ -173,12 +204,12 @@ export class StateHandlerRoom extends Room<State> {
 
         const validateParams: any = ValidateAllInputs(data, inputList);
         if (!this.authenticateHostAction(client.sessionId)) {
-          client.send(`EnemyGhostMovementConfirmation${validateParams.clientToChange}`, false);
+          // client.send(`EnemyGhostMovementConfirmation${validateParams.clientToChange}`, false);
           return;
         }
 
-        const status = this.state.updateEnemyPosition(client.sessionId, validateParams);
-        client.send(`EnemyGhostMovementConfirmation${validateParams.clientToChange}`, status);
+        const status = this.state.setEnemyGhostPosition(client.sessionId, validateParams);
+        // client.send(`EnemyGhostMovementConfirmation${validateParams.clientToChange}`, status);
       } catch (error) {
         console.error(error);
       }

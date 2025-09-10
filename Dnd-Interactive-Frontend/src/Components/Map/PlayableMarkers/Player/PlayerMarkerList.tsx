@@ -11,6 +11,7 @@ import GridMovementController from "../MovementControllers/GridMovementControlle
 import { LatLng } from "leaflet";
 import { useAuthenticatedContext } from "../../../../ContextProvider/useAuthenticatedContext";
 import FreeMovementController from "../MovementControllers/FreeMovementController";
+import { throttle } from "lodash";
 
 export default function PlayerMarkerList() {
   const authContext = useAuthenticatedContext();
@@ -43,13 +44,31 @@ export default function PlayerMarkerList() {
       authContext.room.send("updatePosition", { pos: toPosition, clientToChange: player.userId });
     }
 
+    const handleGhostPositionChange = (toPosition: LatLng[])=>{
+      makeGhostRequest(toPosition);
+    };
+
+    const makeGhostRequest = (toPosition: LatLng[]): void => {
+      switch(movementType){
+        case "free":
+          authContext.room.send("updatePlayerGhostPosition", {pos: toPosition, clientToChange: player.userId});
+        break;
+        case "grid":
+          authContext.room.send("updatePlayerGhostPosition", {pos: toPosition, clientToChange: player.userId})
+        break;
+        default:
+          authContext.room.send("updatePlayerGhostPosition", {pos: toPosition, clientToChange: player.userId});
+        break;
+      }
+    }
+
     switch (movementType) {
       case "free":
-        return <FreeMovementController isPlayer={true}  controllableUser={player} onPositionChange={handlePositionChanged} />;
+        return <FreeMovementController isPlayer={true}  controllableUser={player} onPositionChange={handlePositionChanged} onGhostPositionChange={handleGhostPositionChange}/>;
       case "grid":
-        return <GridMovementController isPlayer={true}  controllableUser={player} onPositionChange={handlePositionChanged} />;
+        return <GridMovementController isPlayer={true}  controllableUser={player} onPositionChange={handlePositionChanged} onGhostPositionChange={handleGhostPositionChange}/>;
       default:
-        return <FreeMovementController isPlayer={true}  controllableUser={player} onPositionChange={handlePositionChanged} />;
+        return <FreeMovementController isPlayer={true}  controllableUser={player} onPositionChange={handlePositionChanged} onGhostPositionChange={handleGhostPositionChange}/>;
     }
   }
   

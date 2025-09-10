@@ -35,6 +35,12 @@ export class State extends Schema {
   @type("string")
   mapMovement: MapMovementType = "free";
 
+  @type("boolean")
+  gridShowing: boolean = true;
+
+  @type("string")
+  gridColor: string = "rgba(255, 255, 255, 0.7)";
+
   @type("string")
   public roomName: string;
 

@@ -23,6 +23,8 @@ export interface GameStateInterface {
   getFog: (id: string) => MapFogPolygon | undefined;
   getIconHeight: () => number;
   getInitiativeIndex: () => number;
+  getGridColor: () => string;
+  getGridShowing: () => boolean;
 }
 const GameStateContext = React.createContext<GameStateInterface>({
   getMap: (): MapData | undefined => {
@@ -55,6 +57,12 @@ const GameStateContext = React.createContext<GameStateInterface>({
   getInitiativeIndex: () => {
     return 0;
   },
+  getGridColor: () => {
+    return "rgba(255, 255, 255, 0.7)"
+  },
+  getGridShowing: () => {
+    return true;
+  }
 });
 
 export function useGameState() {
@@ -142,6 +150,14 @@ export function GameStateContextProvider() {
     if (gameStateContextRef.current == null) return 0;
     return gameStateContextRef.current.getInitiativeIndex();
   };
+  const getGridColor = () => {
+    if(gameStateContextRef.current == null) return "rgba(255, 255, 255, 0.7)";
+    return gameStateContextRef.current.getGridColor();
+  }
+  const getGridShowing = () => {
+    if(gameStateContextRef.current == null) return true;
+    return gameStateContextRef.current.getGridShowing();
+  }
   const providerValue: GameStateInterface = {
     getMap: getMap,
     getMapMovement: getMapMovement,
@@ -153,6 +169,8 @@ export function GameStateContextProvider() {
     getFog: getFog,
     getIconHeight: getIconHeight,
     getInitiativeIndex: getInitiativeIndex,
+    getGridColor: getGridColor,
+    getGridShowing: getGridShowing
   };
   return (
     <GameStateContext.Provider value={providerValue}>

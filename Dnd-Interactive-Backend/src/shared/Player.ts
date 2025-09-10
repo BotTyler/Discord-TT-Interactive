@@ -31,8 +31,8 @@ export class Player extends Schema {
   // This will be the position of the "ghost" player.
   // When this value is undefined the player is not wanting to move.
   // If this value is present the player is looking to move.
-  @type(mLatLng)
-  public toPosition: mLatLng | undefined = undefined;
+  @type([mLatLng])
+  public toPosition: mLatLng[] = [];
 
   @type([mLatLng])
   public drawings: mLatLng[];
@@ -51,6 +51,7 @@ export class Player extends Schema {
 
   @type("number")
   public health: number;
+
   @type("number")
   public totalHealth: number;
 
@@ -69,6 +70,7 @@ export class Player extends Schema {
     this.position = position ?? new mLatLng(0, 0);
     this.color = color ?? "#" + (0x1000000 + Math.random() * 0xffffff).toString(16).substr(1, 6);
     this.drawings = drawings ?? new ArraySchema<mLatLng>();
+    // this.toPosition = toPosition ?? new ArraySchema<mLatLng>();
     this.initiative = initiative ?? 0;
 
     // possibility of undefined value

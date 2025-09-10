@@ -4,27 +4,45 @@ import { Player } from "../../../../shared/Player";
 import MarkerDisplay from "../MarkerDisplay";
 import { LatLng, LeafletEvent, LeafletMouseEvent } from "leaflet";
 import { useGameState } from "../../../../ContextProvider/GameStateContext/GameStateProvider";
+import { Pane, useMapEvents } from "react-leaflet";
 import DistanceLine from "../DistanceLine";
-import { useMapEvents } from "react-leaflet";
 
-export default function FreeMovementController({ controllableUser, isPlayer, onPositionChange }: { controllableUser: Player | Enemy; isPlayer: boolean;  onPositionChange:(position: LatLng)=>void }) {
-    const [markerUser, setMarkerUser] = useState(controllableUser);
+export default function FreeMovementController({ controllableUser, isPlayer, onPositionChange, onGhostPositionChange }:
+    { controllableUser: Player | Enemy; isPlayer: boolean;  onPositionChange:(position: LatLng)=>void; onGhostPositionChange:(position: LatLng[])=>void }) {
+    const [markerUser, setMarkerUser] = useState<any>(controllableUser);
 
     const mapContext = useGameState();
 
+    const [id, setId] = useState<string>(markerUser.userId ?? markerUser.id);
     const [name, setName] = useState<string>(markerUser.name);
-    const [avitarUri, setAvitarUri] = useState<string>(markerUser.avatarUri);
+    const [avatarUri, setAvatarUri] = useState<string>(markerUser.avatarUri);
     const [position, setPosition] = useState<LatLng>(new LatLng(markerUser.position.lat, markerUser.position.lng));
-    const [toPosition, setToPosition] = useState<LatLng>(new LatLng(markerUser.position.lat, markerUser.position.lng));
+    const [toPosition, setToPosition] = useState<LatLng[]>([position]);
     const [iconSize, setSize] = useState<number>(mapContext.getIconHeight());
     const [isConnected, setConnected] = useState<boolean>((markerUser as Player).isConnected ?? true);
     const [color, setColor] = useState<string>((markerUser as Player).color ?? "#f00");
-    const [isHost, setIsHost] = useState<boolean>((markerUser as Player).isHost ?? false);
     const [isMoving, setIsMoving] = useState<boolean>(false);
 
     useEffect(() => {
         setMarkerUser(controllableUser);
     }, [controllableUser]);
+
+
+    
+    useEffect(()=>{
+        if (!isPlayer) return;
+        const tempUser: Player = markerUser as Player;
+        const setNewToPosition = (value: any) => {
+            // Ignore this update if this object is currently moving.
+            if (!isMoving){
+                setToPosition(value.detail.val == null ? [position] : value.detail.val.map((val: any)=>{return new LatLng(val.lat, val.lng)}));
+            }
+        };
+        window.addEventListener(`update-${tempUser.userId}-toPosition`, setNewToPosition);
+        return () => {
+            window.removeEventListener(`update-${tempUser.userId}-toPosition`, setNewToPosition);
+        }
+    }, [isMoving]);
 
     useEffect(() => {
         // setup listeners for the player.
@@ -34,16 +52,10 @@ export default function FreeMovementController({ controllableUser, isPlayer, onP
 
         const setNewPosition = (value: any) => {
             setPosition(value.detail.val);
-            setToPosition(value.detail.val);
         };
         const handleAvatarUriChange = (value: any) => {
-            setAvitarUri(value.detail.val);
+            setAvatarUri(value.detail.val);
         }
-        const setNewToPosition = (value: any) => {
-            // Ignore this update if this object is currently moving.
-            if(isMoving)
-                setToPosition(value.detail.val == null? position : value.detail.val);
-        };
         const handleNameChange = (value: any) => {
             setName(value.detail.val);
         }
@@ -56,37 +68,44 @@ export default function FreeMovementController({ controllableUser, isPlayer, onP
         const handleColorChange = (value: any) => {
             setColor(value.detail.val);
         };
-        const handleIsHostChange = (value: any) => {
-            setIsHost(value.detail.val);
-        };
-
 
         window.addEventListener(`update-${tempUser.userId}-isConnected`, handleConnectionChange);
         window.addEventListener(`update-${tempUser.userId}-name`, handleNameChange);
         window.addEventListener(`update-${tempUser.userId}-avatarUri`, handleAvatarUriChange);
         window.addEventListener(`update-${tempUser.userId}-position`, setNewPosition);
-        window.addEventListener(`update-${tempUser.userId}-toPosition`, setNewToPosition);
         window.addEventListener(`IconHeightChanged`, handleIconHeightChange);
         window.addEventListener(`update-${tempUser.userId}-color`, handleColorChange);
-        window.addEventListener(`update-${tempUser.userId}-isHost`, handleIsHostChange);
 
         return () => {
             window.removeEventListener(`update-${tempUser.userId}-isConnected`, handleConnectionChange);
             window.removeEventListener(`update-${tempUser.userId}-name`, handleNameChange);
             window.removeEventListener(`update-${tempUser.userId}-avatarUri`, handleAvatarUriChange);
             window.removeEventListener(`update-${tempUser.userId}-position`, setNewPosition);
-            window.removeEventListener(`update-${tempUser.userId}-toPosition`, setNewToPosition);
             window.removeEventListener(`IconHeightChanged`, handleIconHeightChange);
             window.removeEventListener(`update-${tempUser.userId}-color`, handleColorChange);
-            window.removeEventListener(`update-${tempUser.userId}-isHost`, handleIsHostChange);
         }
 
     }, [markerUser]);
+    
+    
+    useEffect(()=>{
+        if (isPlayer) return;
+        const tempEnemy: Enemy = markerUser as Enemy;
+        const setNewToPosition = (value: any) => {
+            // Ignore this update if this object is currently moving.
+            if (!isMoving){
+                setToPosition(value.detail.val == null ? [position] : value.detail.val.map((val: any)=>{return new LatLng(val.lat, val.lng)}));
+            }
+        };
+        window.addEventListener(`EnemyUpdate-${tempEnemy.id}-toPosition`, setNewToPosition);
+        return () => {
+            window.removeEventListener(`EnemyUpdate-${tempEnemy.id}-toPosition`, setNewToPosition);
+        }
+    }, [isMoving]);
 
     useEffect(() => {
         // setup listeners for the player.
         if (isPlayer) return;
-        console.warn("ENEMY INSTANCE")
         const tempEnemy: Enemy = markerUser as Enemy;
 
         const updateName = (value: any) => {
@@ -101,7 +120,7 @@ export default function FreeMovementController({ controllableUser, isPlayer, onP
         };
 
         const updateAvatar = (value: any) => {
-            setAvitarUri(value.detail.val);
+            setAvatarUri(value.detail.val);
         };
 
         window.addEventListener(`EnemyUpdate-${tempEnemy.id}-name`, updateName);
@@ -120,30 +139,42 @@ export default function FreeMovementController({ controllableUser, isPlayer, onP
     useMapEvents({
         mousemove: (event: LeafletMouseEvent) => {
             if (!isMoving) return;
-            setToPosition(event.latlng);
+            setToPosition((prev)=>{
+                onGhostPositionChange([event.latlng]);
+                return [event.latlng];
+            });
         }
     })
 
     return (
         <>
-            <MarkerDisplay name={name} avatarURI={avitarUri} color={color} position={position} size={iconSize} className="" />
-            <DistanceLine start={position} end={toPosition} color={color} size={iconSize} />
-            <MarkerDisplay name={name} avatarURI={avitarUri} color={color} position={toPosition} size={iconSize}
-                isDraggable={true}
-                className={`${isMoving? "opacity-50":"opacity-0"}`}
-                displayName={false}
-                eventFunctions={{
-                    dragstart: (event: LeafletEvent) => {
-                        setIsMoving(true);
-                    },
-                    mouseup: (event: LeafletMouseEvent) => {
-                        setIsMoving(false);
-                        setToPosition((prev) => {
-                            onPositionChange(prev);
-                            return position;
-                        });
-                    }
-                }} />
+            <Pane name={`Free-Player-Marker-${id}`} style={{ zIndex: 500 }}>
+                <MarkerDisplay name={name} avatarURI={isPlayer? avatarUri: `/colyseus/getImage/${avatarUri}`} color={color} position={position} size={iconSize} className="" />
+            </Pane>
+            <DistanceLine start={position} end={toPosition.length > 0? toPosition[0] : position} color={color} size={iconSize} />
+            <Pane name={`Free-Player-Ghost-Marker-${id}`} style={{ zIndex: 501 }}>
+                <MarkerDisplay name={name} avatarURI={isPlayer? avatarUri: `/colyseus/getImage/${avatarUri}`} color={color} position={toPosition[toPosition.length - 1] ?? position} size={iconSize}
+                    isDraggable={true}
+                    className={`${isMoving ? "opacity-50" : "opacity-50"}`}
+                    displayName={false}
+                    eventFunctions={{
+                        dragstart: (event: LeafletEvent) => {
+                            setIsMoving(true);
+                        },
+                        mouseup: (event: LeafletMouseEvent) => {
+                            if(event.originalEvent.button === 0) { // LMB press
+                                setIsMoving(false);
+                                onPositionChange(event.latlng);
+                                setToPosition([new LatLng(position.lat, position.lng)]);
+                            }else{
+                                // Cancel request
+                                setIsMoving(false);
+                                onPositionChange(position)
+                                setToPosition([new LatLng(position.lat, position.lng)]);
+                            }
+                        }
+                    }} />
+            </Pane>
         </>
     )
 }

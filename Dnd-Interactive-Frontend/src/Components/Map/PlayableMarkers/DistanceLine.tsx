@@ -4,7 +4,7 @@ import { Polyline, Tooltip, useMap } from "react-leaflet";
 /**
  * Component that will handle the distance measurement when a player is being dragged. The distance is based on the cell size of an image that is determined when a map upload happens.
  */
-export default function DistanceLine({ start, end, size, color }: { start: LatLng; end: LatLng; size: number; color: string }) {
+export default function DistanceLine({ start, end, size, color, showDistance = true }: { start: LatLng; end: LatLng; size: number; color: string; showDistance?: boolean}) {
   const map = useMap();
   const [dist, setDist] = React.useState<number>((map.distance(start, end) / size) * 5);
   useEffect(() => {
@@ -21,7 +21,7 @@ export default function DistanceLine({ start, end, size, color }: { start: LatLn
     <>
       {start !== undefined && end !== undefined ? (
         <Polyline positions={[start, end]} color={color}>
-          {dist < 1 ? (
+          {showDistance === false || dist < 1 ? (
             ""
           ) : (
             <Tooltip direction="auto" position={calcMidpoint(start, end)} offset={[0, 40]} opacity={1} permanent>

@@ -40,6 +40,12 @@ export class State extends Schema {
   @type("string")
   mapMovement: MapMovementType = "free";
 
+  @type("boolean")
+  gridShowing: boolean = true;
+
+  @type("string")
+  gridColor: string = "rgba(255, 255, 255, 0.8)";
+
   @type("string")
   public roomName: string;
 
@@ -74,6 +80,16 @@ export class State extends Schema {
     // I could reset the map here but that should be handled when the room is disposed.
     //this.map = undefined;
     return true;
+  }
+  //#endregion
+
+  //#region Grid
+  setGridColor(_sessionId: string, color: string){
+    this.gridColor = color;
+  }
+
+  setGridShowing(_sessionId: string, isShowing: boolean){
+    this.gridShowing = isShowing;
   }
   //#endregion
 
@@ -200,18 +216,20 @@ export class State extends Schema {
 
     // good to go move the position
     playerToMove.position = new mLatLng(position.pos.lat, position.pos.lng);
-    playerToMove.toPosition = undefined; // Player is replacing the ghost character.
+    playerToMove.toPosition = [new mLatLng(position.pos.lat, position.pos.lng)]; // Player is replacing the ghost character.
     return true;
   }
 
-  updatePlayerGhostPosition(sessionId: string, position: { pos: mLatLng; clientToChange: string }): boolean {
+  setPlayerGhostPosition(sessionId: string, position: { pos: mLatLng[]; clientToChange: string }): boolean {
     // I need to make some checks that the person moving this object is the right person or the host.
     const player = this._getPlayerBySessionId(sessionId);
     const playerToMove = this._getPlayerByUserId(position.clientToChange);
     if (player === undefined || playerToMove === undefined) return false; // Player does not exist
 
     // good to go! move ghost to the position.
-    playerToMove.toPosition = new mLatLng(position.pos.lat, position.pos.lng);
+    playerToMove.toPosition = position.pos.map((val: mLatLng)=>{
+      return new mLatLng(val.lat, val.lng);
+    });
     return true;
   }
 
@@ -224,10 +242,10 @@ export class State extends Schema {
     if (player === undefined || enemyToMove === undefined) return false; // Player does not exist
 
     enemyToMove.position = new mLatLng(position.pos.lat, position.pos.lng);
-    enemyToMove.toPosition = undefined; // Enemy replacing the ghost.
+    enemyToMove.toPosition = [new mLatLng(position.pos.lat, position.pos.lng)];
     return true;
   }
-  updateEnemyGhostPosition(sessionId: string, position: { pos: mLatLng; clientToChange: string }): boolean {
+  setEnemyGhostPosition(sessionId: string, position: { pos: mLatLng[]; clientToChange: string }): boolean {
     // I need to make some checks that the person moving this object is the right person or the host.
     if (this.map === undefined) return false;
     const player = this._getPlayerBySessionId(sessionId);
@@ -235,9 +253,12 @@ export class State extends Schema {
 
     if (player === undefined || enemyToMove === undefined) return false; // Player does not exist
 
-    enemyToMove.toPosition = new mLatLng(position.pos.lat, position.pos.lng);
+    enemyToMove.toPosition = position.pos.map((val: mLatLng)=>{
+      return new mLatLng(val.lat, val.lng);
+    });
     return true;
   }
+
   //#endregion
 
   //#region Drawings
