@@ -11,7 +11,7 @@ import GridMovementController from "../MovementControllers/GridMovementControlle
 import { LatLng } from "leaflet";
 import { useAuthenticatedContext } from "../../../../ContextProvider/useAuthenticatedContext";
 import FreeMovementController from "../MovementControllers/FreeMovementController";
-import { throttle } from "lodash";
+import useDebounced from "../../../../Util/useDebounced";
 
 export default function PlayerMarkerList() {
   const authContext = useAuthenticatedContext();
@@ -39,36 +39,39 @@ export default function PlayerMarkerList() {
     };
   }, []);
 
+  const debouncePositionChange = useDebounced((player: Player, toPosition: LatLng) => {
+    authContext.room.send("updatePosition", { pos: toPosition, clientToChange: player.userId });
+  }, 100)
+
+  const debounceGhostPositionChange = useDebounced((player: Player, toPosition: LatLng[]) => {
+    authContext.room.send("updatePlayerGhostPosition", { pos: toPosition, clientToChange: player.userId });
+    // switch(movementType){
+    //   case "free":
+    //     authContext.room.send("updatePlayerGhostPosition", {pos: toPosition, clientToChange: player.userId});
+    //   break;
+    //   case "grid":
+    //     authContext.room.send("updatePlayerGhostPosition", {pos: toPosition, clientToChange: player.userId})
+    //   break;
+    //   default:
+    //     authContext.room.send("updatePlayerGhostPosition", {pos: toPosition, clientToChange: player.userId});
+    //   break;
+    // }
+  }, 100)
+    
   const getControllerElement = (player: Player): any => {
-    const handlePositionChanged = (toPosition: LatLng): void => {
-      authContext.room.send("updatePosition", { pos: toPosition, clientToChange: player.userId });
-    }
-
-    const handleGhostPositionChange = (toPosition: LatLng[])=>{
-      makeGhostRequest(toPosition);
-    };
-
-    const makeGhostRequest = (toPosition: LatLng[]): void => {
-      switch(movementType){
-        case "free":
-          authContext.room.send("updatePlayerGhostPosition", {pos: toPosition, clientToChange: player.userId});
-        break;
-        case "grid":
-          authContext.room.send("updatePlayerGhostPosition", {pos: toPosition, clientToChange: player.userId})
-        break;
-        default:
-          authContext.room.send("updatePlayerGhostPosition", {pos: toPosition, clientToChange: player.userId});
-        break;
-      }
-    }
-
     switch (movementType) {
       case "free":
-        return <FreeMovementController isPlayer={true}  controllableUser={player} onPositionChange={handlePositionChanged} onGhostPositionChange={handleGhostPositionChange}/>;
+        return <FreeMovementController isPlayer={true} controllableUser={player} 
+        onPositionChange={(toPosition: LatLng) => { debouncePositionChange(player, toPosition) }} 
+        onGhostPositionChange={(toPosition: LatLng[]) => { debounceGhostPositionChange(player, toPosition) }} />;
       case "grid":
-        return <GridMovementController isPlayer={true}  controllableUser={player} onPositionChange={handlePositionChanged} onGhostPositionChange={handleGhostPositionChange}/>;
+        return <GridMovementController isPlayer={true} controllableUser={player} 
+        onPositionChange={(toPosition: LatLng) => { debouncePositionChange(player, toPosition) }} 
+        onGhostPositionChange={(toPosition: LatLng[]) => { debounceGhostPositionChange(player, toPosition) }} />;
       default:
-        return <FreeMovementController isPlayer={true}  controllableUser={player} onPositionChange={handlePositionChanged} onGhostPositionChange={handleGhostPositionChange}/>;
+        return <FreeMovementController isPlayer={true} controllableUser={player} 
+        onPositionChange={(toPosition: LatLng) => { debouncePositionChange(player, toPosition) }} 
+        onGhostPositionChange={(toPosition: LatLng[]) => { debounceGhostPositionChange(player, toPosition) }} />;
     }
   }
   

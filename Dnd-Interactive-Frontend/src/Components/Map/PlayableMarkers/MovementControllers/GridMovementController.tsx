@@ -178,8 +178,6 @@ export default function GridMovementController({ controllableUser, isPlayer, onP
                 const calcCenter: LatLng = calculateNearestcenter(event.latlng);
                 if(prev.length > 0){
                     const last: LatLng = prev[prev.length - 1];
-                    console.log(prev)
-                    console.log(last)
                     if(last.equals(calcCenter)){
                         return [...prev];
                     }

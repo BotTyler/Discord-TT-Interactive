@@ -6,7 +6,7 @@ import { MapMovementType } from "../../../../shared/State";
 import FreeMovementController from "../MovementControllers/FreeMovementController";
 import { LatLng } from "leaflet";
 import { useAuthenticatedContext } from "../../../../ContextProvider/useAuthenticatedContext";
-import { throttle } from "lodash";
+import useDebounced from "../../../../Util/useDebounced";
 
 /**
  * Class that handles all registered enemies and displays their controllers on the interactive react-leaflet map.
@@ -36,37 +36,44 @@ export default function EnemyMarkerList() {
       window.removeEventListener("MapMovementChanged", MovementTypeChanged);
     };
   }, []);
+
+
+
+  // Debounce needs to be defined outside the class.
+  const debouncePositionChange = useDebounced((enemy: Enemy, toPosition: LatLng) => {
+    authContext.room.send("updateEnemyPosition", { pos: toPosition, clientToChange: enemy.id + "" });
+  }, 100)
+
+  const debounceGhostPositionChange = useDebounced((enemy: Enemy, toPosition: LatLng[]) => {
+    // switch(movementType){
+    //   case "free":
+    //     authContext.room.send("updateEnemyGhostPosition", {pos: toPosition, clientToChange: enemy.id + ""});
+    //   break;
+    //   case "grid":
+    //     authContext.room.send("updateEnemyGhostPosition", {pos: toPosition, clientToChange: enemy.id + ""})
+    //   break;
+    //   default:
+    //     authContext.room.send("updateEnemyGhostPosition", {pos: toPosition, clientToChange: enemy.id + ""});
+    //   break;
+    // }
+    authContext.room.send("updateEnemyGhostPosition", { pos: toPosition, clientToChange: enemy.id + "" });
+  }, 100)
+
   function getControllerElement(enemy: Enemy): any {
-    const handlePositionChanged = (toPosition: LatLng): void => {
-      authContext.room.send("updateEnemyPosition", { pos: toPosition, clientToChange: enemy.id + "" });
-    }
-
-    const handleGhostPositionChange = (toPosition: LatLng[]) => {
-      makeGhostRequest(toPosition);
-    };
-
-    const makeGhostRequest = (toPosition: LatLng[]): void => {
-      switch(movementType){
-        case "free":
-          authContext.room.send("updateEnemyGhostPosition", {pos: toPosition, clientToChange: enemy.id + ""});
-        break;
-        case "grid":
-          authContext.room.send("updateEnemyGhostPosition", {pos: toPosition, clientToChange: enemy.id + ""})
-        break;
-        default:
-          authContext.room.send("updateEnemyGhostPosition", {pos: toPosition, clientToChange: enemy.id + ""});
-        break;
-      }
-    }
-    
 
     switch (movementType) {
       case "free":
-        return <FreeMovementController isPlayer={false} controllableUser={enemy} onPositionChange={handlePositionChanged} onGhostPositionChange={handleGhostPositionChange} />;
+        return <FreeMovementController isPlayer={false} controllableUser={enemy} 
+        onPositionChange={(toPosition: LatLng)=>{debouncePositionChange(enemy, toPosition)}} 
+        onGhostPositionChange={(toPosition: LatLng[])=>{debounceGhostPositionChange(enemy, toPosition)}} />;
       case "grid":
-        return <GridMovementController isPlayer={false} controllableUser={enemy} onPositionChange={handlePositionChanged} onGhostPositionChange={handleGhostPositionChange} />;
+        return <GridMovementController isPlayer={false} controllableUser={enemy} 
+        onPositionChange={(toPosition: LatLng)=>{debouncePositionChange(enemy, toPosition)}} 
+        onGhostPositionChange={(toPosition: LatLng[])=>{debounceGhostPositionChange(enemy, toPosition)}} />;
       default:
-        return <FreeMovementController isPlayer={false} controllableUser={enemy} onPositionChange={handlePositionChanged} onGhostPositionChange={handleGhostPositionChange} />;
+        return <FreeMovementController isPlayer={false} controllableUser={enemy} 
+        onPositionChange={(toPosition: LatLng)=>{debouncePositionChange(enemy, toPosition)}} 
+        onGhostPositionChange={(toPosition: LatLng[])=>{debounceGhostPositionChange(enemy, toPosition)}} />;
     }
   }
 
