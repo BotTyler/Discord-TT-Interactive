@@ -9,6 +9,7 @@ export default function EnemyContextElement({ enemy, onValueChanged }: { enemy: 
   const [name, setName] = React.useState<string>(enemy.name);
   const [size, setSize] = React.useState<number>(enemy.size);
   const [position, setPosition] = React.useState<mLatLng>(enemy.position);
+  const [toPosition, setToPosition] = React.useState<mLatLng[]>([]);
   const [health, setHealth] = React.useState<number>(enemy.health);
   const [totalHealth, setTotalHealth] = React.useState<number>(enemy.totalHealth);
   const [deathSaves, setDeathSaves] = React.useState<number>(enemy.deathSaves);
@@ -40,6 +41,9 @@ export default function EnemyContextElement({ enemy, onValueChanged }: { enemy: 
   React.useEffect(() => {
     emitFieldChangeEvent("position", position);
   }, [position]);
+  React.useEffect(() => {
+    emitFieldChangeEvent("toPosition", toPosition);
+  }, [toPosition]);
   React.useEffect(() => {
     emitFieldChangeEvent("health", health);
   }, [health]);
@@ -78,6 +82,9 @@ export default function EnemyContextElement({ enemy, onValueChanged }: { enemy: 
     const positionListener = enemy.listen("position", (value: mLatLng) => {
       setPosition(value);
     });
+    const toPositionListener = enemy.listen("toPosition", (value: mLatLng[]) => {
+      setToPosition(value);
+    });
     const healthListener = enemy.listen("health", (value: number) => {
       setHealth(value);
     });
@@ -100,6 +107,7 @@ export default function EnemyContextElement({ enemy, onValueChanged }: { enemy: 
       nameListener();
       sizeListener();
       positionListener();
+      toPositionListener();
       healthListener();
       totalHealthListener();
       deathSavesListener();

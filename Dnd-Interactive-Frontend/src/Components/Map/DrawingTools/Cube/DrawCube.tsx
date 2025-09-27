@@ -4,7 +4,7 @@ import { LatLng, LeafletMouseEvent } from "leaflet";
 import { useAuthenticatedContext } from "../../../../ContextProvider/useAuthenticatedContext";
 import { DrawingTools, useDrawingGameToolContext } from "../../../../ContextProvider/GameDrawingProvider";
 import { useMap, useMapEvents } from "react-leaflet";
-import DistanceLine from "../../Player/DistanceLine";
+import DistanceLine from "../../PlayableMarkers/DistanceLine";
 import { useGameState } from "../../../../ContextProvider/GameStateContext/GameStateProvider";
 
 export default function DrawCube() {

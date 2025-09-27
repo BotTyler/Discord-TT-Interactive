@@ -9,10 +9,11 @@ import DrawArc from "./DrawingTools/Arc/DrawArc";
 import DrawCircle from "./DrawingTools/Circle/DrawCircle";
 import DrawCube from "./DrawingTools/Cube/DrawCube";
 import DrawLine from "./DrawingTools/Lines/DrawLine";
-import EnemyMarkerList from "./Enemy/EnemyMarkerList";
+import EnemyMarkerList from "./PlayableMarkers/Enemy/EnemyMarkerList";
 import FogCreation from "./Fog/FogCreation";
 import ShowFog from "./Fog/ShowFog";
-import PlayerMarkerList from "./Player/PlayerMarkerList";
+import PlayerMarkerList from "./PlayableMarkers/Player/PlayerMarkerList";
+import GridDisplay from "./Grid/GridDisplay";
 
 /**
  * Component responsible for rendering an interactive map. This will contain everything necessary for an interactive map.
@@ -26,12 +27,18 @@ export default function InteractiveMap({ map }: { map: MapData }) {
     setMap(map);
   }, [map]);
   // changes the enemy z-index, if host the marker should show above fogs and if a client should be hidden by the fog.
+  /**
+   * zIndex:
+   * Players: 500-599
+   * Fog: 600-699
+   * Enemy: 700-799
+   */
   const enemyZindex = React.useCallback(() => {
     const curPlayer = players.getPlayer(authContext.user.id);
     if (curPlayer === undefined) return; // This should never happen but checking anyways
-    if (curPlayer.isHost) return 599;
+    if (curPlayer.isHost) return 700;
 
-    return 597;
+    return 500;
   }, []);
 
   return (
@@ -63,8 +70,12 @@ export default function InteractiveMap({ map }: { map: MapData }) {
               [nMap.height, nMap.width],
             ]}
           ></ImageOverlay>
-          <PlayerMarkerList />
-          {/* Zindex for host is 599 while user is 597 */}
+          <Pane name="Grid" style={{zIndex: 400}}>
+            <GridDisplay />
+          </Pane>
+          <Pane name="Player" style={{zIndex: 500}}>
+            <PlayerMarkerList />
+          </Pane>
           <Pane name="Enemy" style={{ zIndex: enemyZindex() }}>
             <EnemyMarkerList />
           </Pane>
@@ -72,7 +83,7 @@ export default function InteractiveMap({ map }: { map: MapData }) {
           <DrawCube />
           <DrawCircle />
           <DrawArc />
-          <Pane name="fog" style={{ zIndex: 598 }}>
+          <Pane name="fog" style={{ zIndex: 600 }}>
             <ShowFog />
           </Pane>
           <FogCreation />

@@ -4,7 +4,7 @@ import { useMapEvents } from "react-leaflet";
 import { DrawingTools, useDrawingGameToolContext } from "../../../../ContextProvider/GameDrawingProvider";
 import { useGameState } from "../../../../ContextProvider/GameStateContext/GameStateProvider";
 import { useAuthenticatedContext } from "../../../../ContextProvider/useAuthenticatedContext";
-import DistanceLine from "../../Player/DistanceLine";
+import DistanceLine from "../../PlayableMarkers/DistanceLine";
 import Arc from "./Arc";
 
 

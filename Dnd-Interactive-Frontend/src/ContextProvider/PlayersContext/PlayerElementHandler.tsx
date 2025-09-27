@@ -14,6 +14,7 @@ export default function PlayerElementHandler({ player, onValueChanged }: { playe
   const [color, setColor] = React.useState<string>(player.color);
   const [initiative, setInitiative] = React.useState<number>(player.initiative);
   const [position, setPosition] = React.useState<mLatLng>(player.position);
+  const [toPosition, setToPosition] = React.useState<mLatLng[]>([]);
   const [health, setHealth] = React.useState<number>(player.health);
   const [totalHealth, setTotalHealth] = React.useState<number>(player.totalHealth);
   const [deathSaves, setDeathSaves] = React.useState<number>(player.deathSaves);
@@ -65,6 +66,9 @@ export default function PlayerElementHandler({ player, onValueChanged }: { playe
   React.useEffect(() => {
     emitFieldChangeEvent("position", position);
   }, [position]);
+  React.useEffect(() => {
+    emitFieldChangeEvent("toPosition", toPosition);
+  }, [toPosition]);
   React.useEffect(() => {
     emitFieldChangeEvent("drawings", drawings);
   }, [drawings]);
@@ -119,6 +123,9 @@ export default function PlayerElementHandler({ player, onValueChanged }: { playe
     const positionListener = player.listen("position", (value: mLatLng) => {
       setPosition(value);
     });
+    const toPositionListener = player.listen("toPosition", (value: mLatLng[]) => {
+      setToPosition(value);
+    });
     const healthListener = player.listen("health", (value: number) => {
       setHealth(value);
     });
@@ -147,6 +154,7 @@ export default function PlayerElementHandler({ player, onValueChanged }: { playe
       setConnected(val);
     });
 
+
     return () => {
       userIdListener();
       avatarListener();
@@ -156,6 +164,7 @@ export default function PlayerElementHandler({ player, onValueChanged }: { playe
       colorListener();
       initiativeListener();
       positionListener();
+      toPositionListener();
       healthListener();
       totalHealthListener();
       deathSavesListener();

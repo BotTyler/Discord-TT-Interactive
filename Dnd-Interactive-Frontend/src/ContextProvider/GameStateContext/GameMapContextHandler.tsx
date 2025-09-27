@@ -1,5 +1,5 @@
 import { Enemy } from "../../../src/shared/Enemy";
-import { GameStateEnum } from "../../../src/shared/State";
+import { GameStateEnum, MapMovementType } from "../../../src/shared/State";
 import { MapData, MapFogPolygon } from "../../../src/shared/Map";
 import React, { useImperativeHandle } from "react";
 import { useAuthenticatedContext } from "../useAuthenticatedContext";
@@ -10,6 +10,7 @@ export const GameMapContextHandler = React.forwardRef(function GameMapContextHan
   const authenticatedContext = useAuthenticatedContext();
   const [currentGameState, setGameState] = React.useState<GameStateEnum>(GameStateEnum.MAINMENU);
   const [map, setMap] = React.useState<MapData | undefined>(getBaseMapFromAuthContext());
+  const [mapMovement, setMapMovement] = React.useState<MapMovementType>("free");
   const [curHostId, setCurHostId] = React.useState<string | undefined>(authenticatedContext.room.state.currentHostUserId);
 
   // Following variables are held within the map class. These variables are the only ones that have the possibility of changing within the data.
@@ -25,6 +26,10 @@ export const GameMapContextHandler = React.forwardRef(function GameMapContextHan
   // Init index
   const [initiativeIndex, setInitiative] = React.useState<number>(0);
 
+  // Grid values
+  const [gridColor, setGridColor] = React.useState<string>("");
+  const [gridShowing, setGridShowing] = React.useState<boolean>(true);
+
   function getBaseMapFromAuthContext(): MapData | undefined {
     const mMap = authenticatedContext.room.state.map;
 
@@ -36,6 +41,9 @@ export const GameMapContextHandler = React.forwardRef(function GameMapContextHan
     () => ({
       getMap(): MapData | undefined {
         return map;
+      },
+      getMapMovement(): MapMovementType {
+        return mapMovement;
       },
       getCurrentHostId(): string | undefined {
         return curHostId;
@@ -61,8 +69,14 @@ export const GameMapContextHandler = React.forwardRef(function GameMapContextHan
       getInitiativeIndex(): number {
         return initiativeIndex;
       },
+      getGridColor(): string {
+        return gridColor;
+      },
+      getGridShowing(): boolean {
+        return gridShowing;
+      }
     }),
-    [map, curHostId, currentGameState, enemies, fogs, iconHeight, initiativeIndex]
+    [map, mapMovement, curHostId, currentGameState, enemies, fogs, iconHeight, initiativeIndex, gridColor, gridShowing]
   );
 
   const emitFieldChangeEvent = (field: string, value: any) => {
@@ -97,6 +111,15 @@ export const GameMapContextHandler = React.forwardRef(function GameMapContextHan
     });
     window.dispatchEvent(event);
   }, [initiativeIndex]);
+  React.useEffect(()=>{
+    emitFieldChangeEvent("MapMovementChanged", mapMovement);
+  }, [mapMovement]);
+  React.useEffect(()=>{
+    emitFieldChangeEvent("GridDisplayChange", gridShowing);
+  }, [gridShowing]);
+  React.useEffect(()=>{
+    emitFieldChangeEvent("GridColorChange", gridColor);
+  }, [gridColor]);
 
   React.useEffect(() => {
     const GameStateCallback = authenticatedContext.room.state.listen("gameState", (value: any) => {
@@ -119,10 +142,23 @@ export const GameMapContextHandler = React.forwardRef(function GameMapContextHan
       setCurHostId(value);
     });
 
+    const mapMovementListener = authenticatedContext.room.state.listen("mapMovement", (value: MapMovementType) => {
+      setMapMovement(value);
+    })
+    const gridColorListener = authenticatedContext.room.state.listen("gridColor", (value: string) => {
+      setGridColor(value);
+    })
+    const gridShowingListener = authenticatedContext.room.state.listen("gridShowing", (value: boolean) => {
+      setGridShowing(value);
+    })
+
     return () => {
       GameStateCallback();
       mapCallback();
       hostIdListener();
+      mapMovementListener();
+      gridColorListener();
+      gridShowingListener();
     };
   }, [authenticatedContext.room]);
 
@@ -245,6 +281,7 @@ export const GameMapContextHandler = React.forwardRef(function GameMapContextHan
       initiativeIndexListener();
     };
   }, [authenticatedContext.room, map]);
+
   return (
     <>
       {Object.keys(connectedEnemies).map((key) => {

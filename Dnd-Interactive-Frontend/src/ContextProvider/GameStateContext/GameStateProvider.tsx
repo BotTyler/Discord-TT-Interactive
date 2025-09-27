@@ -1,5 +1,5 @@
 import { Enemy } from "../../../src/shared/Enemy";
-import { GameStateEnum } from "../../../src/shared/State";
+import { GameStateEnum, MapMovementType } from "../../../src/shared/State";
 import { MapData, MapFogPolygon } from "../../../src/shared/Map";
 import React from "react";
 import Error from "../../Pages/Error/Error";
@@ -14,6 +14,7 @@ export interface GameStateInterface {
   // curHostId: string | undefined;
   // enemies: Record<string, Enemy>;
   getMap: () => MapData | undefined;
+  getMapMovement: () => MapMovementType;
   getCurrentHostId(): string | undefined;
   getCurrentGameState: () => GameStateEnum;
   getEnemies: () => { [key: string]: Enemy };
@@ -22,10 +23,15 @@ export interface GameStateInterface {
   getFog: (id: string) => MapFogPolygon | undefined;
   getIconHeight: () => number;
   getInitiativeIndex: () => number;
+  getGridColor: () => string;
+  getGridShowing: () => boolean;
 }
 const GameStateContext = React.createContext<GameStateInterface>({
   getMap: (): MapData | undefined => {
     return undefined;
+  },
+  getMapMovement: (): MapMovementType => {
+    return "free";
   },
   getCurrentHostId: (): string | undefined => {
     return undefined;
@@ -51,6 +57,12 @@ const GameStateContext = React.createContext<GameStateInterface>({
   getInitiativeIndex: () => {
     return 0;
   },
+  getGridColor: () => {
+    return "rgba(255, 255, 255, 0.7)"
+  },
+  getGridShowing: () => {
+    return true;
+  }
 });
 
 export function useGameState() {
@@ -102,6 +114,10 @@ export function GameStateContextProvider() {
     if (gameStateContextRef.current == null) return undefined;
     return gameStateContextRef.current.getMap();
   };
+  const getMapMovement = (): MapMovementType => {
+    if (gameStateContextRef.current == null) return "free";
+    return gameStateContextRef.current.getMapMovement();
+  };
   const getCurrentHostId = (): string | undefined => {
     if (gameStateContextRef.current == null) return undefined;
     return gameStateContextRef.current.getCurrentHostId();
@@ -134,8 +150,17 @@ export function GameStateContextProvider() {
     if (gameStateContextRef.current == null) return 0;
     return gameStateContextRef.current.getInitiativeIndex();
   };
+  const getGridColor = () => {
+    if(gameStateContextRef.current == null) return "rgba(255, 255, 255, 0.7)";
+    return gameStateContextRef.current.getGridColor();
+  }
+  const getGridShowing = () => {
+    if(gameStateContextRef.current == null) return true;
+    return gameStateContextRef.current.getGridShowing();
+  }
   const providerValue: GameStateInterface = {
     getMap: getMap,
+    getMapMovement: getMapMovement,
     getCurrentHostId: getCurrentHostId,
     getCurrentGameState: getGameState,
     getEnemies: getEnemies,
@@ -144,6 +169,8 @@ export function GameStateContextProvider() {
     getFog: getFog,
     getIconHeight: getIconHeight,
     getInitiativeIndex: getInitiativeIndex,
+    getGridColor: getGridColor,
+    getGridShowing: getGridShowing
   };
   return (
     <GameStateContext.Provider value={providerValue}>
