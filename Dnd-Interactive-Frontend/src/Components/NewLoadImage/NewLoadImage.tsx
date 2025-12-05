@@ -37,7 +37,10 @@ export const NewLoadImage = forwardRef(function NewLoadImage({ startingImageSrc,
       return {
         async getMinioFileUrl(): Promise<string | undefined> {
           // If there is no image file then we can return the original imgSrc
-          if (!imageFile) return imgSrc;
+          if (!imageFile) {
+            console.log("Image file not found use original image");
+            return startingImageSrc;
+          }
 
           // If no new file is here there must be some src image from an already existing minio instance
           if (!imageFile.file) return imageFile.imgsrc;
@@ -144,11 +147,18 @@ export const NewLoadImage = forwardRef(function NewLoadImage({ startingImageSrc,
             aria-label="Default select example"
             onChange={(e) => {
               const index = +e.target.value;
-              const ImageObject = knownImageList[index];
-              setImageFile({ file: undefined, imgsrc: ImageObject.image_name });
+
+              if (index <= -1) {
+                // reset
+                setImageFile(undefined);
+              } else {
+                // Another load image was used.
+                const ImageObject = knownImageList[index];
+                setImageFile({ file: undefined, imgsrc: ImageObject.image_name });
+              }
             }}
           >
-            <option value={""}>Select Image</option>
+            <option value={-1}>Select Image</option>
             {knownImageList.map((val: LoadImage, i: number) => {
               return (
                 <option value={i} key={`KnownImageList-${val.image_name}-${i}`}>
