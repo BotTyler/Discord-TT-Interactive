@@ -32,29 +32,25 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Check
-        run: |
-          echo ${{ github.event.inputs.project }}
-
       - name: Build Frontend
-        if: ${{ github.event.inputs.project == 'Frontend' || github.even.inputs.project == 'All' }}
+        if: ${{ github.event.inputs.project == 'Frontend' || github.event.inputs.project == 'All' }}
         working-directory: ./Dnd-Interactive-Frontend
         run: |
           docker build \
             -t ghcr.io/${{ github.repository_owner }}/Dnd-Interactive-Frontend:latest .
       - name: Push Frontend Image
-        if: ${{ github.event.inputs.project == 'Frontend' || github.even.inputs.project == 'All' }}
+        if: ${{ github.event.inputs.project == 'Frontend' || github.event.inputs.project == 'All' }}
         run: |
           docker push ghcr.io/${{ github.repository_owner }}/Dnd-Interactive-Frontend:latest
 
 
       - name: Build Backend
-        if: ${{ github.event.inputs.project == 'Backend' || github.even.inputs.project == 'All' }}
+        if: ${{ github.event.inputs.project == 'Backend' || github.event.inputs.project == 'All' }}
         working-directory: ./Dnd-Interactive-Backend
         run: |
           docker build \
             -t ghcr.io/${{ github.repository_owner }}/Dnd-Interactive-Backend:latest .
       - name: Push Frontend Image
-        if: ${{ github.event.inputs.project == 'Backend' || github.even.inputs.project == 'All' }}
+        if: ${{ github.event.inputs.project == 'Backend' || github.event.inputs.project == 'All' }}
         run: |
           docker push ghcr.io/${{ github.repository_owner }}/Dnd-Interactive-Backend:latest
