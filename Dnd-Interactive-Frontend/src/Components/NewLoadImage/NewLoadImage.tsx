@@ -38,7 +38,6 @@ export const NewLoadImage = forwardRef(function NewLoadImage({ startingImageSrc,
         async getMinioFileUrl(): Promise<string | undefined> {
           // If there is no image file then we can return the original imgSrc
           if (!imageFile) {
-            console.log("Image file not found use original image");
             return startingImageSrc;
           }
 

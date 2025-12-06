@@ -1,8 +1,8 @@
 import { Client, Room } from "colyseus";
 import * as crypto from "crypto";
 import { ExportDataInterface } from "../shared/ExportDataInterface";
-import { GameStateEnum, IState, MapMovementType, State} from "../shared/State";
-import { LoadCampaign, LoadImage, LoadSaveHistory} from "../shared/LoadDataInterfaces";
+import { GameStateEnum, IState, MapMovementType, State } from "../shared/State";
+import { LoadCampaign, LoadImage, LoadSaveHistory } from "../shared/LoadDataInterfaces";
 import { AudioCatalogDAO, AudioCatalogDB } from "../Database/Tables/AudioCatalogDB";
 import { EnemyDAO, EnemyDB } from "../Database/Tables/EnemyDB";
 import {
@@ -38,10 +38,9 @@ export class StateHandlerRoom extends Room<State> {
         const validateParams: any = ValidateAllInputs(data, inputList);
 
         // validation complete lets send the message to all the clients
-        if(!this.authenticateHostAction(client.sessionId)) return;
+        if (!this.authenticateHostAction(client.sessionId)) return;
 
         this.state.setGridColor(client.sessionId, validateParams.gridColor);
-
       } catch (error) {
         console.error(error);
       }
@@ -56,10 +55,9 @@ export class StateHandlerRoom extends Room<State> {
         const validateParams: any = ValidateAllInputs(data, inputList);
 
         // validation complete lets send the message to all the clients
-        if(!this.authenticateHostAction(client.sessionId)) return;
+        if (!this.authenticateHostAction(client.sessionId)) return;
 
         this.state.setGridShowing(client.sessionId, validateParams.gridShowing);
-
       } catch (error) {
         console.error(error);
       }
@@ -757,84 +755,7 @@ export class StateHandlerRoom extends Room<State> {
     // saves the map to the database
     this.onMessage("exportMap", (client, _data) => {
       if (!this.authenticateHostAction(client.sessionId)) return;
-
-      const data: ExportDataInterface | undefined = this.state.exportCurrentMapData();
-      // save this data to the database
-
-      if (data === undefined) {
-        client.send("exportData", new Error("Data was not saved!!"));
-        return;
-      }
-
-      const player_id = this.state._getPlayerBySessionId(client.sessionId);
-      if (player_id === undefined) return; // this data cannot be inserted into the table
-      // TODO: This should be transformed into a transaction on the database side for now this is ok for test purposes.
-      SaveHistoryDB.getInstance()
-        .create(new SaveHistoryDAO(new Date(), data.map.id!, player_id.userId))
-        .then((index) => {
-          if (index === undefined) return; // required data is not inserted in the database we need to leave.
-          //we have the save history index we now need to insert into all other databases
-
-          // Create a checkpoint for all players in the player_movement_history DB
-          [...data.players.keys()].forEach((key) => {
-            const p = data.players.get(key)!;
-            const position = p.position;
-            const initiative = p.initiative;
-            const health = p.health;
-            const totalHealth = p.totalHealth;
-            const deathSaves = p.deathSaves;
-            const lifeSaves = p.lifeSaves;
-            PlayerMovementHistoryDB.getInstance().create(
-              new PlayerMovementHistoryDAO(
-                index,
-                key,
-                position,
-                initiative,
-                health,
-                totalHealth,
-                deathSaves,
-                lifeSaves,
-              ),
-            );
-          });
-
-          // Create a checkpoint for all enemies
-          [...data.map.enemy.keys()].forEach((key) => {
-            const e = data.map.enemy.get(key)!;
-            const position = e.position;
-            const size = e.size;
-            const initiaitive = e.initiative;
-            const health = e.health;
-            const totalHealth = e.totalHealth;
-            const deathSaves = e.deathSaves;
-            const lifeSaves = e.lifeSaves;
-            EnemyMovementHistoryDB.getInstance().create(
-              new EnemyMovementHistoryDAO(
-                index,
-                +key,
-                size,
-                position,
-                initiaitive,
-                health,
-                totalHealth,
-                deathSaves,
-                lifeSaves,
-              ),
-            );
-          });
-
-          // Time for fogs
-          [...data.map.fogs.keys()].forEach((key) => {
-            const visible = data.map.fogs.get(key)!.isVisible;
-            FogStateHistoryDB.getInstance().create(new FogStateHistoryDAO(index, +key, visible));
-          });
-
-          InitiativeHistoryDB.getInstance().create(
-            new InitiativeHistoryDAO(index, data.map.initiativeIndex),
-          );
-        });
-
-      // client.send("FileExport", data);
+      this.saveState();
     });
 
     this.onMessage("clearMap", (client, _data) => {
@@ -846,22 +767,25 @@ export class StateHandlerRoom extends Room<State> {
     this.onMessage("SetMapMovementType", (client, data) => {
       // input validation
       try {
-        if(!this.authenticateHostAction(client.sessionId)) return;
+        if (!this.authenticateHostAction(client.sessionId)) return;
         const inputList: ValidationInputType[] = [
-          { name: "mapMovement", PostProcess: (val: string): MapMovementType => {
-            switch(val){
-              case "free":
-                return "free";
-              case "grid":
-                return "grid";
-              default:
-                return "free";
-            }
-          }, type: "string" },
+          {
+            name: "mapMovement",
+            PostProcess: (val: string): MapMovementType => {
+              switch (val) {
+                case "free":
+                  return "free";
+                case "grid":
+                  return "grid";
+                default:
+                  return "free";
+              }
+            },
+            type: "string",
+          },
         ];
         const validateParams: any = ValidateAllInputs(data, inputList);
         this.state.setMapMovement(validateParams.mapMovement);
-
       } catch (error) {
         console.error(error);
       }
@@ -1139,6 +1063,7 @@ delete from Public."Map" where player_id = 'temp';
       if (!player.isHost) {
         return;
       }
+      this.saveState();
       player.isHost = false; // If the user rejoins, this will need to be reset.
       // Since this is the host we need to panic. 0.o
       this.state.PANIC();
@@ -1147,7 +1072,94 @@ delete from Public."Map" where player_id = 'temp';
 
   onDispose() {
     console.log("Dispose StateHandlerRoom");
+    this.saveState();
     this.state.removeAllPlayers();
+  }
+
+  // exportMap
+  saveState(): void {
+    const data: ExportDataInterface | undefined = this.state.exportCurrentMapData();
+    // save this data to the database
+
+    if (data === undefined) {
+      console.log("data not saved!!");
+      // client.send("exportData", new Error("Data was not saved!!"));
+      return;
+    }
+
+    // const player_id = this.state._getPlayerBySessionId(client.sessionId);
+    // if (player_id === undefined) return; // this data cannot be inserted into the table
+    const host_id: string | undefined = this.state.currentHostUserId;
+    if (host_id === undefined) {
+      console.log("Host not defined");
+      return;
+    }
+
+    // TODO: This should be transformed into a transaction on the database side for now this is ok for test purposes.
+    SaveHistoryDB.getInstance()
+      .create(new SaveHistoryDAO(new Date(), data.map.id!, host_id))
+      .then((index) => {
+        if (index === undefined) return; // required data is not inserted in the database we need to leave.
+        //we have the save history index we now need to insert into all other databases
+
+        // Create a checkpoint for all players in the player_movement_history DB
+        [...data.players.keys()].forEach((key) => {
+          const p = data.players.get(key)!;
+          const position = p.position;
+          const initiative = p.initiative;
+          const health = p.health;
+          const totalHealth = p.totalHealth;
+          const deathSaves = p.deathSaves;
+          const lifeSaves = p.lifeSaves;
+          PlayerMovementHistoryDB.getInstance().create(
+            new PlayerMovementHistoryDAO(
+              index,
+              key,
+              position,
+              initiative,
+              health,
+              totalHealth,
+              deathSaves,
+              lifeSaves,
+            ),
+          );
+        });
+
+        // Create a checkpoint for all enemies
+        [...data.map.enemy.keys()].forEach((key) => {
+          const e = data.map.enemy.get(key)!;
+          const position = e.position;
+          const size = e.size;
+          const initiaitive = e.initiative;
+          const health = e.health;
+          const totalHealth = e.totalHealth;
+          const deathSaves = e.deathSaves;
+          const lifeSaves = e.lifeSaves;
+          EnemyMovementHistoryDB.getInstance().create(
+            new EnemyMovementHistoryDAO(
+              index,
+              +key,
+              size,
+              position,
+              initiaitive,
+              health,
+              totalHealth,
+              deathSaves,
+              lifeSaves,
+            ),
+          );
+        });
+
+        // Time for fogs
+        [...data.map.fogs.keys()].forEach((key) => {
+          const visible = data.map.fogs.get(key)!.isVisible;
+          FogStateHistoryDB.getInstance().create(new FogStateHistoryDAO(index, +key, visible));
+        });
+
+        InitiativeHistoryDB.getInstance().create(
+          new InitiativeHistoryDAO(index, data.map.initiativeIndex),
+        );
+      });
   }
 
   //#region Validation

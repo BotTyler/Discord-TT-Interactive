@@ -1,5 +1,5 @@
 import { GameStateEnum } from "../../../../src/shared/State";
-import React from "react";
+import React, { useEffect } from "react";
 import { useAuthenticatedContext } from "../../../ContextProvider/useAuthenticatedContext";
 
 /**
@@ -11,6 +11,18 @@ export default function ImportExport() {
   // const handleImport = React.useCallback((e: React.MouseEvent) => {
   //   authContext.room.send("getSaves");
   // }, []);
+
+  useEffect(() => {
+    // Start interval
+    const intervalId = setInterval(() => {
+      authContext.room.send("exportMap");
+    }, 5 * 60 * 1000); // 5 minute
+
+    // Cleanup: stop interval when component unmounts
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, []);
 
   const handleExport = React.useCallback((e: React.MouseEvent) => {
     authContext.room.send("exportMap");
