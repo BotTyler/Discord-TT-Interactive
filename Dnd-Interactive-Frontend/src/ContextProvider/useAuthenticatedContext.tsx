@@ -107,7 +107,7 @@ function useAuthenticatedContextSetup() {
 
       // Authorize with Discord Client
       const { code } = await discordSdk.commands.authorize({
-        client_id: res_json.client_id,
+        client_id: "1283144396266672278",
         response_type: "code",
         state: "",
         prompt: "none",
