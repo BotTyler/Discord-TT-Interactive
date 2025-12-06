@@ -5,6 +5,7 @@ on:
     inputs:
       project:
         description: "Choose a project?"
+        required: true
         type: choice
         options:
           - Frontend
@@ -16,13 +17,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
-      - uses: actions/checkout@v4
+        uses: actions/checkout@v4
 
       - name: Build Frontend
         if: ${{ github.event.inputs.project == 'Frontend' || github.even.inputs.project == 'All' }}
+        working-directory: ./Dnd-Interactive-Frontend
         run: |
           echo "Building frontend"
       - name: Build Backend
         if: ${{ github.event.inputs.project == 'Backend' || github.even.inputs.project == 'All' }}
+        working-directory: ./Dnd-Interactive-Backend
         run: |
           echo "Building backend"
