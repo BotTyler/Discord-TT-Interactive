@@ -4,9 +4,8 @@ const queryParams = new URLSearchParams(window.location.search);
 const isEmbedded = queryParams.get("frame_id") != null;
 
 let discordSdk: DiscordSDK | DiscordSDKMock;
-
 if (isEmbedded) {
-  discordSdk = new DiscordSDK(import.meta.env.VITE_CLIENT_ID);
+  discordSdk = new DiscordSDK("1283144396266672278");
 } else {
   console.error("THIS APP IS MEANT TO BE EMBEDDED IN DISCORD!!!");
 }
