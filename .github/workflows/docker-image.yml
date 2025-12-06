@@ -54,7 +54,7 @@ jobs:
         run: |
           docker build \
             -t ghcr.io/${{ steps.vars.outputs.owner_lc }}/dnd-backend:latest .
-      - name: Push Frontend Image
+      - name: Push Backend Image
         if: ${{ github.event.inputs.project == 'Backend' || github.event.inputs.project == 'All' }}
         run: |
           docker push ghcr.io/${{ steps.vars.outputs.owner_lc }}/dnd-backend:latest
