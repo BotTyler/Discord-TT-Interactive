@@ -22,7 +22,6 @@ COPY . .
 RUN npm ci
 
 # Copy source and build
-COPY . .
 RUN npm run build
 
 # -------------------------
