@@ -101,9 +101,13 @@ function useAuthenticatedContextSetup() {
       const wsUrl = `/.proxy/colyseus`;
       const colyseusClientSdk = new Client(wsUrl); // this will be used to connect to express endpoints
 
+      // To avoid build time compilations. This needs to be passed in from an API request.
+      const res = await fetch("/colyseus/discord");
+      const res_json: any = await res.json();
+
       // Authorize with Discord Client
       const { code } = await discordSdk.commands.authorize({
-        client_id: import.meta.env.VITE_CLIENT_ID,
+        client_id: res_json.client_id,
         response_type: "code",
         state: "",
         prompt: "none",
