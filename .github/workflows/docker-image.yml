@@ -32,6 +32,10 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Check
+        run: |
+          echo ${{ github.event.inputs.project }}
+
       - name: Build Frontend
         if: ${{ github.event.inputs.project == 'Frontend' || github.even.inputs.project == 'All' }}
         working-directory: ./Dnd-Interactive-Frontend
