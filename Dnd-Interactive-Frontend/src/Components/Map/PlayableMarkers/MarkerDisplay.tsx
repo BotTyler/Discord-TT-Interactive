@@ -6,37 +6,35 @@ import "./MarkerFormatting.css"
 
 export default function MarkerDisplay(
   { name, size, avatarURI, position, color, className = "", isDraggable = false, displayName = true, eventFunctions }:
-  {
+    {
       name: string; size: number; avatarURI: string; position: LatLng; color: string; className: string; isDraggable?: boolean; displayName?: boolean;
       eventFunctions?: LeafletEventHandlerFnMap
-  }) {
+    }) {
 
-    const map = useMap();
+  const map = useMap();
 
-    const [markerName, setName] = useState<string>(name);
-    const [makerSize, setSize] = useState<number>(size);
-    const [markerScaled, setScaled] = useState([map.getZoom(), size * map.getZoomScale(map.getZoom(), 0)]);
-    const [markerAvatar, setAvatar] = useState<string>(avatarURI);
-    const [markerPosition, setPosition] = useState<LatLng>(position);
-    const [markerColor, setColor] = useState<string>(color);
-    const [id, setId] = useState<UUID>(crypto.randomUUID());
+  const [markerName, setName] = useState<string>(name);
+  const [markerScaled, setScaled] = useState([map.getZoom(), size * map.getZoomScale(map.getZoom(), 0)]);
+  const [markerAvatar, setAvatar] = useState<string>(avatarURI);
+  const [markerPosition, setPosition] = useState<LatLng>(position);
+  const [markerColor, setColor] = useState<string>(color);
+  const [id, setId] = useState<UUID>(crypto.randomUUID());
 
-    useEffect(()=>{
-      setName(name);
-    }, [name])
-    useEffect(()=>{
-      setSize(size);
-      setScaled([map.getZoom(), size * map.getZoomScale(map.getZoom(), 0)]);
-    }, [size])
-    useEffect(()=>{
-      setAvatar(avatarURI);
-    }, [avatarURI]);
-    useEffect(()=>{
-      setPosition(position);
-    }, [position])
-    useEffect(()=>{
-      setColor(color);
-    }, [color])
+  useEffect(() => {
+    setName(name);
+  }, [name])
+  useEffect(() => {
+    setScaled([map.getZoom(), size * map.getZoomScale(map.getZoom(), 0)]);
+  }, [size])
+  useEffect(() => {
+    setAvatar(avatarURI);
+  }, [avatarURI]);
+  useEffect(() => {
+    setPosition(position);
+  }, [position])
+  useEffect(() => {
+    setColor(color);
+  }, [color])
 
   useEffect(() => {
     const zoomEnd = () => {
@@ -50,7 +48,7 @@ export default function MarkerDisplay(
       map.off("zoomend", zoomEnd);
     };
   }, [map, markerScaled]);
-const icon = new DivIcon({
+  const icon = new DivIcon({
     html: `
 <div class="w-100 h-100 position-relative marker-container">
 <img
@@ -62,11 +60,11 @@ class="rounded-circle ${className}"
 <div class="position-absolute" style="top: 0; left: 0; right: 0; bottom: 0; background: transparent">
 </div>
 <div class="position-absolute text-center icon-text">
-${displayName? 
-`<p class="markerNameTag text-nowrap">
+${displayName ?
+        `<p class="markerNameTag text-nowrap">
 ${markerName}
-</p>`:""
-}
+</p>`: ""
+      }
 </div>
 </div
 `,
@@ -77,11 +75,11 @@ ${markerName}
   });
   return (
     <Marker
-    position={markerPosition}
-    icon={icon}
-    draggable={isDraggable}
-    key={`PlayableMarker-${id}-marker`}
-    eventHandlers={eventFunctions}
+      position={markerPosition}
+      icon={icon}
+      draggable={isDraggable}
+      key={`PlayableMarker-${id}-marker`}
+      eventHandlers={eventFunctions}
     />
   )
 }
