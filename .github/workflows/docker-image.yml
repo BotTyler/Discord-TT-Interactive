@@ -1,0 +1,31 @@
+name: Docker Image Builder
+
+on:
+  workflow_dispatch:
+    inputs:
+      project:
+        description: "Choose a project?"
+        required: true
+        type: choice
+        options:
+          - Frontend
+          - Backend
+          - All
+        default: All
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Build Frontend
+        if: ${{ github.event.inputs.project == 'Frontend' || github.even.inputs.project == 'All' }}
+        working-directory: ./Dnd-Interactive-Frontend
+        run: |
+          echo "Building frontend"
+      - name: Build Backend
+        if: ${{ github.event.inputs.project == 'Backend' || github.even.inputs.project == 'All' }}
+        working-directory: ./Dnd-Interactive-Backend
+        run: |
+          echo "Building backend"
