@@ -108,8 +108,8 @@ services:
     container_name: minio
     restart: always
     environment:
-      MINIO_ROOT_USER: x
-      MINIO_ROOT_PASSWORD: x
+      MINIO_ROOT_USER: <MINIO_ROOT>
+      MINIO_ROOT_PASSWORD: <MINIO_PASSWORD>
     ports:
       - "9000:9000"
       - "9001:9001"
