@@ -41,7 +41,7 @@ jobs:
         working-directory: ./Dnd-Interactive-Frontend
         run: |
           docker build \
-            --build-arg VITE_CLIENT_ID=${{ secrets.VITE_CLIENT_ID }}
+            --build-arg VITE_CLIENT_ID=${{ secrets.VITE_CLIENT_ID }} \
             -t ghcr.io/${{ steps.vars.outputs.owner_lc }}/dnd-frontend:latest .
       - name: Push Frontend Image
         if: ${{ github.event.inputs.project == 'Frontend' || github.event.inputs.project == 'All' }}
