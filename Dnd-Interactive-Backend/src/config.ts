@@ -230,13 +230,6 @@ export default config({
       }
     });
 
-    app.get("/discord", async (req, res) => {
-      const client_id: string = process.env.VITE_CLIENT_ID;
-
-      res.status(200).json({
-        client_id: client_id,
-      });
-    });
     /**
      * Use @colyseus/playground
      * (It is not recommended to expose this route in a production environment)

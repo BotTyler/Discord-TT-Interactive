@@ -14,6 +14,9 @@
 # -------------------------
 FROM node:18-alpine3.17 AS builder
 
+ARG VITE_CLIENT_ID
+ENV VITE_CLIENT_ID=$VITE_CLIENT_ID
+
 WORKDIR /app
 
 # Install dependencies
