@@ -131,7 +131,7 @@ $ docker compose -f docker-compose.yml up
 3. Add a '**postgres**' user (Super user with all perms)
 4. Add a '**dnd-prod-user**' user (Super user with all perms)
 5. Make a database called '**dnd-prod**'.
-6. Restore from [this]() file
+6. Restore from [this](./DND-SQL-Tables.sql) file
 
 ### Minio
 
