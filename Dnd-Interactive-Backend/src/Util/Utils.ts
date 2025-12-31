@@ -48,7 +48,7 @@ export type ValidationInputType = {
  * - type - The type of the specific param.
  * - SanitizeFunction - (OPTIONAL) If provided, this will sanitize any inputs.
  *
- * @returns If passed validation, a record of values will be returned that are sanitized, otherwise undefined will be returned.
+ * @returns If passed validation, a record of values will be returned that are sanitized, otherwise a runtime error is thrown.
  */
 export function ValidateAllInputs(
   reqInputs: Record<string, any>,

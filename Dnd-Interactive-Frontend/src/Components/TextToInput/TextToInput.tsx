@@ -26,7 +26,6 @@ export default function TextToInput({ value, type, onSubmit }: { value: string; 
 
   const handleKeyDown = (e: any) => {
     if (e.key === "Enter") {
-      console.log("enter was pressed, lets submit");
       setEditing(false);
       onSubmit(changeValue);
     }

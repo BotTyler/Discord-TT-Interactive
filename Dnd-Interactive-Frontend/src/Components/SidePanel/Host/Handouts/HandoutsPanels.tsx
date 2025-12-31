@@ -24,7 +24,6 @@ export default function HandoutsPanel() {
             ref={newloadImageRef}
             showPreview={false}
             onChange={(imageUrl: string) => {
-              console.log(imageUrl);
               setTempPreview(imageUrl);
             }}
           />

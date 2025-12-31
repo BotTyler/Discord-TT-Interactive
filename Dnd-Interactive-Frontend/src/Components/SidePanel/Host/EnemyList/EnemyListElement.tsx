@@ -78,45 +78,46 @@ export default function EnemyListElement({ enemy }: ParamInputs) {
       totalHealth: totalHp,
     });
   };
-  const handleDeleteCallback = (id: number) => {
-    authContext.room.send("deleteEnemy", { id: `${id}` });
+  const handleDeleteCallback = () => {
+    authContext.room.send("deleteEnemy", { id: `${enemy.id}` });
   };
+  const handleVisibilityToggle = (): void => {
+    authContext.room.send("toggleEnemyVisibility", { clientToChange: `${enemy.id}` })
+  }
+
   return (
     <li className={`list-group-item`}>
-      <div className="container-fluid m-0 p-0 overflow-hidden" style={{ minWidth: "300px" }}>
-        {/* name */}
-        <div className="text-center w-100">
-          <p className="fs-6 m-0">{name}</p>
-        </div>
-        <div className="row  g-1 text-center align-items-center justify-content-center">
-          {/* img */}
-          <div className="col-2 p-0">
-            <img className="img-fluid" src={`/colyseus/getImage/${avatarUri}`} onClick={() => handleEditCallback()} style={{ maxHeight: "50px" }} />
-          </div>
 
-          {/* Place button */}
-          <div className="col-1">
-            <button className="btn btn-primary w-100 p-0" onClick={() => handleEditCallback()}>
-              E
+      <div className="row m-0 p-0 overflow-hidden" style={{ minWidth: "300px" }}>
+        <div className="col-3">
+          <img className="img-fluid" src={`/colyseus/getImage/${avatarUri}`} onClick={() => handleEditCallback()} style={{ maxHeight: "50px" }} />
+        </div>
+        <div className="col-5 text-center">
+          <p className="m-0 fs-6">{name}</p>
+          <p className="m-0 fs-6">{totalHp} THP</p>
+        </div>
+        <div className="col-4 d-flex justify-content-center align-items-center">
+          <div className="row gap-1">
+            {/* Place button */}
+            <button className="col-1 btn btn-primary w-auto h-auto p-1" onClick={() => handleEditCallback()}>
+              <i className="bi bi-pencil-square"></i>
             </button>
-          </div>
-          {/* Duplicate button */}
-          <div className="col-1">
-            <button className="btn btn-primary w-100 p-0" onClick={() => handleDuplicateCallback()}>
-              D
+            {/* Duplicate button */}
+            <button className="col-1 btn btn-primary w-auto h-auto p-1" onClick={() => handleDuplicateCallback()}>
+              <i className="bi bi-copy"></i>
             </button>
-          </div>
-          {/* Remove */}
-          <div className="col-1">
-            <button className="btn btn-danger w-100 p-0" onClick={() => handleDeleteCallback(enemy.id)}>
-              X
+            {/* Visibility */}
+            <button className="col-1 btn btn-primary w-auto h-auto p-1" onClick={() => handleVisibilityToggle()}>
+              <i className="bi bi-eye"></i>
             </button>
-          </div>
-          <div className="col-6">
-            <p className="fs-6 m-0">{totalHp} THP</p>
+            {/* Remove */}
+            <button className="col-1 btn btn-danger w-auto h-auto p-1" onClick={() => handleDeleteCallback()}>
+              <i className="bi bi-trash"></i>
+            </button>
           </div>
         </div>
       </div>
+
       {isEditingEnemy ? (
         <EditEnemyModal
           callback={(data) => {

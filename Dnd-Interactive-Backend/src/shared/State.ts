@@ -5,7 +5,12 @@ import { mLatLng } from "./PositionInterface";
 import { Enemy } from "./Enemy";
 import { ExportDataInterface } from "./ExportDataInterface";
 import { Audio as gameAudio } from "./Audio";
-import { LoadEnemyInterface, LoadFogInterface, LoadMapInterface, LoadPlayerInterface } from "./LoadDataInterfaces";
+import {
+  LoadEnemyInterface,
+  LoadFogInterface,
+  LoadMapInterface,
+  LoadPlayerInterface,
+} from "./LoadDataInterfaces";
 import { ArcDrawing, CircleDrawing, CubeDrawing } from "./DrawingInterface";
 
 export interface IState {
@@ -84,11 +89,11 @@ export class State extends Schema {
   //#endregion
 
   //#region Grid
-  setGridColor(_sessionId: string, color: string){
+  setGridColor(_sessionId: string, color: string) {
     this.gridColor = color;
   }
 
-  setGridShowing(_sessionId: string, isShowing: boolean){
+  setGridShowing(_sessionId: string, isShowing: boolean) {
     this.gridShowing = isShowing;
   }
   //#endregion
@@ -137,7 +142,10 @@ export class State extends Schema {
     return true;
   }
 
-  changePlayerInitiative(sessionId: string, data: { initiative: number; clientToChange: string }): boolean {
+  changePlayerInitiative(
+    sessionId: string,
+    data: { initiative: number; clientToChange: string },
+  ): boolean {
     const player = this._getPlayerByUserId(data.clientToChange);
     if (player === undefined) return false;
     player.initiative = data.initiative;
@@ -220,20 +228,26 @@ export class State extends Schema {
     return true;
   }
 
-  setPlayerGhostPosition(sessionId: string, position: { pos: mLatLng[]; clientToChange: string }): boolean {
+  setPlayerGhostPosition(
+    sessionId: string,
+    position: { pos: mLatLng[]; clientToChange: string },
+  ): boolean {
     // I need to make some checks that the person moving this object is the right person or the host.
     const player = this._getPlayerBySessionId(sessionId);
     const playerToMove = this._getPlayerByUserId(position.clientToChange);
     if (player === undefined || playerToMove === undefined) return false; // Player does not exist
 
     // good to go! move ghost to the position.
-    playerToMove.toPosition = position.pos.map((val: mLatLng)=>{
+    playerToMove.toPosition = position.pos.map((val: mLatLng) => {
       return new mLatLng(val.lat, val.lng);
     });
     return true;
   }
 
-  updateEnemyPosition(sessionId: string, position: { pos: mLatLng; clientToChange: string }): boolean {
+  updateEnemyPosition(
+    sessionId: string,
+    position: { pos: mLatLng; clientToChange: string },
+  ): boolean {
     // I need to make some checks that the person moving this object is the right person or the host.
     if (this.map === undefined) return false;
     const player = this._getPlayerBySessionId(sessionId);
@@ -245,7 +259,10 @@ export class State extends Schema {
     enemyToMove.toPosition = [new mLatLng(position.pos.lat, position.pos.lng)];
     return true;
   }
-  setEnemyGhostPosition(sessionId: string, position: { pos: mLatLng[]; clientToChange: string }): boolean {
+  setEnemyGhostPosition(
+    sessionId: string,
+    position: { pos: mLatLng[]; clientToChange: string },
+  ): boolean {
     // I need to make some checks that the person moving this object is the right person or the host.
     if (this.map === undefined) return false;
     const player = this._getPlayerBySessionId(sessionId);
@@ -253,7 +270,7 @@ export class State extends Schema {
 
     if (player === undefined || enemyToMove === undefined) return false; // Player does not exist
 
-    enemyToMove.toPosition = position.pos.map((val: mLatLng)=>{
+    enemyToMove.toPosition = position.pos.map((val: mLatLng) => {
       return new mLatLng(val.lat, val.lng);
     });
     return true;
@@ -293,7 +310,10 @@ export class State extends Schema {
   addCube(sessionId: string, data: { center: mLatLng; radius: number }): boolean {
     const player = this._getPlayerBySessionId(sessionId);
     if (player === undefined) return false;
-    player.cubeDrawing = new CubeDrawing(new mLatLng(data.center.lat, data.center.lng), data.radius);
+    player.cubeDrawing = new CubeDrawing(
+      new mLatLng(data.center.lat, data.center.lng),
+      data.radius,
+    );
     return true;
   }
 
@@ -308,7 +328,10 @@ export class State extends Schema {
   addCircle(sessionId: string, data: { center: mLatLng; radius: number }): boolean {
     const player = this._getPlayerBySessionId(sessionId);
     if (player === undefined) return false;
-    player.circleDrawing = new CircleDrawing(new mLatLng(data.center.lat, data.center.lng), data.radius);
+    player.circleDrawing = new CircleDrawing(
+      new mLatLng(data.center.lat, data.center.lng),
+      data.radius,
+    );
     return true;
   }
 
@@ -320,10 +343,17 @@ export class State extends Schema {
   }
   //#endregion
   //#region Arc
-  addArc(sessionId: string, data: { center: mLatLng; toLocation: mLatLng; angle: number }): boolean {
+  addArc(
+    sessionId: string,
+    data: { center: mLatLng; toLocation: mLatLng; angle: number },
+  ): boolean {
     const player = this._getPlayerBySessionId(sessionId);
     if (player === undefined) return false;
-    player.arcDrawing = new ArcDrawing(new mLatLng(data.center.lat, data.center.lng), new mLatLng(data.toLocation.lat, data.toLocation.lng), data.angle);
+    player.arcDrawing = new ArcDrawing(
+      new mLatLng(data.center.lat, data.center.lng),
+      new mLatLng(data.toLocation.lat, data.toLocation.lng),
+      data.angle,
+    );
     return true;
   }
 
@@ -381,7 +411,7 @@ export class State extends Schema {
         enemy: new MapSchema<Enemy>({}),
         initiativeIndex: +(data.initiativeIndex ?? 0),
       },
-      data.id
+      data.id,
     );
     return false;
   }
@@ -431,7 +461,7 @@ export class State extends Schema {
       totalHealth: number;
       deathSaves: number;
       lifeSaves: number;
-    }
+    },
   ): boolean {
     if (this.map === undefined) return false;
     this.map.enemy.set(
@@ -447,7 +477,8 @@ export class State extends Schema {
         totalHealth: data.totalHealth,
         deathSaves: data.deathSaves,
         lifeSaves: data.lifeSaves,
-      })
+        isVisible: true,
+      }),
     );
     return true;
   }
@@ -456,7 +487,10 @@ export class State extends Schema {
     this.map.enemy.delete(data.id);
     return true;
   }
-  updateEnemyInformation(sessionId: string, data: { id: string; name: string; size: number; avatarUri: string; totalHealth: number }): boolean {
+  updateEnemyInformation(
+    sessionId: string,
+    data: { id: string; name: string; size: number; avatarUri: string; totalHealth: number },
+  ): boolean {
     if (this.map === undefined) return false;
     const enemy = this.map.enemy.get(data.id);
     if (enemy === undefined) return false;
@@ -534,6 +568,14 @@ export class State extends Schema {
 
     return true;
   }
+  toggleEnemyVisibility(sessionId: string, data: { clientToChange: string }): boolean {
+    if (this.map === undefined) return false;
+
+    const player = this.map.enemy.get(`${data.clientToChange}`);
+    if (player === undefined) return false;
+    player.isVisible = !player.isVisible;
+    return true;
+  }
 
   //#endregion
 
@@ -554,8 +596,8 @@ export class State extends Schema {
           return new mLatLng(points.lat, points.lng);
         }),
         data.isVisible,
-        +data.id
-      )
+        +data.id,
+      ),
     );
 
     return true;
@@ -608,7 +650,7 @@ export class State extends Schema {
         enemy: new MapSchema<Enemy>({}),
         initiativeIndex: initiativeIndex,
       },
-      +data.id!
+      +data.id!,
     );
   }
 
@@ -639,7 +681,8 @@ export class State extends Schema {
           totalHealth: +enemy.total_health,
           deathSaves: +enemy.death_saves,
           lifeSaves: +enemy.life_saves,
-        })
+          isVisible: enemy.is_visible,
+        }),
       );
     });
   }

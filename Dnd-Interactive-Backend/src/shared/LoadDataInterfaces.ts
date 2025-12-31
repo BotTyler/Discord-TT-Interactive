@@ -30,6 +30,7 @@ export interface LoadEnemyInterface {
   total_health: number;
   death_saves: number;
   life_saves: number;
+  is_visible: boolean;
 }
 
 export interface LoadFogInterface {

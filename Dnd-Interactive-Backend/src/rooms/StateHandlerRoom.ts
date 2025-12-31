@@ -700,6 +700,20 @@ export class StateHandlerRoom extends Room<State> {
         console.error(error);
       }
     });
+    this.onMessage("toggleEnemyVisibility", (client, data) => {
+      if (!this.authenticateHostAction(client.sessionId)) return;
+      try {
+        const inputList: ValidationInputType[] = [
+          { name: "clientToChange", type: "string", PostProcess: undefined },
+        ];
+
+        const validateParams: any = ValidateAllInputs(data, inputList);
+
+        this.state.toggleEnemyVisibility(client.sessionId, validateParams);
+      } catch (error) {
+        console.error(error);
+      }
+    });
 
     // EXPORT and IMPORT
 
@@ -1135,6 +1149,7 @@ delete from Public."Map" where player_id = 'temp';
           const totalHealth = e.totalHealth;
           const deathSaves = e.deathSaves;
           const lifeSaves = e.lifeSaves;
+          const isVisible = e.isVisible;
           EnemyMovementHistoryDB.getInstance().create(
             new EnemyMovementHistoryDAO(
               index,
@@ -1146,6 +1161,7 @@ delete from Public."Map" where player_id = 'temp';
               totalHealth,
               deathSaves,
               lifeSaves,
+              isVisible,
             ),
           );
         });
