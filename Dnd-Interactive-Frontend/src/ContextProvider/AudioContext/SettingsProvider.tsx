@@ -141,8 +141,6 @@ function AssetManager() {
 
   useEffect(() => {
     const handleImageListResponse = (val: any) => {
-      console.log("image response");
-      console.log(val);
       setImgList(val.map((obj: any) => {
         return obj.image_name;
       }));

@@ -15,6 +15,7 @@ export default function EnemyContextElement({ enemy, onValueChanged }: { enemy: 
   const [deathSaves, setDeathSaves] = React.useState<number>(enemy.deathSaves);
   const [lifeSaves, setLifeSaves] = React.useState<number>(enemy.lifeSaves);
   const [initiative, setInitiative] = React.useState<number>(enemy.initiative);
+  const [isVisible, setVisible] = React.useState<boolean>(enemy.isVisible);
 
   const authContext = useAuthenticatedContext();
   const emitFieldChangeEvent = (field: string, value: any) => {
@@ -56,6 +57,9 @@ export default function EnemyContextElement({ enemy, onValueChanged }: { enemy: 
   React.useEffect(() => {
     emitFieldChangeEvent("lifeSaves", lifeSaves);
   }, [lifeSaves]);
+  React.useEffect(() => {
+    emitFieldChangeEvent("isVisible", isVisible);
+  }, [isVisible]);
   React.useEffect(() => {
     // 2 events need to be provided for the initiative list
     const event = new CustomEvent(`EnemiesInitiativeChange`, {
@@ -100,6 +104,9 @@ export default function EnemyContextElement({ enemy, onValueChanged }: { enemy: 
     const initiativeListener = enemy.listen("initiative", (value: number) => {
       setInitiative(value);
     });
+    const isVisibleListener = enemy.listen("isVisible", (value: boolean): void => {
+      setVisible(value);
+    })
 
     return () => {
       idListener();
@@ -113,6 +120,7 @@ export default function EnemyContextElement({ enemy, onValueChanged }: { enemy: 
       deathSavesListener();
       lifeSavesListener();
       initiativeListener();
+      isVisibleListener();
     };
   }, [authContext.room, enemy]);
 

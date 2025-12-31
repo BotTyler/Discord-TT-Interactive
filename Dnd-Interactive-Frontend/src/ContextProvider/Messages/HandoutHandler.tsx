@@ -43,8 +43,6 @@ export default function HandoutHandler() {
     } else if (randomY < padding) {
       return randomY + padding;
     }
-    console.log(`${height}:${randomY}:${padding}`);
-
     return randomY;
   };
 

@@ -1,7 +1,7 @@
 import { Schema, type } from "@colyseus/schema";
 import { mLatLng } from "./PositionInterface";
 
-export type TEnemyOptions = Pick<Enemy, "id" | "avatarUri" | "name" | "position" | "size" | "initiative" | "health" | "totalHealth" | "lifeSaves" | "deathSaves">;
+export type TEnemyOptions = Pick<Enemy, "id" | "avatarUri" | "name" | "position" | "size" | "initiative" | "health" | "totalHealth" | "lifeSaves" | "deathSaves" | "isVisible">;
 
 export class Enemy extends Schema {
   @type("number")
@@ -38,8 +38,11 @@ export class Enemy extends Schema {
   @type("number")
   public lifeSaves: number;
 
+  @type("boolean")
+  public isVisible: boolean;
+
   // Init
-  constructor({ avatarUri, id, name, position, size, initiative, health, totalHealth, lifeSaves, deathSaves }: TEnemyOptions) {
+  constructor({ avatarUri, id, name, position, size, initiative, health, totalHealth, lifeSaves, deathSaves, isVisible }: TEnemyOptions) {
     super();
     this.id = id;
     this.avatarUri = avatarUri;
@@ -51,5 +54,6 @@ export class Enemy extends Schema {
     this.totalHealth = totalHealth ?? 1;
     this.lifeSaves = lifeSaves ?? 0;
     this.deathSaves = deathSaves ?? 0;
+    this.isVisible = isVisible ?? true;
   }
 }
