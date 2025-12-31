@@ -1,4 +1,3 @@
-import { UUID } from "crypto";
 import { LatLng, LeafletEvent, LeafletMouseEvent } from "leaflet";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Pane, useMapEvents } from "react-leaflet";
