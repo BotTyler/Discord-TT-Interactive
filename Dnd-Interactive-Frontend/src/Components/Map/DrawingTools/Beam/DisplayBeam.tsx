@@ -8,10 +8,6 @@ import { usePlayers } from "../../../../ContextProvider/PlayersContext/PlayersCo
 import { useAuthenticatedContext } from "../../../../ContextProvider/useAuthenticatedContext";
 import Beam from "./Beam";
 
-/**
- * React Component that displays all lines from a player that are registered with the server.
- * If looking to draw lines look into DrawLine.tsx component.
- */
 export default function DisplayBeam({ player }: { player: Player }) {
   const players = usePlayers();
   const toolContext = useGameToolContext();
@@ -21,11 +17,9 @@ export default function DisplayBeam({ player }: { player: Player }) {
   const [beam, setBeam] = useState<BeamDrawing | undefined>(players.getPlayer(player.userId)!.beamDrawing);
   const [playerSize, setPlayerSize] = useState<number>(mapContext.getIconHeight());
   const [color, setColor] = useState<string>(player.color);
-  console.log(beam);
 
   useEffect(() => {
     const setValue = (value: any) => {
-      console.log(value.detail.val);
       setBeam(value.detail.val);
     };
     const handleColorChange = (val: any) => {
