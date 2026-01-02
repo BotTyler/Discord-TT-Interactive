@@ -75,8 +75,8 @@ export default function HealthDeathTrackerElement({ item, isPlayer }: { item: Pl
                 totalHealth={totalHealth}
                 HealthClick={(val: number) => {
                   if (isPlayer) {
-                    const id = (item as Player).userId;
-                    authContext.room.send("playerHeal", { clientToChange: id, heal: val });
+                    // const id = (item as Player).userId;
+                    // authContext.room.send("playerHeal", { clientToChange: id, heal: val });
                   } else {
                     const id = (item as Enemy).id;
                     authContext.room.send("enemyHeal", { clientToChange: `${id}`, heal: val });
@@ -84,8 +84,8 @@ export default function HealthDeathTrackerElement({ item, isPlayer }: { item: Pl
                 }}
                 DamageClick={(val: number) => {
                   if (isPlayer) {
-                    const id = (item as Player).userId;
-                    authContext.room.send("playerDamage", { clientToChange: id, damage: val });
+                    // const id = (item as Player).userId;
+                    // authContext.room.send("playerDamage", { clientToChange: id, damage: val });
                   } else {
                     const id = (item as Enemy).id;
                     authContext.room.send("enemyDamage", { clientToChange: `${id}`, damage: val });
@@ -99,8 +99,8 @@ export default function HealthDeathTrackerElement({ item, isPlayer }: { item: Pl
                 id={isPlayer ? `Player-${(item as Player).userId}` : `Enemy-${(item as Enemy).id}`}
                 deathAdd={() => {
                   if (isPlayer) {
-                    const id = (item as Player).userId;
-                    authContext.room.send("playerDeathAdd", { clientToChange: id });
+                    // const id = (item as Player).userId;
+                    // authContext.room.send("playerDeathAdd", { clientToChange: id });
                   } else {
                     const id = (item as Enemy).id;
                     authContext.room.send("enemyDeathAdd", { clientToChange: `${id}` });
@@ -108,8 +108,8 @@ export default function HealthDeathTrackerElement({ item, isPlayer }: { item: Pl
                 }}
                 deathRemove={() => {
                   if (isPlayer) {
-                    const id = (item as Player).userId;
-                    authContext.room.send("playerDeathRemove", { clientToChange: id });
+                    // const id = (item as Player).userId;
+                    // authContext.room.send("playerDeathRemove", { clientToChange: id });
                   } else {
                     const id = (item as Enemy).id;
                     authContext.room.send("enemyDeathRemove", { clientToChange: `${id}` });
@@ -117,8 +117,8 @@ export default function HealthDeathTrackerElement({ item, isPlayer }: { item: Pl
                 }}
                 saveAdd={() => {
                   if (isPlayer) {
-                    const id = (item as Player).userId;
-                    authContext.room.send("playerSaveAdd", { clientToChange: id });
+                    // const id = (item as Player).userId;
+                    // authContext.room.send("playerSaveAdd", { clientToChange: id });
                   } else {
                     const id = (item as Enemy).id;
                     authContext.room.send("enemySaveAdd", { clientToChange: `${id}` });
@@ -126,8 +126,8 @@ export default function HealthDeathTrackerElement({ item, isPlayer }: { item: Pl
                 }}
                 saveRemove={() => {
                   if (isPlayer) {
-                    const id = (item as Player).userId;
-                    authContext.room.send("playerSaveRemove", { clientToChange: id });
+                    // const id = (item as Player).userId;
+                    // authContext.room.send("playerSaveRemove", { clientToChange: id });
                   } else {
                     const id = (item as Enemy).id;
                     authContext.room.send("enemySaveRemove", { clientToChange: `${id}` });

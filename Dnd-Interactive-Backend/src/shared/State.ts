@@ -151,67 +151,67 @@ export class State extends Schema {
     player.initiative = data.initiative;
     return true;
   }
-  changePlayerTotalHp(sessionId: string, data: { totalHp: number }): boolean {
-    const player = this._getPlayerBySessionId(sessionId);
-    if (player === undefined) return false;
-    player.totalHealth = data.totalHp;
-    return true;
-  }
-
-  changePlayerHp(sessionId: string, data: { hp: number }): boolean {
-    const player = this._getPlayerBySessionId(sessionId);
-    if (player === undefined) return false;
-    player.health = data.hp;
-    return true;
-  }
-
-  healPlayer(sessionId: string, data: { clientToChange: string; heal: number }): boolean {
-    const player = this._getPlayerByUserId(data.clientToChange);
-    if (player === undefined) return false;
-    player.health += Math.abs(data.heal);
-    if (player.health > player.totalHealth) {
-      player.health = player.totalHealth;
-    }
-    return true;
-  }
-  damagePlayer(sessionId: string, data: { clientToChange: string; damage: number }): boolean {
-    const player = this._getPlayerByUserId(data.clientToChange);
-    if (player === undefined) return false;
-    player.health -= Math.abs(data.damage);
-    if (player.health <= 0) {
-      player.health = 0;
-    }
-    return true;
-  }
-  addPlayerDeath(sessionId: string, data: { clientToChange: string }): boolean {
-    const player = this._getPlayerByUserId(data.clientToChange);
-    if (player === undefined) return false;
-    player.deathSaves += 1;
-    return true;
-  }
-  removePlayerDeath(sessionId: string, data: { clientToChange: string }): boolean {
-    const player = this._getPlayerByUserId(data.clientToChange);
-    if (player === undefined) return false;
-    player.deathSaves -= 1;
-    return true;
-  }
-  addPlayerSave(sessionId: string, data: { clientToChange: string }): boolean {
-    const player = this._getPlayerByUserId(data.clientToChange);
-    if (player === undefined) return false;
-    player.lifeSaves += 1;
-    if (player.lifeSaves >= 3) {
-      player.lifeSaves = 0;
-      player.deathSaves = 0;
-      player.health = 1;
-    }
-    return true;
-  }
-  removePlayerSave(sessionId: string, data: { clientToChange: string }): boolean {
-    const player = this._getPlayerByUserId(data.clientToChange);
-    if (player === undefined) return false;
-    player.lifeSaves -= 1;
-    return true;
-  }
+  // changePlayerTotalHp(sessionId: string, data: { totalHp: number }): boolean {
+  //   const player = this._getPlayerBySessionId(sessionId);
+  //   if (player === undefined) return false;
+  //   player.totalHealth = data.totalHp;
+  //   return true;
+  // }
+  //
+  // changePlayerHp(sessionId: string, data: { hp: number }): boolean {
+  //   const player = this._getPlayerBySessionId(sessionId);
+  //   if (player === undefined) return false;
+  //   player.health = data.hp;
+  //   return true;
+  // }
+  //
+  // healPlayer(sessionId: string, data: { clientToChange: string; heal: number }): boolean {
+  //   const player = this._getPlayerByUserId(data.clientToChange);
+  //   if (player === undefined) return false;
+  //   player.health += Math.abs(data.heal);
+  //   if (player.health > player.totalHealth) {
+  //     player.health = player.totalHealth;
+  //   }
+  //   return true;
+  // }
+  // damagePlayer(sessionId: string, data: { clientToChange: string; damage: number }): boolean {
+  //   const player = this._getPlayerByUserId(data.clientToChange);
+  //   if (player === undefined) return false;
+  //   player.health -= Math.abs(data.damage);
+  //   if (player.health <= 0) {
+  //     player.health = 0;
+  //   }
+  //   return true;
+  // }
+  // addPlayerDeath(sessionId: string, data: { clientToChange: string }): boolean {
+  //   const player = this._getPlayerByUserId(data.clientToChange);
+  //   if (player === undefined) return false;
+  //   player.deathSaves += 1;
+  //   return true;
+  // }
+  // removePlayerDeath(sessionId: string, data: { clientToChange: string }): boolean {
+  //   const player = this._getPlayerByUserId(data.clientToChange);
+  //   if (player === undefined) return false;
+  //   player.deathSaves -= 1;
+  //   return true;
+  // }
+  // addPlayerSave(sessionId: string, data: { clientToChange: string }): boolean {
+  //   const player = this._getPlayerByUserId(data.clientToChange);
+  //   if (player === undefined) return false;
+  //   player.lifeSaves += 1;
+  //   if (player.lifeSaves >= 3) {
+  //     player.lifeSaves = 0;
+  //     player.deathSaves = 0;
+  //     player.health = 1;
+  //   }
+  //   return true;
+  // }
+  // removePlayerSave(sessionId: string, data: { clientToChange: string }): boolean {
+  //   const player = this._getPlayerByUserId(data.clientToChange);
+  //   if (player === undefined) return false;
+  //   player.lifeSaves -= 1;
+  //   return true;
+  // }
 
   //#endregion
 
@@ -535,9 +535,6 @@ export class State extends Schema {
     const player = this.map.enemy.get(`${data.clientToChange}`);
     if (player === undefined) return false;
     player.health += Math.abs(data.heal);
-    if (player.health > player.totalHealth) {
-      player.health = player.totalHealth;
-    }
 
     return true;
   }
