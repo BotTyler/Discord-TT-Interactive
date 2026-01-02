@@ -11,7 +11,7 @@ import {
   LoadMapInterface,
   LoadPlayerInterface,
 } from "./LoadDataInterfaces";
-import { ArcDrawing, CircleDrawing, CubeDrawing } from "./DrawingInterface";
+import { ArcDrawing, BeamDrawing, CircleDrawing, CubeDrawing } from "./DrawingInterface";
 
 export interface IState {
   roomName: string;
@@ -361,6 +361,26 @@ export class State extends Schema {
     const player = this._getPlayerBySessionId(sessionId);
     if (player === undefined) return false;
     player.arcDrawing = undefined;
+    return true;
+  }
+  //#endregion
+  //#region Beam
+  addBeam(sessionId: string, data: { start: mLatLng; end: mLatLng; width: number }): boolean {
+    const player = this._getPlayerBySessionId(sessionId);
+    if (player === undefined) return false;
+
+    player.beamDrawing = new BeamDrawing(
+      new mLatLng(data.start.lat, data.start.lng),
+      new mLatLng(data.end.lat, data.end.lng),
+      data.width,
+    );
+    return true;
+  }
+
+  removeBeam(sessionId: string): boolean {
+    const player = this._getPlayerBySessionId(sessionId);
+    if (player === undefined) return false;
+    player.beamDrawing = undefined;
     return true;
   }
   //#endregion

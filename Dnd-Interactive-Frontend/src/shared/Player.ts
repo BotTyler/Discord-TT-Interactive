@@ -1,7 +1,26 @@
 import { ArraySchema, Schema, type } from "@colyseus/schema";
 import { mLatLng } from "./PositionInterface";
-import { ArcDrawing, CircleDrawing, CubeDrawing } from "./DrawingInterface";
-export type TPlayerOptions = Pick<Player, "name" | "sessionId" | "userId" | "avatarUri" | "position" | "color" | "drawings" | "initiative" | "circleDrawing" | "cubeDrawing" | "arcDrawing" | "health" | "totalHealth" | "lifeSaves" | "deathSaves" | "isConnected">;
+import { ArcDrawing, BeamDrawing, CircleDrawing, CubeDrawing } from "./DrawingInterface";
+export type TPlayerOptions = Pick<
+  Player,
+  | "name"
+  | "sessionId"
+  | "userId"
+  | "avatarUri"
+  | "position"
+  | "color"
+  | "drawings"
+  | "initiative"
+  | "circleDrawing"
+  | "cubeDrawing"
+  | "arcDrawing"
+  | "beamDrawing"
+  | "health"
+  | "totalHealth"
+  | "lifeSaves"
+  | "deathSaves"
+  | "isConnected"
+>;
 
 export class Player extends Schema {
   @type("string")
@@ -46,11 +65,15 @@ export class Player extends Schema {
   @type(ArcDrawing)
   public arcDrawing: ArcDrawing | undefined;
 
+  @type(BeamDrawing)
+  public beamDrawing: BeamDrawing | undefined;
+
   @type("number")
   public initiative: number;
 
   @type("number")
   public health: number;
+
   @type("number")
   public totalHealth: number;
 
@@ -60,7 +83,25 @@ export class Player extends Schema {
   @type("number")
   public deathSaves: number;
 
-  constructor({ name, userId, avatarUri, sessionId, position, color, drawings, initiative, circleDrawing, cubeDrawing, arcDrawing, health, totalHealth, lifeSaves, deathSaves, isConnected }: TPlayerOptions) {
+  constructor({
+    name,
+    userId,
+    avatarUri,
+    sessionId,
+    position,
+    color,
+    drawings,
+    initiative,
+    circleDrawing,
+    cubeDrawing,
+    arcDrawing,
+    beamDrawing,
+    health,
+    totalHealth,
+    lifeSaves,
+    deathSaves,
+    isConnected,
+  }: TPlayerOptions) {
     super();
     this.userId = userId;
     this.avatarUri = avatarUri;
@@ -75,6 +116,7 @@ export class Player extends Schema {
     this.circleDrawing = circleDrawing;
     this.cubeDrawing = cubeDrawing;
     this.arcDrawing = arcDrawing;
+    this.beamDrawing = beamDrawing;
     this.health = health ?? 1;
     this.totalHealth = totalHealth ?? 1;
     this.lifeSaves = lifeSaves ?? 0;

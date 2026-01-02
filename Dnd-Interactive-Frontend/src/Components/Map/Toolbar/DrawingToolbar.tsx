@@ -41,7 +41,16 @@ export default function DrawingToolbar() {
         >
           <i className="bi bi-bounding-box-circles fs-3"></i>
         </button>
+        <button
+          type="button"
+          className={`btn btn-secondary ${toolContext.curTool === DrawingTools.BEAM ? "active" : ""}`}
+          onClick={() => {
+            toolContext.setTool(DrawingTools.BEAM);
+          }}
+        >
+          L
+        </button>
       </div>
-    </div>
+    </div >
   );
 }
