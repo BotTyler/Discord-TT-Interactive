@@ -14,6 +14,7 @@ import FogCreation from "./Fog/FogCreation";
 import ShowFog from "./Fog/ShowFog";
 import PlayerMarkerList from "./PlayableMarkers/Player/PlayerMarkerList";
 import GridDisplay from "./Grid/GridDisplay";
+import DrawBeam from "./DrawingTools/Beam/DrawBeam";
 
 /**
  * Component responsible for rendering an interactive map. This will contain everything necessary for an interactive map.
@@ -70,10 +71,10 @@ export default function InteractiveMap({ map }: { map: MapData }) {
               [nMap.height, nMap.width],
             ]}
           ></ImageOverlay>
-          <Pane name="Grid" style={{zIndex: 400}}>
+          <Pane name="Grid" style={{ zIndex: 400 }}>
             <GridDisplay />
           </Pane>
-          <Pane name="Player" style={{zIndex: 500}}>
+          <Pane name="Player" style={{ zIndex: 500 }}>
             <PlayerMarkerList />
           </Pane>
           <Pane name="Enemy" style={{ zIndex: enemyZindex() }}>
@@ -83,6 +84,7 @@ export default function InteractiveMap({ map }: { map: MapData }) {
           <DrawCube />
           <DrawCircle />
           <DrawArc />
+          <DrawBeam />
           <Pane name="fog" style={{ zIndex: 600 }}>
             <ShowFog />
           </Pane>

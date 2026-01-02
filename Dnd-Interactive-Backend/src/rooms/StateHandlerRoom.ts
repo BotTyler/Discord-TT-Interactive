@@ -1,8 +1,5 @@
 import { Client, Room } from "colyseus";
 import * as crypto from "crypto";
-import { ExportDataInterface } from "../shared/ExportDataInterface";
-import { GameStateEnum, IState, MapMovementType, State } from "../shared/State";
-import { LoadCampaign, LoadImage, LoadSaveHistory } from "../shared/LoadDataInterfaces";
 import { AudioCatalogDAO, AudioCatalogDB } from "../Database/Tables/AudioCatalogDB";
 import { EnemyDAO, EnemyDB } from "../Database/Tables/EnemyDB";
 import {
@@ -20,6 +17,9 @@ import {
   PlayerMovementHistoryDB,
 } from "../Database/Tables/PlayerMovementHistoryDB";
 import { SaveHistoryDAO, SaveHistoryDB } from "../Database/Tables/SaveHistoryDB";
+import { ExportDataInterface } from "../shared/ExportDataInterface";
+import { LoadCampaign, LoadImage, LoadSaveHistory } from "../shared/LoadDataInterfaces";
+import { GameStateEnum, IState, MapMovementType, State } from "../shared/State";
 import { sanitize, ValidateAllInputs, ValidationInputType } from "../Util/Utils";
 
 export class StateHandlerRoom extends Room<State> {
@@ -476,6 +476,26 @@ export class StateHandlerRoom extends Room<State> {
 
     this.onMessage("removeArc", (client, _data) => {
       this.state.removeArc(client.sessionId);
+    });
+
+    // Beam Drawings
+    this.onMessage("addBeam", (client, data) => {
+      try {
+        const inputList: ValidationInputType[] = [
+          { name: "start", type: "object", PostProcess: undefined },
+          { name: "end", type: "object", PostProcess: undefined },
+          { name: "width", type: "number", PostProcess: undefined },
+        ];
+
+        const validateParams: any = ValidateAllInputs(data, inputList);
+        this.state.addBeam(client.sessionId, validateParams);
+      } catch (error) {
+        console.error(error);
+      }
+    });
+
+    this.onMessage("removeBeam", (client, _data) => {
+      this.state.removeCircle(client.sessionId);
     });
 
     // FOG

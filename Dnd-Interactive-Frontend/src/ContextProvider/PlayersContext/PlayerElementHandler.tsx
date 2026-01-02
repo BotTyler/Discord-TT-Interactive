@@ -1,4 +1,4 @@
-import { ArcDrawing, CircleDrawing, CubeDrawing } from "../../../src/shared/DrawingInterface";
+import { ArcDrawing, BeamDrawing, CircleDrawing, CubeDrawing } from "../../../src/shared/DrawingInterface";
 import { mLatLng } from "../../../src/shared/PositionInterface";
 import { Player } from "../../../src/shared/Player";
 import React from "react";
@@ -23,6 +23,7 @@ export default function PlayerElementHandler({ player, onValueChanged }: { playe
   const [cubeDrawings, setCubeDrawings] = React.useState<CubeDrawing | undefined>(player.cubeDrawing);
   const [circleDrawings, setCircleDrawings] = React.useState<CircleDrawing | undefined>(player.circleDrawing);
   const [arcDrawings, setArcDrawings] = React.useState<ArcDrawing | undefined>(player.arcDrawing);
+  const [beamDrawing, setBeamDrawing] = React.useState<BeamDrawing | undefined>(player.beamDrawing);
   const [isConnected, setConnected] = React.useState<boolean>(player.isConnected);
   const authContext = useAuthenticatedContext();
 
@@ -81,6 +82,9 @@ export default function PlayerElementHandler({ player, onValueChanged }: { playe
   React.useEffect(() => {
     emitFieldChangeEvent("arcDrawing", arcDrawings);
   }, [arcDrawings]);
+  React.useEffect(() => {
+    emitFieldChangeEvent("beamDrawing", beamDrawing);
+  }, [beamDrawing]);
   React.useEffect(() => {
     emitFieldChangeEvent("health", health);
   }, [health]);
@@ -150,6 +154,9 @@ export default function PlayerElementHandler({ player, onValueChanged }: { playe
     const arcDrawingListener = player.listen("arcDrawing", (value: ArcDrawing | undefined) => {
       setArcDrawings(value ?? undefined);
     });
+    const beamDrawingListener = player.listen("beamDrawing", (value: BeamDrawing | undefined) => {
+      setBeamDrawing(value ?? undefined);
+    });
     const connectionListener = player.listen("isConnected", (val: boolean) => {
       setConnected(val);
     });
@@ -173,6 +180,7 @@ export default function PlayerElementHandler({ player, onValueChanged }: { playe
       cubeDrawingListener();
       circleDrawingListener();
       arcDrawingListener();
+      beamDrawingListener();
       connectionListener;
     };
   }, [authContext.room, player]);

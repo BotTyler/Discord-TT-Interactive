@@ -12,6 +12,7 @@ import { LatLng } from "leaflet";
 import { useAuthenticatedContext } from "../../../../ContextProvider/useAuthenticatedContext";
 import FreeMovementController from "../MovementControllers/FreeMovementController";
 import useDebounced from "../../../../Util/useDebounced";
+import DisplayBeam from "../../DrawingTools/Beam/DisplayBeam";
 
 export default function PlayerMarkerList() {
   const authContext = useAuthenticatedContext();
@@ -57,24 +58,24 @@ export default function PlayerMarkerList() {
     //   break;
     // }
   }, 100)
-    
+
   const getControllerElement = (player: Player): any => {
     switch (movementType) {
       case "free":
-        return <FreeMovementController isPlayer={true} controllableUser={player} 
-        onPositionChange={(toPosition: LatLng) => { debouncePositionChange(player, toPosition) }} 
-        onGhostPositionChange={(toPosition: LatLng[]) => { debounceGhostPositionChange(player, toPosition) }} />;
+        return <FreeMovementController isPlayer={true} controllableUser={player}
+          onPositionChange={(toPosition: LatLng) => { debouncePositionChange(player, toPosition) }}
+          onGhostPositionChange={(toPosition: LatLng[]) => { debounceGhostPositionChange(player, toPosition) }} />;
       case "grid":
-        return <GridMovementController isPlayer={true} controllableUser={player} 
-        onPositionChange={(toPosition: LatLng) => { debouncePositionChange(player, toPosition) }} 
-        onGhostPositionChange={(toPosition: LatLng[]) => { debounceGhostPositionChange(player, toPosition) }} />;
+        return <GridMovementController isPlayer={true} controllableUser={player}
+          onPositionChange={(toPosition: LatLng) => { debouncePositionChange(player, toPosition) }}
+          onGhostPositionChange={(toPosition: LatLng[]) => { debounceGhostPositionChange(player, toPosition) }} />;
       default:
-        return <FreeMovementController isPlayer={true} controllableUser={player} 
-        onPositionChange={(toPosition: LatLng) => { debouncePositionChange(player, toPosition) }} 
-        onGhostPositionChange={(toPosition: LatLng[]) => { debounceGhostPositionChange(player, toPosition) }} />;
+        return <FreeMovementController isPlayer={true} controllableUser={player}
+          onPositionChange={(toPosition: LatLng) => { debouncePositionChange(player, toPosition) }}
+          onGhostPositionChange={(toPosition: LatLng[]) => { debounceGhostPositionChange(player, toPosition) }} />;
     }
   }
-  
+
 
   return (
     <>
@@ -85,6 +86,7 @@ export default function PlayerMarkerList() {
             <DisplayCube player={player} />
             <DisplayCircle player={player} />
             <DisplayArc player={player} />
+            <DisplayBeam player={player} />
             {getControllerElement(player)}
           </div>
         );

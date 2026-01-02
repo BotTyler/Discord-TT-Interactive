@@ -46,3 +46,21 @@ export class ArcDrawing extends Schema {
     this.angle = angle;
   }
 }
+
+export class BeamDrawing extends Schema {
+  @type(mLatLng)
+  start: mLatLng;
+
+  @type(mLatLng)
+  end: mLatLng;
+
+  @type("number")
+  width: number;
+
+  constructor(start: mLatLng, end: mLatLng, width: number) {
+    super();
+    this.start = start;
+    this.end = end;
+    this.width = width;
+  }
+}
