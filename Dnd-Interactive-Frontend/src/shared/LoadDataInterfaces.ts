@@ -42,6 +42,7 @@ export interface LoadSaveHistory {
   id: number;
   date: Date;
   map: number;
+  player_size: number;
 }
 
 export interface LoadImage {

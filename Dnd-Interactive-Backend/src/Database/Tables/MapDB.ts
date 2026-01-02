@@ -6,25 +6,23 @@ import { DAO, DatabaseBase } from "../Interface/DatabaseObjectInterface";
 export class MapDAO extends DAO {
   public readonly id?: number;
   public readonly image_id: number; // reference to image catalog
-  public readonly icon_height: number;
   public readonly name: string;
   public readonly player_id: string;
 
-  constructor(image_id: number, icon_height: number, name: string, player_id: string, id?: number) {
+  constructor(image_id: number, name: string, player_id: string, id?: number) {
     super();
     this.id = id;
     this.image_id = image_id;
-    this.icon_height = icon_height;
     this.name = name;
     this.player_id = player_id;
   }
 
   getKeys(): string[] {
-    return ["image_id", "icon_height", "name", "player_id"];
+    return ["image_id", "name", "player_id"];
     // return ["id", "map_image", "width", "height", "icon_height"];
   }
   getValues(): any[] {
-    return [this.image_id, this.icon_height, this.name, this.player_id];
+    return [this.image_id, this.name, this.player_id];
     // return [this.id, this.map_image, this.width, this.height, this.icon_height];
   }
   getIdName(): string {

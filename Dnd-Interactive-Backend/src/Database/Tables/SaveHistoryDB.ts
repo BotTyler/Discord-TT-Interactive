@@ -7,20 +7,22 @@ export class SaveHistoryDAO extends DAO {
   public readonly date: Date;
   public readonly map: number;
   public readonly player_id: string;
+  public readonly player_size: number;
 
-  constructor(date: Date, map: number, player_id: string, id?: number) {
+  constructor(date: Date, map: number, player_id: string, player_size: number, id?: number) {
     super();
     this.id = id;
     this.date = date;
     this.player_id = player_id;
     this.map = map;
+    this.player_size = player_size;
   }
 
   getKeys(): string[] {
-    return ["date", "map", "player_id"];
+    return ["date", "map", "player_id", "player_size"];
   }
   getValues(): any[] {
-    return [this.date.toISOString(), this.map, this.player_id];
+    return [this.date.toISOString(), this.map, this.player_id, this.player_size];
   }
   getIdName(): string {
     return "id";
