@@ -2,7 +2,6 @@ export interface LoadMapInterface {
   id: number;
   width: number;
   height: number;
-  icon_height: number;
   player_id: string;
   image_name: string;
 }
@@ -43,6 +42,7 @@ export interface LoadSaveHistory {
   id: number;
   date: Date;
   map: number;
+  player_size: number;
 }
 
 export interface LoadImage {

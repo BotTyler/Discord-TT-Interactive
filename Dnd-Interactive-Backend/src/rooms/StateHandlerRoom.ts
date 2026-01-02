@@ -756,14 +756,7 @@ export class StateHandlerRoom extends Room<State> {
           .then((value) => {
             if (value === undefined) return;
             MapDB.getInstance()
-              .create(
-                new MapDAO(
-                  value.img_catalog_id!,
-                  validateParams.iconHeight,
-                  validateParams.name,
-                  player.userId,
-                ),
-              )
+              .create(new MapDAO(value.img_catalog_id!, validateParams.name, player.userId))
               .then((index) => {
                 const mData: any = {
                   id: index,
@@ -775,7 +768,7 @@ export class StateHandlerRoom extends Room<State> {
                 };
                 // create atleast one save for the future
                 SaveHistoryDB.getInstance().create(
-                  new SaveHistoryDAO(new Date(), mData.id, player.userId),
+                  new SaveHistoryDAO(new Date(), mData.id, player.userId, mData.iconHeight),
                 );
                 this.state.setMap(client.sessionId, mData);
                 this.state.gameState = GameStateEnum.HOSTPLAY;
@@ -842,7 +835,7 @@ export class StateHandlerRoom extends Room<State> {
         .selectById(_data.user_id)
         .then((value: SaveHistoryDAO[] | undefined) => {
           const sendData: LoadSaveHistory[] | undefined = value?.map((val) => {
-            return { id: val.id ?? -1, date: val.date, map: val.map };
+            return { id: val.id ?? -1, date: val.date, map: val.map, player_size: val.player_size };
           });
           client.send("getSavesResult", sendData ?? []);
         });
@@ -889,7 +882,12 @@ delete from Public."Map" where player_id = 'temp';
           .then((value: SaveHistoryDAO[] | undefined) => {
             const sendData: LoadSaveHistory[] =
               value?.map((val) => {
-                return { id: val.id ?? -1, date: val.date, map: val.map };
+                return {
+                  id: val.id ?? -1,
+                  date: val.date,
+                  map: val.map,
+                  player_size: val.player_size,
+                };
               }) ?? [];
 
             client.send("CampaignVersionHistoryResult", sendData);
@@ -937,6 +935,7 @@ delete from Public."Map" where player_id = 'temp';
         const inputList: ValidationInputType[] = [
           { name: "map_id", type: "number", PostProcess: undefined },
           { name: "history_id", type: "number", PostProcess: undefined },
+          { name: "player_size", type: "number", PostProcess: undefined },
         ];
 
         const validateParams: any = ValidateAllInputs(data, inputList);
@@ -968,8 +967,11 @@ delete from Public."Map" where player_id = 'temp';
         if (savedHistoryData[0] === undefined) return; // if the map is not present the rest of the data is useless
 
         const initData = savedHistoryData[4]![0] ?? { history_id: -1, initiative_index: 0 };
-        this.state.loadMapData(savedHistoryData[0], +initData.initiative_index);
-
+        this.state.loadMapData(
+          savedHistoryData[0],
+          +initData.initiative_index,
+          +validateParams.player_size,
+        );
         this.state.loadPlayerData(savedHistoryData[1] ?? []);
         this.state.loadEnemyData(savedHistoryData[2] ?? []);
         this.state.loadFogData(savedHistoryData[3] ?? []);
@@ -1131,7 +1133,7 @@ delete from Public."Map" where player_id = 'temp';
 
     // TODO: This should be transformed into a transaction on the database side for now this is ok for test purposes.
     SaveHistoryDB.getInstance()
-      .create(new SaveHistoryDAO(new Date(), data.map.id!, host_id))
+      .create(new SaveHistoryDAO(new Date(), data.map.id!, host_id, data.map.iconHeight))
       .then((index) => {
         if (index === undefined) return; // required data is not inserted in the database we need to leave.
         //we have the save history index we now need to insert into all other databases

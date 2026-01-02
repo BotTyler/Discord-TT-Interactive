@@ -189,7 +189,7 @@ export function VersionHistory({ campaign }: { campaign: LoadCampaign | undefine
 
                   // setIsNewMapSelected(false)
 
-                  authContext.room.send("loadMap", { history_id: +versionHistoryList[index].id, map_id: +versionHistoryList[index].map });
+                  authContext.room.send("loadMap", { history_id: +versionHistoryList[index].id, map_id: +versionHistoryList[index].map, player_size: +versionHistoryList[index].player_size });
                 }}
               >
                 {val.date.toLocaleString()}

@@ -658,14 +658,14 @@ export class State extends Schema {
   }
 
   // the below load functions should only be called with the data from the database
-  loadMapData(map: LoadMapInterface[], initiativeIndex: number) {
+  loadMapData(map: LoadMapInterface[], initiativeIndex: number, player_size: number) {
     const data = map[0]; // using the first since there should only be one element
     this.map = new MapData(
       {
         mapBase64: data.image_name,
         width: +data.width,
         height: +data.height,
-        iconHeight: +data.icon_height,
+        iconHeight: player_size,
         fogs: new MapSchema<MapFogPolygon>({}),
         enemy: new MapSchema<Enemy>({}),
         initiativeIndex: initiativeIndex,
