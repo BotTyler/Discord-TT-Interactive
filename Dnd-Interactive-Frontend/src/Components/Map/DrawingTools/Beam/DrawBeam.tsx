@@ -5,6 +5,7 @@ import { DrawingTools, useDrawingGameToolContext } from "../../../../ContextProv
 import { useGameState } from "../../../../ContextProvider/GameStateContext/GameStateProvider";
 import { useAuthenticatedContext } from "../../../../ContextProvider/useAuthenticatedContext";
 import Beam from "./Beam";
+import DistanceLine from "../../PlayableMarkers/DistanceLine";
 
 export default function DrawBeam() {
   const authContext = useAuthenticatedContext();
@@ -63,6 +64,7 @@ export default function DrawBeam() {
   return drawingReady() ? (
     <>
       <Beam start={start!} end={end!} width={5} playerSize={playerSize} color="#fff" key={`CurrentBeam`} removeCallback={() => { }} />
+      <DistanceLine start={start!} end={end!} size={playerSize} color={"red"} key={`CurrentCircleCreationDistanceLine`} />
     </>
   ) : (
     ""
