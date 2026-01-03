@@ -50,6 +50,8 @@ export default function GridMovementController({ controllableUser, isPlayer, onP
     const xDiff: number = position.lng - centerLng;
     const yDiff: number = position.lat - centerLat;
 
+    // Calculate the quadrant the mouse is in compared to the estimated center.
+    // This will be used to assist in estimating the direction the user is heading in.
     const offsetXMult: 1 | -1 = xDiff >= 0 ? 1 : -1;
     const offsetYMult: 1 | -1 = yDiff >= 0 ? 1 : -1;
 
