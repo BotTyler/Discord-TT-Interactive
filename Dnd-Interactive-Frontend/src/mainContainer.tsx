@@ -13,7 +13,7 @@ import { ErrorHandlerProvider } from "./ErrorHandlerContext";
 
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
 root.render(
-  <div className="w-100 h-100" style={{ fontSize: "12px" }}>
+  <div className="w-100 h-100 fs-6">
     {/* <React.StrictMode> */}
     <ErrorBoundary
       fallback={<div>Something went wrong</div>}

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useAuthenticatedContext } from "../../../../ContextProvider/useAuthenticatedContext";
 import DeathComponent from "./DeathComponent";
 import HealthComponent from "./HealthComponent";
+import { ProgressDiv } from "../../../ProgressBar/ProgressBarComponent";
 
 export default function HealthDeathTrackerElement({ item, isPlayer }: { item: Player | Enemy; isPlayer: boolean }) {
   const [name, setName] = useState<string>(item.name);
@@ -54,88 +55,85 @@ export default function HealthDeathTrackerElement({ item, isPlayer }: { item: Pl
   }, []);
 
   return (
-    <div>
-      {/* Name */}
-      <div className="w-100 text-center">
-        <p className="m-0">{name}</p>
+    <div className="">
+      <div className="w-100" style={{ height: "5px" }}>
+        <ProgressDiv current={health} max={totalHealth} />
       </div>
-      <div className="row align-items-center text-center justify-content-center">
+      <div className="d-flex">
         {/* Image */}
-        <div className="col-2">
-          <img className="img-fluid" src={`${isPlayer ? "" : `/colyseus/getImage/`}${avatarUri}`} />
+        <div className="" style={{ width: "100px" }}>
+          <img className="w-100 h-100" src={`${isPlayer ? "" : `/colyseus/getImage/`}${avatarUri}`} />
         </div>
 
         {/* content */}
-        <div className="col-10">
-          {/* Health and Death Saving throw container */}
-          <div className="w-100">
-            {health > 0 ? (
-              <HealthComponent
-                health={health}
-                totalHealth={totalHealth}
-                HealthClick={(val: number) => {
-                  if (isPlayer) {
-                    const id = (item as Player).userId;
-                    authContext.room.send("playerHeal", { clientToChange: id, heal: val });
-                  } else {
-                    const id = (item as Enemy).id;
-                    authContext.room.send("enemyHeal", { clientToChange: `${id}`, heal: val });
-                  }
-                }}
-                DamageClick={(val: number) => {
-                  if (isPlayer) {
-                    const id = (item as Player).userId;
-                    authContext.room.send("playerDamage", { clientToChange: id, damage: val });
-                  } else {
-                    const id = (item as Enemy).id;
-                    authContext.room.send("enemyDamage", { clientToChange: `${id}`, damage: val });
-                  }
-                }}
-              />
-            ) : (
-              <DeathComponent
-                deathNumber={deathSaves}
-                saveNumber={lifeSaves}
-                id={isPlayer ? `Player-${(item as Player).userId}` : `Enemy-${(item as Enemy).id}`}
-                deathAdd={() => {
-                  if (isPlayer) {
-                    const id = (item as Player).userId;
-                    authContext.room.send("playerDeathAdd", { clientToChange: id });
-                  } else {
-                    const id = (item as Enemy).id;
-                    authContext.room.send("enemyDeathAdd", { clientToChange: `${id}` });
-                  }
-                }}
-                deathRemove={() => {
-                  if (isPlayer) {
-                    const id = (item as Player).userId;
-                    authContext.room.send("playerDeathRemove", { clientToChange: id });
-                  } else {
-                    const id = (item as Enemy).id;
-                    authContext.room.send("enemyDeathRemove", { clientToChange: `${id}` });
-                  }
-                }}
-                saveAdd={() => {
-                  if (isPlayer) {
-                    const id = (item as Player).userId;
-                    authContext.room.send("playerSaveAdd", { clientToChange: id });
-                  } else {
-                    const id = (item as Enemy).id;
-                    authContext.room.send("enemySaveAdd", { clientToChange: `${id}` });
-                  }
-                }}
-                saveRemove={() => {
-                  if (isPlayer) {
-                    const id = (item as Player).userId;
-                    authContext.room.send("playerSaveRemove", { clientToChange: id });
-                  } else {
-                    const id = (item as Enemy).id;
-                    authContext.room.send("enemySaveRemove", { clientToChange: `${id}` });
-                  }
-                }}
-              />
-            )}
-          </div>
+        <div className="flex-grow-1">
+          {health > 0 ? (
+            <HealthComponent
+              name={name}
+              health={health}
+              totalHealth={totalHealth}
+              HealthClick={(val: number) => {
+                if (isPlayer) {
+                  // const id = (item as Player).userId;
+                  // authContext.room.send("playerHeal", { clientToChange: id, heal: val });
+                } else {
+                  const id = (item as Enemy).id;
+                  authContext.room.send("enemyHeal", { clientToChange: `${id}`, heal: val });
+                }
+              }}
+              DamageClick={(val: number) => {
+                if (isPlayer) {
+                  // const id = (item as Player).userId;
+                  // authContext.room.send("playerDamage", { clientToChange: id, damage: val });
+                } else {
+                  const id = (item as Enemy).id;
+                  authContext.room.send("enemyDamage", { clientToChange: `${id}`, damage: val });
+                }
+              }}
+            />
+          ) : (
+            <DeathComponent
+              deathNumber={deathSaves}
+              saveNumber={lifeSaves}
+              id={isPlayer ? `Player-${(item as Player).userId}` : `Enemy-${(item as Enemy).id}`}
+              deathAdd={() => {
+                if (isPlayer) {
+                  // const id = (item as Player).userId;
+                  // authContext.room.send("playerDeathAdd", { clientToChange: id });
+                } else {
+                  const id = (item as Enemy).id;
+                  authContext.room.send("enemyDeathAdd", { clientToChange: `${id}` });
+                }
+              }}
+              deathRemove={() => {
+                if (isPlayer) {
+                  // const id = (item as Player).userId;
+                  // authContext.room.send("playerDeathRemove", { clientToChange: id });
+                } else {
+                  const id = (item as Enemy).id;
+                  authContext.room.send("enemyDeathRemove", { clientToChange: `${id}` });
+                }
+              }}
+              saveAdd={() => {
+                if (isPlayer) {
+                  // const id = (item as Player).userId;
+                  // authContext.room.send("playerSaveAdd", { clientToChange: id });
+                } else {
+                  const id = (item as Enemy).id;
+                  authContext.room.send("enemySaveAdd", { clientToChange: `${id}` });
+                }
+              }}
+              saveRemove={() => {
+                if (isPlayer) {
+                  // const id = (item as Player).userId;
+                  // authContext.room.send("playerSaveRemove", { clientToChange: id });
+                } else {
+                  const id = (item as Enemy).id;
+                  authContext.room.send("enemySaveRemove", { clientToChange: `${id}` });
+                }
+              }}
+            />
+          )}
         </div>
       </div>
     </div>

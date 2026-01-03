@@ -240,115 +240,115 @@ export class StateHandlerRoom extends Room<State> {
         console.error(error);
       }
     });
-    this.onMessage("changePlayerTotalHp", (client, data) => {
-      try {
-        const inputList: ValidationInputType[] = [
-          { name: "totalHp", type: "number", PostProcess: undefined },
-        ];
-
-        const validateParams: any = ValidateAllInputs(data, inputList);
-
-        // do not need to soft auth since this method should be used to change the player that is requesting.
-        this.state.changePlayerTotalHp(client.sessionId, validateParams);
-      } catch (error) {
-        console.error(error);
-      }
-    });
-    this.onMessage("changePlayerHp", (client, data) => {
-      try {
-        const inputList: ValidationInputType[] = [
-          { name: "hp", type: "number", PostProcess: undefined },
-        ];
-
-        const validateParams: any = ValidateAllInputs(data, inputList);
-
-        // do not need to soft auth since this method should be used to change the player that is requesting.
-        this.state.changePlayerHp(client.sessionId, validateParams);
-      } catch (error) {
-        console.error(error);
-      }
-    });
-    this.onMessage("playerHeal", (client, data) => {
-      if (!this.softAuthenticate(client.sessionId, data.clientToChange)) return;
-      try {
-        const inputList: ValidationInputType[] = [
-          { name: "heal", type: "number", PostProcess: undefined },
-          { name: "clientToChange", type: "string", PostProcess: undefined },
-        ];
-
-        const validateParams: any = ValidateAllInputs(data, inputList);
-        this.state.healPlayer(client.sessionId, validateParams);
-      } catch (error) {
-        console.error(error);
-      }
-    });
-    this.onMessage("playerDamage", (client, data) => {
-      if (!this.softAuthenticate(client.sessionId, data.clientToChange)) return;
-      try {
-        const inputList: ValidationInputType[] = [
-          { name: "damage", type: "number", PostProcess: undefined },
-          { name: "clientToChange", type: "string", PostProcess: undefined },
-        ];
-
-        const validateParams: any = ValidateAllInputs(data, inputList);
-        this.state.damagePlayer(client.sessionId, validateParams);
-      } catch (error) {
-        console.error(error);
-      }
-    });
-
-    this.onMessage("playerDeathAdd", (client, data) => {
-      if (!this.softAuthenticate(client.sessionId, data.clientToChange)) return;
-      try {
-        const inputList: ValidationInputType[] = [
-          { name: "clientToChange", type: "string", PostProcess: undefined },
-        ];
-
-        const validateParams: any = ValidateAllInputs(data, inputList);
-        this.state.addPlayerDeath(client.sessionId, validateParams);
-      } catch (error) {
-        console.error(error);
-      }
-    });
-    this.onMessage("playerDeathRemove", (client, data) => {
-      if (!this.softAuthenticate(client.sessionId, data.clientToChange)) return;
-      try {
-        const inputList: ValidationInputType[] = [
-          { name: "clientToChange", type: "string", PostProcess: undefined },
-        ];
-
-        const validateParams: any = ValidateAllInputs(data, inputList);
-        this.state.removePlayerDeath(client.sessionId, validateParams);
-      } catch (error) {
-        console.error(error);
-      }
-    });
-    this.onMessage("playerSaveAdd", (client, data) => {
-      if (!this.softAuthenticate(client.sessionId, data.clientToChange)) return;
-      try {
-        const inputList: ValidationInputType[] = [
-          { name: "clientToChange", type: "string", PostProcess: undefined },
-        ];
-
-        const validateParams: any = ValidateAllInputs(data, inputList);
-        this.state.addPlayerSave(client.sessionId, validateParams);
-      } catch (error) {
-        console.error(error);
-      }
-    });
-    this.onMessage("playerSaveRemove", (client, data) => {
-      if (!this.softAuthenticate(client.sessionId, data.clientToChange)) return;
-      try {
-        const inputList: ValidationInputType[] = [
-          { name: "clientToChange", type: "string", PostProcess: undefined },
-        ];
-
-        const validateParams: any = ValidateAllInputs(data, inputList);
-        this.state.removePlayerSave(client.sessionId, validateParams);
-      } catch (error) {
-        console.error(error);
-      }
-    });
+    // this.onMessage("changePlayerTotalHp", (client, data) => {
+    //   try {
+    //     const inputList: ValidationInputType[] = [
+    //       { name: "totalHp", type: "number", PostProcess: undefined },
+    //     ];
+    //
+    //     const validateParams: any = ValidateAllInputs(data, inputList);
+    //
+    //     // do not need to soft auth since this method should be used to change the player that is requesting.
+    //     this.state.changePlayerTotalHp(client.sessionId, validateParams);
+    //   } catch (error) {
+    //     console.error(error);
+    //   }
+    // });
+    // this.onMessage("changePlayerHp", (client, data) => {
+    //   try {
+    //     const inputList: ValidationInputType[] = [
+    //       { name: "hp", type: "number", PostProcess: undefined },
+    //     ];
+    //
+    //     const validateParams: any = ValidateAllInputs(data, inputList);
+    //
+    //     // do not need to soft auth since this method should be used to change the player that is requesting.
+    //     this.state.changePlayerHp(client.sessionId, validateParams);
+    //   } catch (error) {
+    //     console.error(error);
+    //   }
+    // });
+    // this.onMessage("playerHeal", (client, data) => {
+    //   if (!this.softAuthenticate(client.sessionId, data.clientToChange)) return;
+    //   try {
+    //     const inputList: ValidationInputType[] = [
+    //       { name: "heal", type: "number", PostProcess: undefined },
+    //       { name: "clientToChange", type: "string", PostProcess: undefined },
+    //     ];
+    //
+    //     const validateParams: any = ValidateAllInputs(data, inputList);
+    //     this.state.healPlayer(client.sessionId, validateParams);
+    //   } catch (error) {
+    //     console.error(error);
+    //   }
+    // });
+    // this.onMessage("playerDamage", (client, data) => {
+    //   if (!this.softAuthenticate(client.sessionId, data.clientToChange)) return;
+    //   try {
+    //     const inputList: ValidationInputType[] = [
+    //       { name: "damage", type: "number", PostProcess: undefined },
+    //       { name: "clientToChange", type: "string", PostProcess: undefined },
+    //     ];
+    //
+    //     const validateParams: any = ValidateAllInputs(data, inputList);
+    //     this.state.damagePlayer(client.sessionId, validateParams);
+    //   } catch (error) {
+    //     console.error(error);
+    //   }
+    // });
+    //
+    // this.onMessage("playerDeathAdd", (client, data) => {
+    //   if (!this.softAuthenticate(client.sessionId, data.clientToChange)) return;
+    //   try {
+    //     const inputList: ValidationInputType[] = [
+    //       { name: "clientToChange", type: "string", PostProcess: undefined },
+    //     ];
+    //
+    //     const validateParams: any = ValidateAllInputs(data, inputList);
+    //     this.state.addPlayerDeath(client.sessionId, validateParams);
+    //   } catch (error) {
+    //     console.error(error);
+    //   }
+    // });
+    // this.onMessage("playerDeathRemove", (client, data) => {
+    //   if (!this.softAuthenticate(client.sessionId, data.clientToChange)) return;
+    //   try {
+    //     const inputList: ValidationInputType[] = [
+    //       { name: "clientToChange", type: "string", PostProcess: undefined },
+    //     ];
+    //
+    //     const validateParams: any = ValidateAllInputs(data, inputList);
+    //     this.state.removePlayerDeath(client.sessionId, validateParams);
+    //   } catch (error) {
+    //     console.error(error);
+    //   }
+    // });
+    // this.onMessage("playerSaveAdd", (client, data) => {
+    //   if (!this.softAuthenticate(client.sessionId, data.clientToChange)) return;
+    //   try {
+    //     const inputList: ValidationInputType[] = [
+    //       { name: "clientToChange", type: "string", PostProcess: undefined },
+    //     ];
+    //
+    //     const validateParams: any = ValidateAllInputs(data, inputList);
+    //     this.state.addPlayerSave(client.sessionId, validateParams);
+    //   } catch (error) {
+    //     console.error(error);
+    //   }
+    // });
+    // this.onMessage("playerSaveRemove", (client, data) => {
+    //   if (!this.softAuthenticate(client.sessionId, data.clientToChange)) return;
+    //   try {
+    //     const inputList: ValidationInputType[] = [
+    //       { name: "clientToChange", type: "string", PostProcess: undefined },
+    //     ];
+    //
+    //     const validateParams: any = ValidateAllInputs(data, inputList);
+    //     this.state.removePlayerSave(client.sessionId, validateParams);
+    //   } catch (error) {
+    //     console.error(error);
+    //   }
+    // });
 
     // HOST
     this.onMessage("setHost", (client, _data) => {
