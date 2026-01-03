@@ -1,6 +1,6 @@
 import { Enemy } from "../../../../../src/shared/Enemy"
 import { Player } from "../../../../../src/shared/Player"
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { useGameState } from "../../../../ContextProvider/GameStateContext/GameStateProvider";
 import { usePlayers } from "../../../../ContextProvider/PlayersContext/PlayersContext";
 import { useAuthenticatedContext } from "../../../../ContextProvider/useAuthenticatedContext";
@@ -40,7 +40,7 @@ export default function HealthDeathTrackerPanel() {
           );
         })}
         {Object.values(playerList).map((val) => {
-          if (val.isHost) return <></>;
+          if (val.isHost) return <div key={"HealthDeathTrackerElement-Player-HOST"}></div>;
           return (
             <li className="list-group-item p-0" key={`HealthDeathTrackerElement-Player-${val.userId}`}>
               <HealthDeathTrackerElement item={val} isPlayer={true} />
