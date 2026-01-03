@@ -25,7 +25,7 @@ export function ProgressDiv({ current, max }: { current: number; max: number; })
 
   function numberToColor(): string {
     const clamped = Math.max(0, Math.min(1, current / max));
-    const hue = 120 * clamped;            // 0 = red, 60 = yellow, 120 = green
+    const hue = 120 * clamped;
 
     const rgb: RGB = hsvToRgb(hue, 1, 1);
     return `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`
