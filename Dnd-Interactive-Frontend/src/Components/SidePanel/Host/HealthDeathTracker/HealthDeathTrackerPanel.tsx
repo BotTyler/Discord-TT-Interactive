@@ -1,6 +1,6 @@
-import { Enemy } from "../../../../../src/shared/Enemy"
-import { Player } from "../../../../../src/shared/Player"
-import { useEffect, useId, useState } from "react";
+import { useEffect, useState } from "react";
+import { Enemy } from "../../../../../src/shared/Enemy";
+import { Player } from "../../../../../src/shared/Player";
 import { useGameState } from "../../../../ContextProvider/GameStateContext/GameStateProvider";
 import { usePlayers } from "../../../../ContextProvider/PlayersContext/PlayersContext";
 import { useAuthenticatedContext } from "../../../../ContextProvider/useAuthenticatedContext";
