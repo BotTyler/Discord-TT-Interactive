@@ -30,11 +30,11 @@ export default function HealthDeathTrackerPanel() {
     };
   }, [authContext.room]);
   return (
-    <div className="container-fluid h-100">
-      <ul className="list-group">
+    <div className="container-fluid p-0 h-100">
+      <ul className="list-group gap-1">
         {Object.values(enemyList).map((val) => {
           return (
-            <li className="list-group-item" key={`HealthDeathTrackerElement-Enemy-${val.id}`}>
+            <li className="list-group-item p-0" key={`HealthDeathTrackerElement-Enemy-${val.id}`}>
               <HealthDeathTrackerElement item={val} isPlayer={false} />
             </li>
           );
@@ -42,7 +42,7 @@ export default function HealthDeathTrackerPanel() {
         {Object.values(playerList).map((val) => {
           if (val.isHost) return <></>;
           return (
-            <li className="list-group-item" key={`HealthDeathTrackerElement-Player-${val.userId}`}>
+            <li className="list-group-item p-0" key={`HealthDeathTrackerElement-Player-${val.userId}`}>
               <HealthDeathTrackerElement item={val} isPlayer={true} />
             </li>
           );

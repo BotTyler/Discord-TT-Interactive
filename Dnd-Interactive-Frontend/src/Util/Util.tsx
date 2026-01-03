@@ -12,3 +12,7 @@ export function getFileNameFromMinioString(minioFileName: string): string {
   // 0 -> first match
   // 2 -> second group in that match (0=initial string) (1=either audio or images) (2=name of the file)
 }
+
+export function clamp(num: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, num));
+}

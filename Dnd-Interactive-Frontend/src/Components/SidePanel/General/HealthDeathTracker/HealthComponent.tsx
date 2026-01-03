@@ -1,37 +1,28 @@
 import { useState } from "react";
 
-export default function HealthComponent({ health, totalHealth, HealthClick, DamageClick }: { health: number; totalHealth: number; HealthClick: (val: number) => void; DamageClick: (val: number) => void }) {
+export default function HealthComponent({ name, health, totalHealth, HealthClick, DamageClick }: { name: string, health: number; totalHealth: number; HealthClick: (val: number) => void; DamageClick: (val: number) => void }) {
   return (
-    <div className="w-100 row">
+    <div className="w-100 h-100 row g-0 p-0 m-0 gap-0">
+      {/* HP values */}
+      <div className="col-7 d-flex flex-column justify-content-center align-items-center fs-6 border-start border-end">
+        <p className="m-0">{name}</p>
+        <p className="m-0">{health} / {totalHealth}</p>
+      </div>
       {/* HP/Dmg Input */}
       <div className="col-5">
         <HealDamageComponent HealthClick={HealthClick} DamageClick={DamageClick} />
-      </div>
-      {/* HP values */}
-      <div className="col-7 d-flex justify-content-center align-items-center row">
-        <div className="col-5">
-          <p className="m-0">Current</p>
-          <p className="m-0">{health}</p>
-        </div>
-        <div className="col-2">
-          <p className="m-0"></p>
-          <p className="m-0">/</p>
-        </div>
-        <div className="col-5">
-          <p className="m-0">Total</p>
-          <p className="m-0">{totalHealth}</p>
-        </div>
       </div>
     </div>
   );
 }
 
+
 export function HealDamageComponent({ HealthClick, DamageClick }: { HealthClick: (val: number) => void; DamageClick: (val: number) => void }) {
   const [inputValue, setInputValue] = useState<number>(0);
   return (
-    <>
+    <div className="w-100 h-100 d-flex flex-column">
       <button
-        className="btn btn-success w-100 p-0"
+        className="btn btn-success w-100 rounded-0"
         style={{ fontSize: "small" }}
         onClick={() => {
           HealthClick(inputValue);
@@ -43,13 +34,17 @@ export function HealDamageComponent({ HealthClick, DamageClick }: { HealthClick:
       <input
         type="number"
         value={inputValue}
-        className="w-100"
+        className="w-100 flex-grow-1"
+        onClick={(e) => {
+          const target: any = e.target;
+          target.select();
+        }}
         onChange={(e) => {
           setInputValue(+e.target.value);
         }}
       />
       <button
-        className="btn btn-danger w-100 p-0"
+        className="btn btn-danger w-100 rounded-0"
         style={{ fontSize: "small" }}
         onClick={() => {
           DamageClick(inputValue);
@@ -58,6 +53,6 @@ export function HealDamageComponent({ HealthClick, DamageClick }: { HealthClick:
       >
         Damage
       </button>
-    </>
+    </div>
   );
 }
