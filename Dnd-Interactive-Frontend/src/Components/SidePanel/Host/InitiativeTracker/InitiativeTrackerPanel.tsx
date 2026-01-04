@@ -3,7 +3,7 @@ import InitiativeListHandler from "./InitiativeListHandler";
 export default function InitiativeTrackerPanel() {
   const authContext = useAuthenticatedContext();
   return (
-    <div className="container-fluid p-0">
+    <div className="container-fluid p-0 h-100 overflow-hidden d-flex flex-column">
       <div className="btn-group w-100" role="group" aria-label="Basic example">
         <button
           type="button"
@@ -24,7 +24,7 @@ export default function InitiativeTrackerPanel() {
           Next
         </button>
       </div>
-      <ul className="list-group">
+      <ul className="list-group overflow-auto">
         <InitiativeListHandler />
       </ul>
     </div>

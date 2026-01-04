@@ -194,7 +194,6 @@ export default function FreeMovementController({ controllableUser, isPlayer, onP
           displayName={false}
           eventFunctions={{
             dragstart: (event: LeafletEvent) => {
-              console.log("starting drag")
               setIsMoving(true);
             },
             mouseup: (event: LeafletMouseEvent) => {
