@@ -1,6 +1,6 @@
 import { LatLng, LeafletEvent, LeafletMouseEvent } from "leaflet";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Pane, useMapEvents } from "react-leaflet";
+import { Pane, useMap, useMapEvents } from "react-leaflet";
 import { useGameState } from "../../../../ContextProvider/GameStateContext/GameStateProvider";
 import { Tools, useGameToolContext } from "../../../../ContextProvider/GameToolProvider";
 import { usePlayers } from "../../../../ContextProvider/PlayersContext/PlayersContext";
@@ -8,13 +8,14 @@ import { useAuthenticatedContext } from "../../../../ContextProvider/useAuthenti
 import { Enemy } from "../../../../shared/Enemy";
 import { MapData } from "../../../../shared/Map";
 import { Player } from "../../../../shared/Player";
-import DistanceLine from "../DistanceLine";
+import { DistanceLineGrid } from "../DistanceLine";
 import MarkerDisplay from "../MarkerDisplay";
 
 export default function GridMovementController({ controllableUser, isPlayer, onPositionChange, onGhostPositionChange }:
   { controllableUser: Player | Enemy; isPlayer: boolean; onPositionChange: (position: LatLng) => void; onGhostPositionChange: (position: LatLng[]) => void }) {
   const [markerUser, setMarkerUser] = useState<any>(controllableUser);
 
+  const leafletMap = useMap();
   const mapContext = useGameState();
   const authContext = useAuthenticatedContext();
   const playerContext = usePlayers();
@@ -42,15 +43,21 @@ export default function GridMovementController({ controllableUser, isPlayer, onP
   }, [isMoving])
 
   const calculateNearestcenter = useCallback((position: LatLng): LatLng => {
-    const centerXIndex: number = Math.floor(position.lng / iconSize);
-    const centerYIndex: number = Math.floor(position.lat / iconSize);
-
-
     const halfIcon = iconSize / 2;
+    const centerLng: number = Math.floor(position.lng / iconSize) * iconSize + halfIcon;
+    const centerLat: number = Math.floor(position.lat / iconSize) * iconSize + halfIcon;
+
+    const xDiff: number = position.lng - centerLng;
+    const yDiff: number = position.lat - centerLat;
+
+    // Calculate the quadrant the mouse is in compared to the estimated center.
+    // This will be used to assist in estimating the direction the user is heading in.
+    const offsetXMult: 1 | -1 = xDiff >= 0 ? 1 : -1;
+    const offsetYMult: 1 | -1 = yDiff >= 0 ? 1 : -1;
 
     const offset = Math.floor(markerSize / iconSize) % 2 == 0 ? halfIcon : 0;
-    const xval: number = (centerXIndex * iconSize) + halfIcon + offset;
-    const yval: number = (centerYIndex * iconSize) + halfIcon + offset;
+    const xval: number = centerLng + (offset * offsetXMult);
+    const yval: number = centerLat + (offset * offsetYMult);
     return new LatLng(yval, xval);
 
   }, [mapWidth, mapHeight, iconSize, markerSize]);
@@ -182,7 +189,13 @@ export default function GridMovementController({ controllableUser, isPlayer, onP
     mousemove: (event: LeafletMouseEvent) => {
       if (!isMoving) return;
       setToPosition((prev) => {
-        const calcCenter: LatLng = calculateNearestcenter(event.latlng);
+        const mousePos: LatLng = event.latlng;
+        const calcCenter: LatLng = calculateNearestcenter(mousePos);
+
+        const distance: number = leafletMap.distance(mousePos, calcCenter);
+        const confidence: number = distance * 2 / iconSize;
+        if (confidence > 1) return [...prev];
+
         if (prev.length > 0) {
           const last: LatLng = prev[prev.length - 1];
           if (last.equals(calcCenter)) {
@@ -229,12 +242,10 @@ export default function GridMovementController({ controllableUser, isPlayer, onP
           size={markerSize}
           className={isVisible ? "opacity-100" : "opacity-50"} />
       </Pane>
-      {/* <DistanceLine start={position} end={toPosition} color={color} size={iconSize} /> */}
-      {toPosition.map((val: LatLng, index: number) => {
-        return <DistanceLine start={index === 0 ? position : toPosition[index - 1]} end={val} color={color} size={iconSize} showDistance={false} key={`Grid-Player-DistanceLine-${id}-${index}`} />
-      })}
+      <DistanceLineGrid positions={toPosition} color={color} playerSize={markerSize} />
       <Pane name={`Grid-Player-Ghost-Marker-${id}`} style={{ zIndex: 501 }}>
-        <MarkerDisplay name={name} avatarURI={isPlayer ? avatarUri : `/colyseus/getImage/${avatarUri}`} color={color} position={toPosition[toPosition.length - 1] ?? position} size={markerSize}
+        {/* size needs to be at least the iconSize due to issues with mouse up event */}
+        <MarkerDisplay name={name} avatarURI={isPlayer ? avatarUri : `/colyseus/getImage/${avatarUri}`} color={color} position={toPosition[toPosition.length - 1] ?? position} size={isMoving ? Math.max(markerSize, iconSize) : markerSize}
           isDraggable={true}
           className={`opacity-50`}
           displayName={false}
