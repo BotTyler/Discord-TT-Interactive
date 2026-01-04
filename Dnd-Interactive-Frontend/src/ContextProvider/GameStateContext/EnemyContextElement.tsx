@@ -58,6 +58,10 @@ export default function EnemyContextElement({ enemy, onValueChanged }: { enemy: 
     emitFieldChangeEvent("lifeSaves", lifeSaves);
   }, [lifeSaves]);
   React.useEffect(() => {
+    const event = new CustomEvent(`EnemiesVisibilityChange`, {
+      detail: { val: `EnemiesVisibilityChange` },
+    });
+    window.dispatchEvent(event);
     emitFieldChangeEvent("isVisible", isVisible);
   }, [isVisible]);
   React.useEffect(() => {
