@@ -14,20 +14,17 @@ const ALLOWED_TABLES = new Set([
   "Initiative_History",
   "Image_Catalog",
   "Audio_Catalog",
+  "Summons",
+  "Summons_History",
 ]);
-export abstract class DatabaseBase<
-  T extends DAO,
-> {
+export abstract class DatabaseBase<T extends DAO> {
   protected tableName: string;
   constructor(tableName: string) {
-    if (!ALLOWED_TABLES.has(tableName))
-      throw new Error("Invalid Table Name");
+    if (!ALLOWED_TABLES.has(tableName)) throw new Error("Invalid Table Name");
     this.tableName = tableName;
   }
 
-  async create(
-    data: T,
-  ): Promise<number | undefined> {
+  async create(data: T): Promise<number | undefined> {
     const keys = data.getKeys();
     const values = data.getValues();
     const placeholders = data.getPlaceHolders();
@@ -35,14 +32,10 @@ export abstract class DatabaseBase<
     const query = `INSERT INTO public."${this.tableName}" (${keys.join(", ")}) VALUES (${placeholders.join(", ")}) RETURNING ${data.getIdName()} as id`;
     console.log(query);
 
-    const result:
-      | QueryResult<{ id: number }>
-      | undefined = await Database.getInstance()
+    const result: QueryResult<{ id: number }> | undefined = await Database.getInstance()
       .query(query, values)
       .catch((e) => {
-        console.error(
-          `Could not ***insert*** (${this.tableName})\n\t${e}`,
-        );
+        console.error(`Could not ***insert*** (${this.tableName})\n\t${e}`);
         return undefined;
       });
 
@@ -56,35 +49,22 @@ export abstract class DatabaseBase<
     await Database.getInstance()
       .query(query, [id])
       .catch((e) => {
-        console.error(
-          `Could not ***delete*** (${this.tableName})\n\t${e}`,
-        );
+        console.error(`Could not ***delete*** (${this.tableName})\n\t${e}`);
         return undefined;
       });
   }
 
-  async update(
-    data: T,
-  ): Promise<number | undefined> {
+  async update(data: T): Promise<number | undefined> {
     const keys = data.getKeys();
     const values = data.getValues();
-    const setString = keys
-      .map((key, i) => `${key} = $${i + 1}`)
-      .join(", ");
+    const setString = keys.map((key, i) => `${key} = $${i + 1}`).join(", ");
 
     const query = `UPDATE public."${this.tableName}" SET ${setString} WHERE ${data.getIdName()} = $${keys.length + 1} RETURNING ${data.getIdName()} as id`;
     console.log(query);
-    const result:
-      | QueryResult<{ id: number }>
-      | undefined = await Database.getInstance()
-      .query(query, [
-        ...values,
-        data.getIdValue(),
-      ])
+    const result: QueryResult<{ id: number }> | undefined = await Database.getInstance()
+      .query(query, [...values, data.getIdValue()])
       .catch((e) => {
-        console.error(
-          `Could not ***update*** (${this.tableName})\n\t${e}`,
-        );
+        console.error(`Could not ***update*** (${this.tableName})\n\t${e}`);
         return undefined;
       });
 
@@ -95,15 +75,12 @@ export abstract class DatabaseBase<
     const query = `SELECT * FROM public."${this.tableName}";`;
     console.log(query);
 
-    const result: QueryResult<T> | undefined =
-      await Database.getInstance()
-        .query(query)
-        .catch((e) => {
-          console.error(
-            `Could not ***select*** (${this.tableName})\n\t${e}`,
-          );
-          return undefined;
-        });
+    const result: QueryResult<T> | undefined = await Database.getInstance()
+      .query(query)
+      .catch((e) => {
+        console.error(`Could not ***select*** (${this.tableName})\n\t${e}`);
+        return undefined;
+      });
     return result?.rows;
   }
 }

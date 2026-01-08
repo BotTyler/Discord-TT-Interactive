@@ -3,6 +3,8 @@ import { mLatLng } from "../../../src/shared/PositionInterface";
 import { Player } from "../../../src/shared/Player";
 import React from "react";
 import { useAuthenticatedContext } from "../useAuthenticatedContext";
+import { Summons } from "../../shared/Summons";
+import SummonsElementHandler from "./SummonsElementHandler";
 
 // this class def can be simpler
 export default function PlayerElementHandler({ player, onValueChanged }: { player: Player; onValueChanged: (field: string, value: unknown) => void }) {
@@ -25,11 +27,14 @@ export default function PlayerElementHandler({ player, onValueChanged }: { playe
   const [arcDrawings, setArcDrawings] = React.useState<ArcDrawing | undefined>(player.arcDrawing);
   const [beamDrawing, setBeamDrawing] = React.useState<BeamDrawing | undefined>(player.beamDrawing);
   const [isConnected, setConnected] = React.useState<boolean>(player.isConnected);
+
+  const [summons, setSummons] = React.useState<Summons[]>(player.summons);
+  const [connectedSummons, setConnectedSummons] = React.useState<Summons[]>(player.summons);
+
   const authContext = useAuthenticatedContext();
 
   // below effects are used to emit events when the value is finalized
   const emitFieldChangeEvent = (field: string, value: any) => {
-    // console.log(`Emitting ${userId}:${field}`);
     onValueChanged(field, value);
     const event = new CustomEvent(`update-${userId}-${field}`, {
       detail: { val: value },
@@ -100,6 +105,9 @@ export default function PlayerElementHandler({ player, onValueChanged }: { playe
   React.useEffect(() => {
     emitFieldChangeEvent("isConnected", isConnected);
   }, [isConnected]);
+  React.useEffect(() => {
+    emitFieldChangeEvent("summons", summons);
+  }, [summons]);
 
   React.useEffect(() => {
     // set all listeners with the colyseus backend
@@ -157,8 +165,12 @@ export default function PlayerElementHandler({ player, onValueChanged }: { playe
     const beamDrawingListener = player.listen("beamDrawing", (value: BeamDrawing | undefined) => {
       setBeamDrawing(value ?? undefined);
     });
-    const connectionListener = player.listen("isConnected", (val: boolean) => {
-      setConnected(val);
+    const connectionListener = player.listen("isConnected", (value: boolean) => {
+      setConnected(value);
+    });
+    const summonsListener = player.listen("summons", (value: Summons[]) => {
+      setSummons([...value]);
+      setConnectedSummons([...value]);
     });
 
 
@@ -181,8 +193,26 @@ export default function PlayerElementHandler({ player, onValueChanged }: { playe
       circleDrawingListener();
       arcDrawingListener();
       beamDrawingListener();
-      connectionListener;
+      connectionListener();
+      summonsListener();
     };
   }, [authContext.room, player]);
-  return <></>;
+  return <>
+    {connectedSummons.map((item: Summons) => {
+      return <SummonsElementHandler summon={item} key={`Player-${userId}-Summon-${item.id}`} onValueChanged={(field: string, value: unknown): void => {
+        setSummons((prev: Summons[]): Summons[] => {
+          const summonsUpdate: Summons[] = prev.map((val: Summons): Summons => {
+            if (val.id !== item.id) return val;
+
+            // Note: this is bad.
+            const _summons: any = { ...val };
+            _summons[field] = value;
+            return _summons;
+          })
+
+          return summonsUpdate;
+        })
+      }} />
+    })}
+  </>;
 }

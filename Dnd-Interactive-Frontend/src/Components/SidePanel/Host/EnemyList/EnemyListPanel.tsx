@@ -4,9 +4,9 @@ import { Enemy } from "../../../../../src/shared/Enemy"
 import { mLatLng } from "../../../../../src/shared/PositionInterface"
 import { useGameState } from "../../../../ContextProvider/GameStateContext/GameStateProvider";
 import { useAuthenticatedContext } from "../../../../ContextProvider/useAuthenticatedContext";
-import EditEnemyModal from "../EditEnemyModal";
 import EnemyListElement from "./EnemyListElement";
 import PlayerSizeInput from "./PlayerSizeInput";
+import EditCharacterModal from "../../../Modal/SummonedCharacterModal";
 
 /**
  * Component that will display the list of enemies and anything else only the host will need.
@@ -50,7 +50,7 @@ export default function EnemyListPanel() {
         </button>
       </div>
       {isAddingEnemy ? (
-        <EditEnemyModal
+        <EditCharacterModal
           callback={(data) => {
             if (data !== undefined) {
               authContext.room.send("addEnemy", {
@@ -64,9 +64,10 @@ export default function EnemyListPanel() {
             setIsAddingEnemy(false);
             return;
           }}
-          enemyavatarUri={""}
-          enemyname=""
-          enemysize={25}
+          title="Enemy Add"
+          avatarUri={""}
+          name=""
+          size={25}
           totalHp={1}
           key={`AddEnemyModal`}
         />

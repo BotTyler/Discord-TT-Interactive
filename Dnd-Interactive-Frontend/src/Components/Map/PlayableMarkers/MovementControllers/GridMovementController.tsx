@@ -10,9 +10,10 @@ import { MapData } from "../../../../shared/Map";
 import { Player } from "../../../../shared/Player";
 import { DistanceLineGrid } from "../DistanceLine";
 import MarkerDisplay from "../MarkerDisplay";
+import { Summons } from "../../../../shared/Summons";
 
-export default function GridMovementController({ controllableUser, isPlayer, onPositionChange, onGhostPositionChange }:
-  { controllableUser: Player | Enemy; isPlayer: boolean; onPositionChange: (position: LatLng) => void; onGhostPositionChange: (position: LatLng[]) => void }) {
+export default function GridMovementController({ controllableUser, userType, onPositionChange, onGhostPositionChange }:
+  { controllableUser: Player | Enemy | Summons; userType: "player" | "enemy" | "summon"; onPositionChange: (position: LatLng) => void; onGhostPositionChange: (position: LatLng[]) => void }) {
   const [markerUser, setMarkerUser] = useState<any>(controllableUser);
 
   const leafletMap = useMap();
@@ -24,14 +25,14 @@ export default function GridMovementController({ controllableUser, isPlayer, onP
   const [id, setId] = useState<string>(markerUser.userId ?? markerUser.id);
   const [name, setName] = useState<string>(markerUser.name);
   const [avatarUri, setAvatarUri] = useState<string>(markerUser.avatarUri);
-  const [markerSize, setMarkerSize] = useState<number>((markerUser as Enemy).size ?? mapContext.getIconHeight());
+  const [markerSize, setMarkerSize] = useState<number>((markerUser as Enemy | Summons).size ?? mapContext.getIconHeight());
   const [iconSize, setIconSize] = useState<number>(mapContext.getIconHeight());
   const [position, setPosition] = useState<LatLng>(new LatLng(markerUser.position.lat, markerUser.position.lng));
   const [toPosition, setToPosition] = useState<LatLng[]>([position]);
   const [isConnected, setConnected] = useState<boolean>((markerUser as Player).isConnected ?? true);
   const [color, setColor] = useState<string>((markerUser as Player).color ?? "#f00");
   const [isMoving, setIsMoving] = useState<boolean>(false);
-  const [isVisible, setIsVisible] = useState<boolean>((markerUser as Enemy).isVisible ?? true);
+  const [isVisible, setIsVisible] = useState<boolean>((markerUser as Enemy | Summons).isVisible ?? true);
 
   // use the map like this may be dangerous, but this component does not load until the map is set.
   const [mapWidth, setMapWidth] = useState<number>(mapContext.getMap()!.width);
@@ -69,7 +70,7 @@ export default function GridMovementController({ controllableUser, isPlayer, onP
 
   useEffect(() => {
     // setup listeners for the player.
-    if (!isPlayer) return;
+    if (userType !== "player") return;
 
     const tempUser: Player = markerUser as Player;
 
@@ -137,7 +138,7 @@ export default function GridMovementController({ controllableUser, isPlayer, onP
 
   useEffect(() => {
     // setup listeners for the enemy.
-    if (isPlayer) return;
+    if (userType !== "enemy") return;
 
     const tempEnemy: Enemy = markerUser as Enemy;
 
@@ -184,6 +185,55 @@ export default function GridMovementController({ controllableUser, isPlayer, onP
 
   }, [markerUser]);
 
+  useEffect(() => {
+    // setup listeners for the enemy.
+    if (userType !== "summon") return;
+
+    const tempSummon: Summons = markerUser as Summons;
+
+    const updateName = (value: any) => {
+      setName(value.detail.val);
+    }
+    const updatePosition = (value: any) => {
+      setPosition(value.detail.val);
+    };
+    const updateSize = (value: any) => {
+      setMarkerSize(value.detail.val);
+    };
+    const handleIconHeightChange = (value: any) => {
+      setIconSize(value.detail.val);
+    };
+    const updateAvatar = (value: any) => {
+      setAvatarUri(value.detail.val);
+    };
+    const handleVisibilityChange = (value: any) => {
+      setIsVisible(value.detail.val);
+    }
+    const setNewToPosition = (value: any) => {
+      // Ignore this update if this object is currently moving.
+      if (!isMovingRef.current)
+        setToPosition(value.detail.val == null ? [position] : value.detail.val.map((val: any) => { return new LatLng(val.lat, val.lng) }));
+    };
+
+    window.addEventListener(`SummonUpdate-${tempSummon.id}-name`, updateName);
+    window.addEventListener(`SummonUpdate-${tempSummon.id}-position`, updatePosition);
+    window.addEventListener(`SummonUpdate-${tempSummon.id}-size`, updateSize);
+    window.addEventListener(`IconHeightChanged`, handleIconHeightChange);
+    window.addEventListener(`SummonUpdate-${tempSummon.id}-avatarUri`, updateAvatar);
+    window.addEventListener(`SummonUpdate-${tempSummon.id}-toPosition`, setNewToPosition);
+    window.addEventListener(`SummonUpdate-${tempSummon.id}-isVisible`, handleVisibilityChange);
+    return () => {
+      window.removeEventListener(`SummonUpdate-${tempSummon.id}-name`, updateName);
+      window.removeEventListener(`SummonUpdate-${tempSummon.id}-position`, updatePosition);
+      window.removeEventListener(`SummonUpdate-${tempSummon.id}-size`, updateSize);
+      window.removeEventListener(`IconHeightChanged`, handleIconHeightChange);
+      window.removeEventListener(`SummonUpdate-${tempSummon.id}-avatarUri`, updateAvatar);
+      window.removeEventListener(`SummonUpdate-${tempSummon.id}-toPosition`, setNewToPosition);
+      window.removeEventListener(`SummonUpdate-${tempSummon.id}-isVisible`, handleVisibilityChange);
+    }
+
+  }, [markerUser]);
+
 
   useMapEvents({
     mousemove: (event: LeafletMouseEvent) => {
@@ -220,32 +270,56 @@ export default function GridMovementController({ controllableUser, isPlayer, onP
   }
 
   const handleToolEvent = (): void => {
-    if (isPlayer) return;
+    const handleVisibibilityTool = (): void => {
+      switch (userType) {
+        case "player":
+          break;
+        case "enemy":
+          authContext.room.send("toggleEnemyVisibility", { clientToChange: `${id}` });
+          break;
+        case "summon":
+          authContext.room.send("toggleSummonVisibility", { id: +id, player_id: markerUser.player_id });
+          break;
+      }
+    }
+
+    const handleDeleteTool = (): void => {
+      switch (userType) {
+        case "player":
+          break;
+        case "enemy":
+          authContext.room.send("deleteEnemy", { id: `${id}` });
+          break;
+        case "summon":
+          authContext.room.send("deleteSummons", { id: +id, player_id: markerUser.player_id });
+          break;
+      }
+    }
     switch (toolContext.curTool) {
       case Tools.VISIBILITY:
-        authContext.room.send("toggleEnemyVisibility", { clientToChange: `${id}` });
+        handleVisibibilityTool();
         break;
       case Tools.DELETE:
-        authContext.room.send("deleteEnemy", { id: `${id}` });
+        handleDeleteTool();
         break
     }
   }
 
   return determineVisibility() ? (
     <>
-      <Pane name={`Grid-Player-Marker-${id}`} style={{ zIndex: 500 }}>
+      <Pane name={`Grid-${userType}-Marker-${id}`} style={{ zIndex: 500 }}>
         <MarkerDisplay
           name={name}
-          avatarURI={isPlayer ? avatarUri : `/colyseus/getImage/${avatarUri}`}
+          avatarURI={userType === "player" ? avatarUri : `/colyseus/getImage/${avatarUri}`}
           color={color}
           position={position}
           size={markerSize}
           className={isVisible ? "opacity-100" : "opacity-50"} />
       </Pane>
       <DistanceLineGrid positions={toPosition} color={color} playerSize={markerSize} />
-      <Pane name={`Grid-Player-Ghost-Marker-${id}`} style={{ zIndex: 501 }}>
+      <Pane name={`Grid-${userType}-Ghost-Marker-${id}`} style={{ zIndex: 501 }}>
         {/* size needs to be at least the iconSize due to issues with mouse up event */}
-        <MarkerDisplay name={name} avatarURI={isPlayer ? avatarUri : `/colyseus/getImage/${avatarUri}`} color={color} position={toPosition[toPosition.length - 1] ?? position} size={isMoving ? Math.max(markerSize, iconSize) : markerSize}
+        <MarkerDisplay name={name} avatarURI={userType === "player" ? avatarUri : `/colyseus/getImage/${avatarUri}`} color={color} position={toPosition[toPosition.length - 1] ?? position} size={isMoving ? Math.max(markerSize, iconSize) : markerSize}
           isDraggable={true}
           className={`opacity-50`}
           displayName={false}

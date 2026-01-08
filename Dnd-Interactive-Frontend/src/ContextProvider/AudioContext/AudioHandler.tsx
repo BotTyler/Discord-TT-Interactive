@@ -84,24 +84,6 @@ export const AudioHandler = React.forwardRef(function AudioHandler({ }: {}, ref:
       setPlaying(value);
     });
 
-    // handle adding a deleting from the audio queue
-    // const handleQueueAdd = gameAudio.queue.onAdd((value: string) => {
-    //   console.log(`adding: ${value}`);
-
-    //   setQueue((prev) => {
-    //     return [...prev, value];
-    //   });
-    // });
-
-    // const handleQueueDelete = gameAudio.queue.onRemove((val: string, key: number) => {
-    //   console.log(`Removing: ${val}::${key}`);
-    //   setQueue((prev) => {
-    //     return prev.filter((value: string, index: number) => {
-    //       return index !== key;
-    //     });
-    //   });
-    // });
-
     // For some reason colyseus made the ArrayScema and over complicated map.
     const handleQueueChange = gameAudio.listen("queue", (value: any) => {
       setQueue((prev) => {
@@ -117,8 +99,6 @@ export const AudioHandler = React.forwardRef(function AudioHandler({ }: {}, ref:
       handleCurrentVideoIndex();
       handleTimestamp();
       handlePlaying();
-      // handleQueueAdd();
-      // handleQueueDelete();
       handleQueueChange();
     };
   }, [authContext.room, gameAudio]);

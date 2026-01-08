@@ -11,7 +11,6 @@ export default function FogContextElement({ fog, onValueChanged }: { fog: MapFog
   const authContext = useAuthenticatedContext();
 
   const emitFieldChangeEvent = (field: string, value: any) => {
-    // console.log(`Fog Updating: "FogUpdate-${id}-${field}": ${value}`);
 
     onValueChanged(field, value);
     const event = new CustomEvent(`FogUpdate-${id}-${field}`, {

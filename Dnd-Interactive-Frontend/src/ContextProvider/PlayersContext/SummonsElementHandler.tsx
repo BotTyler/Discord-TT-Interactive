@@ -1,0 +1,125 @@
+import React from "react";
+import { useAuthenticatedContext } from "../useAuthenticatedContext";
+import { Summons } from "../../shared/Summons";
+import { mLatLng } from "../../shared/PositionInterface";
+
+// this class def can be simpler
+export default function SummonsElementHandler({ summon, onValueChanged }: { summon: Summons; onValueChanged: (field: string, value: unknown) => void }) {
+  const [id, setId] = React.useState<number>(summon.id);
+  const [player_id, setPlayerId] = React.useState<string>(summon.player_id);
+  const [avatarUri, setAvatarUri] = React.useState<string>(summon.avatarUri);
+  const [name, setName] = React.useState<string>(summon.name);
+  const [position, setPosition] = React.useState<mLatLng>(summon.position);
+  const [toPosition, setToPosition] = React.useState<mLatLng[]>([]);
+  const [size, setSize] = React.useState<number>(summon.size);
+  const [health, setHealth] = React.useState<number>(summon.health);
+  const [totalHealth, setTotalHealth] = React.useState<number>(summon.totalHealth);
+  const [lifeSaves, setLifeSaves] = React.useState<number>(summon.lifeSaves);
+  const [deathSaves, setDeathSaves] = React.useState<number>(summon.deathSaves);
+  const [isVisible, setIsVisible] = React.useState<boolean>(summon.isVisible);
+  const authContext = useAuthenticatedContext();
+
+  // below effects are used to emit events when the value is finalized
+  const emitFieldChangeEvent = (field: string, value: any) => {
+    onValueChanged(field, value);
+    const event = new CustomEvent(`SummonUpdate-${id}-${field}`, {
+      detail: { val: value },
+    });
+    window.dispatchEvent(event);
+  };
+
+  React.useEffect(() => {
+    emitFieldChangeEvent("id", id);
+  }, [id]);
+  React.useEffect(() => {
+    emitFieldChangeEvent("player_id", player_id);
+  }, [player_id]);
+  React.useEffect(() => {
+    emitFieldChangeEvent("avatarUri", avatarUri);
+  }, [avatarUri]);
+  React.useEffect(() => {
+    emitFieldChangeEvent("name", name);
+  }, [name]);
+  React.useEffect(() => {
+    emitFieldChangeEvent("position", position);
+  }, [position]);
+  React.useEffect(() => {
+    emitFieldChangeEvent("toPosition", toPosition);
+  }, [toPosition]);
+  React.useEffect(() => {
+    emitFieldChangeEvent("size", size);
+  }, [size]);
+  React.useEffect(() => {
+    emitFieldChangeEvent("health", health);
+  }, [health]);
+  React.useEffect(() => {
+    emitFieldChangeEvent("totalHealth", totalHealth);
+  }, [totalHealth]);
+  React.useEffect(() => {
+    emitFieldChangeEvent("lifeSaves", lifeSaves);
+  }, [lifeSaves]);
+  React.useEffect(() => {
+    emitFieldChangeEvent("deathSaves", deathSaves);
+  }, [deathSaves]);
+  React.useEffect(() => {
+    emitFieldChangeEvent("isVisible", isVisible);
+  }, [isVisible]);
+
+  React.useEffect(() => {
+    // set all listeners with the colyseus backend
+    const idListener = summon.listen("id", (value: number) => {
+      setId(value);
+    });
+    const playerIdListener = summon.listen("player_id", (value: string) => {
+      setPlayerId(value);
+    });
+    const avatarUriListener = summon.listen("avatarUri", (value: string) => {
+      setAvatarUri(value);
+    });
+    const nameListener = summon.listen("name", (value: string) => {
+      setName(value);
+    });
+    const positionListener = summon.listen("position", (value: mLatLng) => {
+      setPosition(value);
+    });
+    const toPositionListener = summon.listen("toPosition", (value: mLatLng[]) => {
+      setToPosition(value);
+    });
+    const sizeListener = summon.listen("size", (value: number) => {
+      setSize(value);
+    });
+    const healthListener = summon.listen("health", (value: number) => {
+      setHealth(value);
+    });
+    const totalHealthListener = summon.listen("totalHealth", (value: number) => {
+      setTotalHealth(value);
+    });
+    const lifeSavesListener = summon.listen("lifeSaves", (value: number) => {
+      setLifeSaves(value);
+    });
+    const deathSavesListener = summon.listen("deathSaves", (value: number) => {
+      setDeathSaves(value);
+    });
+    const isVisibleListener = summon.listen("isVisible", (value: boolean) => {
+      setIsVisible(value);
+    });
+
+
+    return () => {
+      idListener();
+      playerIdListener();
+      avatarUriListener();
+      nameListener();
+      positionListener();
+      toPositionListener();
+      sizeListener();
+      sizeListener();
+      healthListener();
+      totalHealthListener();
+      lifeSavesListener();
+      deathSavesListener();
+      isVisibleListener();
+    };
+  }, [authContext.room, summon]);
+  return <></>;
+}

@@ -1,6 +1,7 @@
 import { ArraySchema, Schema, type } from "@colyseus/schema";
-import { mLatLng } from "./PositionInterface";
 import { ArcDrawing, BeamDrawing, CircleDrawing, CubeDrawing } from "./DrawingInterface";
+import { mLatLng } from "./PositionInterface";
+import { Summons } from "./Summons";
 export type TPlayerOptions = Pick<
   Player,
   | "name"
@@ -20,8 +21,8 @@ export type TPlayerOptions = Pick<
   | "lifeSaves"
   | "deathSaves"
   | "isConnected"
+  | "summons"
 >;
-
 export class Player extends Schema {
   @type("string")
   public name: string;
@@ -83,6 +84,9 @@ export class Player extends Schema {
   @type("number")
   public deathSaves: number;
 
+  @type([Summons])
+  public summons: Summons[];
+
   constructor({
     name,
     userId,
@@ -101,6 +105,7 @@ export class Player extends Schema {
     lifeSaves,
     deathSaves,
     isConnected,
+    summons,
   }: TPlayerOptions) {
     super();
     this.userId = userId;
@@ -123,5 +128,6 @@ export class Player extends Schema {
     this.lifeSaves = lifeSaves ?? 0;
     this.deathSaves = deathSaves ?? 0;
     this.isConnected = isConnected ?? true;
+    this.summons = summons ?? [];
   }
 }

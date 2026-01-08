@@ -1,15 +1,35 @@
 import { useState } from "react";
+import TextToInput from "../../../TextToInput/TextToInput";
 
-export default function HealthComponent({ name, health, totalHealth, HealthClick, DamageClick }: { name: string, health: number; totalHealth: number; HealthClick: (val: number) => void; DamageClick: (val: number) => void }) {
+export default function HealthComponent(
+  { name, health, totalHealth, HealthClick, DamageClick, HealthChange, TotalHealthChange }:
+    {
+      name: string,
+      health: number;
+      totalHealth: number;
+      HealthClick: (val: number) => void;
+      DamageClick: (val: number) => void;
+      HealthChange: (val: number) => void;
+      TotalHealthChange: (val: number) => void;
+    }
+) {
   return (
     <div className="w-100 h-100 row g-0 p-0 m-0 gap-0">
       {/* HP values */}
-      <div className="col-7 d-flex flex-column justify-content-center align-items-center fs-6 border-start border-end">
+      <div className="col-8 d-flex flex-column justify-content-center align-items-center fs-6 border-start border-end">
         <p className="m-0">{name}</p>
-        <p className="m-0">{health} / {totalHealth}</p>
+        <div className="overflow-hidden w-100 d-flex justify-content-center">
+          <TextToInput type="number" value={health} onSubmit={(val: string): void => {
+            HealthChange!(+val);
+          }} />
+          <p className="h-100 m-0 fs-5">/</p>
+          <TextToInput type="number" value={totalHealth} onSubmit={(val: string): void => {
+            TotalHealthChange!(+val);
+          }} />
+        </div>
       </div>
       {/* HP/Dmg Input */}
-      <div className="col-5">
+      <div className="col-4">
         <HealDamageComponent HealthClick={HealthClick} DamageClick={DamageClick} />
       </div>
     </div>
@@ -22,7 +42,7 @@ export function HealDamageComponent({ HealthClick, DamageClick }: { HealthClick:
   return (
     <div className="w-100 h-100 d-flex flex-column">
       <button
-        className="btn btn-success w-100 rounded-0"
+        className="btn btn-success w-100 rounded-0 p-1"
         style={{ fontSize: "small" }}
         onClick={() => {
           HealthClick(inputValue);
@@ -44,7 +64,7 @@ export function HealDamageComponent({ HealthClick, DamageClick }: { HealthClick:
         }}
       />
       <button
-        className="btn btn-danger w-100 rounded-0"
+        className="btn btn-danger w-100 rounded-0 p-1"
         style={{ fontSize: "small" }}
         onClick={() => {
           DamageClick(inputValue);

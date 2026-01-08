@@ -1,4 +1,5 @@
-export default function DeathComponent({ saveNumber, deathNumber, id, deathAdd, deathRemove, saveAdd, saveRemove }: { saveNumber: number; deathNumber: number; id: string; deathAdd: () => void; deathRemove: () => void; saveAdd: () => void; saveRemove: () => void }) {
+export default function DeathComponent({ saveNumber, deathNumber, id, deathAdd, deathRemove, saveAdd, saveRemove }:
+  { saveNumber: number; deathNumber: number; id: string; deathAdd: () => void; deathRemove: () => void; saveAdd: () => void; saveRemove: () => void }) {
   return (
     <div className="w-100 d-flex flex-column justify-content-center align-items-center py-2 gap-3">
       {/* Success Saving Throws */}

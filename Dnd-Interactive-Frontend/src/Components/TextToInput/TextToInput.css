@@ -1,0 +1,27 @@
+.text_to_input {
+  field-sizing: content;
+  /* Make it look like a <p> */
+  border: none;
+  background: transparent;
+  padding: 0.375rem 0.75rem;
+  margin: 0;
+
+  font: inherit; /* inherit font-family, size, weight */
+  color: inherit;
+  line-height: inherit;
+
+  outline: none;
+  box-shadow: none;
+  cursor: text;
+}
+
+.text_to_input:hover {
+  cursor: pointer;
+}
+
+.text_to_input:focus {
+  border: 1px solid #ced4da; /* Bootstrap-like border */
+  border-radius: 0.375rem;
+  background-color: #fff;
+  color: black;
+}

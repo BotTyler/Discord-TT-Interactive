@@ -19,7 +19,6 @@ export default function EnemyContextElement({ enemy, onValueChanged }: { enemy: 
 
   const authContext = useAuthenticatedContext();
   const emitFieldChangeEvent = (field: string, value: any) => {
-    // console.log(`Enemy Updating: "EnemyUpdate-${id}-${field}": ${value}`);
     onValueChanged(field, value);
     const event = new CustomEvent(`EnemyUpdate-${id}-${field}`, {
       detail: { val: value },

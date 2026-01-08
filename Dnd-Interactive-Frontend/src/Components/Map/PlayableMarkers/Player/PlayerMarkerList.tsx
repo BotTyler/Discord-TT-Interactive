@@ -1,5 +1,5 @@
 import { Player } from "../../../../shared/Player";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { usePlayers } from "../../../../ContextProvider/PlayersContext/PlayersContext";
 import DisplayArc from "../../DrawingTools/Arc/DisplayArc";
 import DisplayCircle from "../../DrawingTools/Circle/DisplayCircle";
@@ -13,6 +13,7 @@ import { useAuthenticatedContext } from "../../../../ContextProvider/useAuthenti
 import FreeMovementController from "../MovementControllers/FreeMovementController";
 import useDebounced from "../../../../Util/useDebounced";
 import DisplayBeam from "../../DrawingTools/Beam/DisplayBeam";
+import { Summons } from "../../../../shared/Summons";
 
 export default function PlayerMarkerList() {
   const authContext = useAuthenticatedContext();
@@ -46,31 +47,20 @@ export default function PlayerMarkerList() {
 
   const debounceGhostPositionChange = useDebounced((player: Player, toPosition: LatLng[]) => {
     authContext.room.send("updatePlayerGhostPosition", { pos: toPosition, clientToChange: player.userId });
-    // switch(movementType){
-    //   case "free":
-    //     authContext.room.send("updatePlayerGhostPosition", {pos: toPosition, clientToChange: player.userId});
-    //   break;
-    //   case "grid":
-    //     authContext.room.send("updatePlayerGhostPosition", {pos: toPosition, clientToChange: player.userId})
-    //   break;
-    //   default:
-    //     authContext.room.send("updatePlayerGhostPosition", {pos: toPosition, clientToChange: player.userId});
-    //   break;
-    // }
   }, 100)
 
   const getControllerElement = (player: Player): any => {
     switch (movementType) {
       case "free":
-        return <FreeMovementController isPlayer={true} controllableUser={player}
+        return <FreeMovementController userType="player" controllableUser={player}
           onPositionChange={(toPosition: LatLng) => { debouncePositionChange(player, toPosition) }}
           onGhostPositionChange={(toPosition: LatLng[]) => { debounceGhostPositionChange(player, toPosition) }} />;
       case "grid":
-        return <GridMovementController isPlayer={true} controllableUser={player}
+        return <GridMovementController userType="player" controllableUser={player}
           onPositionChange={(toPosition: LatLng) => { debouncePositionChange(player, toPosition) }}
           onGhostPositionChange={(toPosition: LatLng[]) => { debounceGhostPositionChange(player, toPosition) }} />;
       default:
-        return <FreeMovementController isPlayer={true} controllableUser={player}
+        return <FreeMovementController userType="player" controllableUser={player}
           onPositionChange={(toPosition: LatLng) => { debouncePositionChange(player, toPosition) }}
           onGhostPositionChange={(toPosition: LatLng[]) => { debounceGhostPositionChange(player, toPosition) }} />;
     }
@@ -88,9 +78,76 @@ export default function PlayerMarkerList() {
             <DisplayArc player={player} />
             <DisplayBeam player={player} />
             {getControllerElement(player)}
+            <SummonsControllerListElement _player={player} />
           </div>
         );
       })}
     </>
   );
+}
+
+function SummonsControllerListElement({ _player }: { _player: Player }) {
+  const authContext = useAuthenticatedContext();
+  const gameStateContext = useGameState();
+
+  const [player, setPlayer] = useState<Player>(_player);
+  const [movementType, setMovementType] = useState<MapMovementType>(gameStateContext.getMapMovement());
+
+  const [summons, setSummons] = useState<Summons[]>(_player.summons);
+
+  useEffect(() => {
+    setPlayer(player);
+  }, [_player]);
+
+  useEffect(() => {
+    const handleSummonsChange = (val: any): void => {
+      setSummons(val.detail.val);
+    }
+
+    const MovementTypeChanged = (value: any) => {
+      setMovementType(value.detail.val);
+    }
+
+    window.addEventListener(`update-${player.userId}-summons`, handleSummonsChange);
+    window.addEventListener("MapMovementChanged", MovementTypeChanged);
+    return () => {
+      window.removeEventListener(`update-${player.userId}-summons`, handleSummonsChange);
+      window.removeEventListener("MapMovementChanged", MovementTypeChanged);
+    }
+  }, [player]);
+
+  const debouncePositionChange = useDebounced((summons: Summons, toPosition: LatLng) => {
+    authContext.room.send("updateSummonsPosition", { pos: toPosition, id: summons.id, player_id: player.userId });
+  }, 100)
+
+  const debounceGhostPositionChange = useDebounced((summons: Summons, toPosition: LatLng[]) => {
+    authContext.room.send("updateSummonsGhostPosition", { pos: toPosition, id: summons.id, player_id: player.userId });
+  }, 100)
+
+  const getControllerElement = (summons: Summons): any => {
+    switch (movementType) {
+      case "free":
+        return <FreeMovementController userType="summon" controllableUser={summons}
+          onPositionChange={(toPosition: LatLng) => { debouncePositionChange(summons, toPosition) }}
+          onGhostPositionChange={(toPosition: LatLng[]) => { debounceGhostPositionChange(summons, toPosition) }} />;
+      case "grid":
+        return <GridMovementController userType="summon" controllableUser={summons}
+          onPositionChange={(toPosition: LatLng) => { debouncePositionChange(summons, toPosition) }}
+          onGhostPositionChange={(toPosition: LatLng[]) => { debounceGhostPositionChange(summons, toPosition) }} />;
+      default:
+        return <FreeMovementController userType="summon" controllableUser={summons}
+          onPositionChange={(toPosition: LatLng) => { debouncePositionChange(summons, toPosition) }}
+          onGhostPositionChange={(toPosition: LatLng[]) => { debounceGhostPositionChange(summons, toPosition) }} />;
+    }
+  }
+
+  return (
+    <>
+      {summons.map((val: Summons) => {
+        <div key={`SummonControlElement-${val.id}`}>
+          {getControllerElement(val)}
+        </div>
+      })};
+    </>
+  )
 }

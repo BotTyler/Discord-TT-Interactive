@@ -63,17 +63,17 @@ export default function EnemyMarkerList() {
 
     switch (movementType) {
       case "free":
-        return <FreeMovementController isPlayer={false} controllableUser={enemy} 
-        onPositionChange={(toPosition: LatLng)=>{debouncePositionChange(enemy, toPosition)}} 
-        onGhostPositionChange={(toPosition: LatLng[])=>{debounceGhostPositionChange(enemy, toPosition)}} />;
+        return <FreeMovementController userType="enemy" controllableUser={enemy}
+          onPositionChange={(toPosition: LatLng) => { debouncePositionChange(enemy, toPosition) }}
+          onGhostPositionChange={(toPosition: LatLng[]) => { debounceGhostPositionChange(enemy, toPosition) }} />;
       case "grid":
-        return <GridMovementController isPlayer={false} controllableUser={enemy} 
-        onPositionChange={(toPosition: LatLng)=>{debouncePositionChange(enemy, toPosition)}} 
-        onGhostPositionChange={(toPosition: LatLng[])=>{debounceGhostPositionChange(enemy, toPosition)}} />;
+        return <GridMovementController userType="enemy" controllableUser={enemy}
+          onPositionChange={(toPosition: LatLng) => { debouncePositionChange(enemy, toPosition) }}
+          onGhostPositionChange={(toPosition: LatLng[]) => { debounceGhostPositionChange(enemy, toPosition) }} />;
       default:
-        return <FreeMovementController isPlayer={false} controllableUser={enemy} 
-        onPositionChange={(toPosition: LatLng)=>{debouncePositionChange(enemy, toPosition)}} 
-        onGhostPositionChange={(toPosition: LatLng[])=>{debounceGhostPositionChange(enemy, toPosition)}} />;
+        return <FreeMovementController userType="enemy" controllableUser={enemy}
+          onPositionChange={(toPosition: LatLng) => { debouncePositionChange(enemy, toPosition) }}
+          onGhostPositionChange={(toPosition: LatLng[]) => { debounceGhostPositionChange(enemy, toPosition) }} />;
     }
   }
 

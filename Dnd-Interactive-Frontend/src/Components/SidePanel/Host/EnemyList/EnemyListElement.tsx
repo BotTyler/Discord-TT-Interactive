@@ -3,7 +3,7 @@ import { mLatLng } from "../../../../../src/shared/PositionInterface"
 import React from "react";
 import { useGameState } from "../../../../ContextProvider/GameStateContext/GameStateProvider";
 import { useAuthenticatedContext } from "../../../../ContextProvider/useAuthenticatedContext";
-import EditEnemyModal from "../EditEnemyModal";
+import EditCharacterModal from "../../../Modal/SummonedCharacterModal";
 
 interface ParamInputs {
   enemy: Enemy;
@@ -22,6 +22,7 @@ export default function EnemyListElement({ enemy }: ParamInputs) {
   const [name, setName] = React.useState<string>(enemy.name);
   const [size, setSize] = React.useState<number>(enemy.size);
   const [position, setPosition] = React.useState<mLatLng>(enemy.position);
+  const [health, setHealth] = React.useState<number>(enemy.health);
   const [totalHp, setTotalHp] = React.useState<number>(enemy.totalHealth);
   const [isEditingEnemy, setEditingEnemy] = React.useState<boolean>(false);
 
@@ -45,13 +46,19 @@ export default function EnemyListElement({ enemy }: ParamInputs) {
       setPosition(value.detail.val);
     };
 
+    const handleHpChange = (value: any) => {
+      setHealth(value.detail.val);
+    };
+
     const handleTotalHpChange = (value: any) => {
       setTotalHp(value.detail.val);
     };
+
     window.addEventListener(`EnemyUpdate-${curEnemy.id}-avatarUri`, handleAvatarChange);
     window.addEventListener(`EnemyUpdate-${curEnemy.id}-name`, handleNameChange);
     window.addEventListener(`EnemyUpdate-${curEnemy.id}-size`, handleSizeChange);
     window.addEventListener(`EnemyUpdate-${curEnemy.id}-position`, handlePositionChange);
+    window.addEventListener(`EnemyUpdate-${curEnemy.id}-health`, handleHpChange);
     window.addEventListener(`EnemyUpdate-${curEnemy.id}-totalHealth`, handleTotalHpChange);
 
     return () => {
@@ -59,6 +66,7 @@ export default function EnemyListElement({ enemy }: ParamInputs) {
       window.removeEventListener(`EnemyUpdate-${curEnemy.id}-name`, handleNameChange);
       window.removeEventListener(`EnemyUpdate-${curEnemy.id}-size`, handleSizeChange);
       window.removeEventListener(`EnemyUpdate-${curEnemy.id}-position`, handlePositionChange);
+      window.removeEventListener(`EnemyUpdate-${curEnemy.id}-health`, handleHpChange);
       window.removeEventListener(`EnemyUpdate-${curEnemy.id}-totalHealth`, handleTotalHpChange);
     };
   }, []);
@@ -89,7 +97,7 @@ export default function EnemyListElement({ enemy }: ParamInputs) {
     <li className={`list-group-item`}>
 
       <div className="row m-0 p-0 overflow-hidden" style={{ minWidth: "300px" }}>
-        <div className="col-3">
+        <div className="col-3" style={{ cursor: "pointer" }}>
           <img className="img-fluid" src={`/colyseus/getImage/${avatarUri}`} onClick={() => handleEditCallback()} style={{ maxHeight: "50px" }} />
         </div>
         <div className="col-5 text-center">
@@ -119,7 +127,7 @@ export default function EnemyListElement({ enemy }: ParamInputs) {
       </div>
 
       {isEditingEnemy ? (
-        <EditEnemyModal
+        <EditCharacterModal
           callback={(data) => {
             if (data === undefined) {
               setEditingEnemy(false);
@@ -130,14 +138,16 @@ export default function EnemyListElement({ enemy }: ParamInputs) {
               name: data.name,
               size: data.size,
               avatarUri: data.avatarUri,
+              health: health,
               totalHealth: data.hp,
             });
             setEditingEnemy(false);
             return;
           }}
-          enemyname={name}
-          enemysize={size}
-          enemyavatarUri={avatarUri}
+          title="Enemy Edit"
+          name={name}
+          size={size}
+          avatarUri={avatarUri}
           totalHp={totalHp}
           key={`EditEnemyModal-${enemy.id}`}
         />

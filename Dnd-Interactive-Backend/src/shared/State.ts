@@ -1,17 +1,19 @@
-import { Schema, MapSchema, type, ArraySchema } from "@colyseus/schema";
-import { TPlayerOptions, Player } from "./Player";
-import { MapData, MapFogPolygon } from "./Map";
-import { mLatLng } from "./PositionInterface";
+import { ArraySchema, MapSchema, Schema, type } from "@colyseus/schema";
+import { Audio as gameAudio } from "./Audio";
+import { ArcDrawing, BeamDrawing, CircleDrawing, CubeDrawing } from "./DrawingInterface";
 import { Enemy } from "./Enemy";
 import { ExportDataInterface } from "./ExportDataInterface";
-import { Audio as gameAudio } from "./Audio";
 import {
   LoadEnemyInterface,
   LoadFogInterface,
   LoadMapInterface,
   LoadPlayerInterface,
 } from "./LoadDataInterfaces";
-import { ArcDrawing, BeamDrawing, CircleDrawing, CubeDrawing } from "./DrawingInterface";
+import { MapData, MapFogPolygon } from "./Map";
+import { Player, TPlayerOptions } from "./Player";
+import { mLatLng } from "./PositionInterface";
+import { Summons } from "./Summons";
+import { ShJoinInterface } from "../Database/Tables/SummonsHistoryDB";
 
 export interface IState {
   roomName: string;
@@ -433,6 +435,10 @@ export class State extends Schema {
       },
       data.id,
     );
+
+    this.players.forEach((player: Player): void => {
+      player.summons = [];
+    });
     return false;
   }
 
@@ -509,7 +515,14 @@ export class State extends Schema {
   }
   updateEnemyInformation(
     sessionId: string,
-    data: { id: string; name: string; size: number; avatarUri: string; totalHealth: number },
+    data: {
+      id: string;
+      name: string;
+      size: number;
+      avatarUri: string;
+      health: number;
+      totalHealth: number;
+    },
   ): boolean {
     if (this.map === undefined) return false;
     const enemy = this.map.enemy.get(data.id);
@@ -517,6 +530,7 @@ export class State extends Schema {
     enemy.name = data.name;
     enemy.size = data.size;
     enemy.avatarUri = data.avatarUri;
+    enemy.health = data.health;
     enemy.totalHealth = data.totalHealth;
     return true;
   }
@@ -554,6 +568,7 @@ export class State extends Schema {
     const player = this.map.enemy.get(`${data.clientToChange}`);
     if (player === undefined) return false;
     player.deathSaves += 1;
+    if (player.deathSaves > 3) player.deathSaves = 3;
     return true;
   }
   removeEnemyDeath(sessionId: string, data: { clientToChange: string }): boolean {
@@ -561,6 +576,7 @@ export class State extends Schema {
     const player = this.map.enemy.get(`${data.clientToChange}`);
     if (player === undefined) return false;
     player.deathSaves -= 1;
+    if (player.deathSaves < 0) player.deathSaves = 0;
 
     return true;
   }
@@ -582,6 +598,7 @@ export class State extends Schema {
     const player = this.map.enemy.get(`${data.clientToChange}`);
     if (player === undefined) return false;
     player.lifeSaves -= 1;
+    if (player.lifeSaves < 0) player.lifeSaves = 0;
 
     return true;
   }
@@ -595,6 +612,233 @@ export class State extends Schema {
   }
 
   //#endregion
+
+  //#region Summons
+  updateSummonPosition(
+    sessionId: string,
+    data: { pos: mLatLng; id: number; player_id: string },
+  ): boolean {
+    // I need to make some checks that the person moving this object is the right person or the host.
+    const player: Player | null = this._getPlayerByUserId(data.player_id) ?? null;
+
+    if (player === null) return false; // Player does not exist
+    const summon: Summons | null =
+      player.summons.find((val: Summons) => val.id === data.id) ?? null;
+    if (summon === null) return false;
+
+    summon.position = new mLatLng(data.pos.lat, data.pos.lng);
+    summon.toPosition = [new mLatLng(data.pos.lat, data.pos.lng)];
+    return true;
+  }
+
+  setSummonGhostPosition(
+    sessionId: string,
+    data: { pos: mLatLng[]; id: number; player_id: string },
+  ): boolean {
+    // I need to make some checks that the person moving this object is the right person or the host.
+    const player: Player | null = this._getPlayerByUserId(data.player_id) ?? null;
+
+    if (player === null) return false; // Player does not exist
+    const summon: Summons | null =
+      player.summons.find((val: Summons) => val.id === data.id) ?? null;
+    if (summon === null) return false;
+
+    summon.toPosition = data.pos.map((val: mLatLng) => {
+      return new mLatLng(val.lat, val.lng);
+    });
+
+    return true;
+  }
+
+  addSummon(
+    sessionId: string,
+    data: {
+      id: number;
+      player_id: string;
+      avatarUri: string;
+      name: string;
+      position: mLatLng;
+      size: number;
+      health: number;
+      totalHealth: number;
+      deathSaves: number;
+      lifeSaves: number;
+    },
+  ): boolean {
+    if (this.map === undefined) return false;
+
+    const player: Player | undefined = this._getPlayerBySessionId(sessionId);
+    if (player === undefined) return false;
+
+    const insertSummon: Summons = new Summons({
+      id: data.id,
+      avatarUri: data.avatarUri,
+      name: data.name,
+      position: new mLatLng(data.position.lat, data.position.lng),
+      health: data.health,
+      totalHealth: data.totalHealth,
+      size: data.size,
+      player_id: player.userId,
+      lifeSaves: data.lifeSaves,
+      deathSaves: data.deathSaves,
+      isVisible: true,
+    });
+    console.log("inserting summon");
+
+    player.summons = [...player.summons, insertSummon];
+    return true;
+  }
+
+  removeSummon(sessionId: string, data: { id: number }): boolean {
+    if (this.map === undefined) return false;
+
+    const player: Player | undefined = this._getPlayerBySessionId(sessionId);
+    if (player === undefined) return false;
+
+    player.summons = player.summons.filter((summon: Summons): boolean => summon.id !== data.id);
+
+    return true;
+  }
+
+  updateSummonsInformation(
+    sessionId: string,
+    data: {
+      id: number;
+      avatarUri: string;
+      name: string;
+      health: number;
+      totalHealth: number;
+      size: number;
+    },
+  ): boolean {
+    if (this.map === undefined) return false;
+
+    const player: Player | undefined = this._getPlayerBySessionId(sessionId);
+    if (player === undefined) return false;
+
+    // Force unwrap is fine as the previous 'if' ensures it is available.
+    const summon: Summons | null =
+      player.summons.find((item: Summons) => item.id == data.id) ?? null;
+    if (summon === null) return false;
+    summon.avatarUri = data.avatarUri;
+    summon.name = data.name;
+    summon.health = data.health;
+    summon.totalHealth = data.totalHealth;
+    summon.size = data.size;
+
+    return true;
+  }
+
+  healSummons(sessionId: string, data: { id: number; heal: number }): boolean {
+    if (this.map === undefined) return false;
+
+    const player: Player | undefined = this._getPlayerBySessionId(sessionId);
+    if (player === undefined) return false;
+
+    const summon: Summons | null =
+      player.summons.find((item: Summons): boolean => item.id === data.id) ?? null;
+    if (summon === null) return false;
+
+    summon.health += data.heal;
+
+    return true;
+  }
+
+  damageSummons(sessionId: string, data: { id: number; damage: number }): boolean {
+    if (this.map === undefined) return false;
+
+    const player: Player | undefined = this._getPlayerBySessionId(sessionId);
+    if (player === undefined) return false;
+
+    const summon: Summons | null =
+      player.summons.find((item: Summons): boolean => item.id === data.id) ?? null;
+    if (summon === null) return false;
+
+    summon.health -= data.damage;
+    if (summon.health < 0) summon.health = 0;
+
+    return true;
+  }
+
+  addSummonsDeath(sessionId: string, data: { id: number }): boolean {
+    if (this.map === undefined) return false;
+
+    const player: Player | undefined = this._getPlayerBySessionId(sessionId);
+    if (player === undefined) return false;
+
+    const summon: Summons | null =
+      player.summons.find((item: Summons): boolean => item.id === data.id) ?? null;
+    if (summon === null) return false;
+
+    summon.deathSaves += 1;
+    if (summon.deathSaves > 3) summon.deathSaves = 3;
+
+    return true;
+  }
+  removeSummonsDeath(sessionId: string, data: { id: number }): boolean {
+    if (this.map === undefined) return false;
+
+    const player: Player | undefined = this._getPlayerBySessionId(sessionId);
+    if (player === undefined) return false;
+
+    const summon: Summons | null =
+      player.summons.find((item: Summons): boolean => item.id === data.id) ?? null;
+    if (summon === null) return false;
+
+    summon.deathSaves -= 1;
+    if (summon.deathSaves < 0) summon.deathSaves = 0;
+
+    return true;
+  }
+
+  addSummonsSave(sessionId: string, data: { id: number }): boolean {
+    if (this.map === undefined) return false;
+
+    const player: Player | undefined = this._getPlayerBySessionId(sessionId);
+    if (player === undefined) return false;
+
+    const summon: Summons | null =
+      player.summons.find((item: Summons): boolean => item.id === data.id) ?? null;
+    if (summon === null) return false;
+
+    summon.lifeSaves += 1;
+    if (summon.lifeSaves >= 3) {
+      summon.lifeSaves = 0;
+      summon.deathSaves = 0;
+      summon.health = 1;
+    }
+    return true;
+  }
+
+  removeSummonsSave(sessionId: string, data: { id: number }): boolean {
+    if (this.map === undefined) return false;
+
+    const player: Player | undefined = this._getPlayerBySessionId(sessionId);
+    if (player === undefined) return false;
+
+    const summon: Summons | null =
+      player.summons.find((item: Summons): boolean => item.id === data.id) ?? null;
+    if (summon === null) return false;
+
+    summon.lifeSaves -= 1;
+    if (summon.lifeSaves < 0) summon.lifeSaves = 0;
+    return true;
+  }
+
+  toggleSummonsVisibility(sessionId: string, data: { id: number }): boolean {
+    if (this.map === undefined) return false;
+
+    const player: Player | undefined = this._getPlayerBySessionId(sessionId);
+    if (player === undefined) return false;
+
+    const summon: Summons | null =
+      player.summons.find((item: Summons): boolean => item.id === data.id) ?? null;
+    if (summon === null) return false;
+
+    summon.isVisible = !summon.isVisible;
+
+    return true;
+  }
 
   //#region Fog
 
@@ -674,6 +918,7 @@ export class State extends Schema {
   loadPlayerData(players: LoadPlayerInterface[]) {
     players.forEach((val) => {
       if (!this.players.has(val.player_id)) {
+        // TODO: Set this, no reason to not estimate the player if they were here before.
         return;
       }
 
@@ -716,6 +961,34 @@ export class State extends Schema {
         poly.push(point);
       });
       this.map!.fogs.set(fog.fog_id + "", new MapFogPolygon(poly, fog.visible, +fog.fog_id));
+    });
+  }
+
+  loadSummonsData(summons: ShJoinInterface[]): void {
+    // Reset or instantiate summons
+    this.players.forEach((player: Player): void => {
+      player.summons = [];
+    });
+    summons.forEach((val: ShJoinInterface): void => {
+      if (!this.players.has(val.player_id)) {
+        console.log("Not the right player");
+        return;
+      }
+      const currentPlayer: Player = this.players.get(val.player_id)!;
+      const summon: Summons = new Summons({
+        avatarUri: val.image_name,
+        id: +val.summons_id,
+        name: val.name,
+        position: new mLatLng(val.position_lat, val.position_lng),
+        size: +val.size,
+        player_id: currentPlayer.userId,
+        health: +val.health,
+        totalHealth: +val.total_health,
+        lifeSaves: +val.life_saves,
+        deathSaves: +val.death_saves,
+        isVisible: val.is_visible,
+      });
+      currentPlayer.summons = [...currentPlayer.summons, summon];
     });
   }
   //#endregion

@@ -21,6 +21,10 @@ import { ExportDataInterface } from "../shared/ExportDataInterface";
 import { LoadCampaign, LoadImage, LoadSaveHistory } from "../shared/LoadDataInterfaces";
 import { GameStateEnum, IState, MapMovementType, State } from "../shared/State";
 import { sanitize, ValidateAllInputs, ValidationInputType } from "../Util/Utils";
+import { SummonsDao, SummonsDB } from "../Database/Tables/SummonsDb";
+import { SummonsHistoryDao, SummonsHistoryDB } from "../Database/Tables/SummonsHistoryDB";
+import { Summons } from "../shared/Summons";
+import { mLatLng } from "../shared/PositionInterface";
 
 export class StateHandlerRoom extends Room<State> {
   maxClients = 1000;
@@ -117,7 +121,6 @@ export class StateHandlerRoom extends Room<State> {
 
         validateParams.playerIds.forEach((x: string) => {
           // we need to grab the player
-          console.log(x);
           const player = this.state._getPlayerByUserId(x);
           if (!player) {
             console.error("Player not found");
@@ -475,7 +478,7 @@ export class StateHandlerRoom extends Room<State> {
     });
 
     this.onMessage("removeArc", (client, _data) => {
-      this.state.removeArc(client.sessionId);
+      this.state.removeBeam(client.sessionId);
     });
 
     // Beam Drawings
@@ -615,11 +618,32 @@ export class StateHandlerRoom extends Room<State> {
           { name: "name", type: "string", PostProcess: undefined },
           { name: "avatarUri", type: "string", PostProcess: undefined },
           { name: "size", type: "number", PostProcess: undefined },
+          { name: "health", type: "number", PostProcess: undefined },
           { name: "totalHealth", type: "number", PostProcess: undefined },
         ];
 
         const validateParams: any = ValidateAllInputs(data, inputList);
-        this.state.updateEnemyInformation(client.sessionId, validateParams);
+
+        // insert enemy into the database after inserting then add the enemy to the list. If the insert faild do not add the enemy.
+        ImageCatalogDB.getInstance()
+          // .create(new ImageCatalogDAO(player.userId, data.avatarUri, data.imgWidth, data.imgHeight))
+          .selectByImageName(validateParams.avatarUri)
+          .then((value) => {
+            if (value === undefined) return;
+            EnemyDB.getInstance()
+              .selectById(+validateParams.id)
+              .then((enemy: EnemyDAO | null) => {
+                if (enemy === null) return;
+                enemy.image_id = value.img_catalog_id!;
+                enemy.name = validateParams.name;
+
+                // NGL this many encased db calls is bad.
+                EnemyDB.getInstance().update(enemy);
+
+                this.state.updateEnemyInformation(client.sessionId, validateParams);
+              })
+              .catch((e) => {});
+          });
       } catch (error) {
         console.error(error);
       }
@@ -735,6 +759,272 @@ export class StateHandlerRoom extends Room<State> {
       }
     });
 
+    // Summons
+    this.onMessage("updateSummonsPosition", (client, data) => {
+      try {
+        const inputList: ValidationInputType[] = [
+          { name: "pos", type: "object", PostProcess: undefined },
+          { name: "id", type: "number", PostProcess: undefined },
+          { name: "player_id", type: "string", PostProcess: undefined },
+        ];
+
+        const validateParams: any = ValidateAllInputs(data, inputList);
+        if (!this.softAuthenticate(client.sessionId, validateParams.player_id)) {
+          return;
+        }
+
+        const status = this.state.updateSummonPosition(client.sessionId, validateParams);
+      } catch (error) {
+        console.error(error);
+      }
+    });
+
+    this.onMessage("updateSummonsGhostPosition", (client, data) => {
+      try {
+        const inputList: ValidationInputType[] = [
+          { name: "pos", type: "object", PostProcess: undefined },
+          { name: "id", type: "number", PostProcess: undefined },
+          { name: "player_id", type: "string", PostProcess: undefined },
+        ];
+
+        const validateParams: any = ValidateAllInputs(data, inputList);
+        if (!this.softAuthenticate(client.sessionId, validateParams.player_id)) {
+          // client.send(`EnemyGhostMovementConfirmation${validateParams.clientToChange}`, false);
+          return;
+        }
+
+        const status = this.state.setSummonGhostPosition(client.sessionId, validateParams);
+        // client.send(`EnemyGhostMovementConfirmation${validateParams.clientToChange}`, status);
+      } catch (error) {
+        console.error(error);
+      }
+    });
+
+    this.onMessage("addSummons", (client, data) => {
+      try {
+        const inputList: ValidationInputType[] = [
+          { name: "avatarUri", type: "string", PostProcess: undefined },
+          { name: "name", type: "string", PostProcess: undefined },
+          { name: "position", type: "object", PostProcess: undefined },
+          { name: "size", type: "number", PostProcess: undefined },
+          { name: "totalHealth", type: "number", PostProcess: undefined },
+        ];
+        // NOTE: This utilizes the player so no authentication is required.
+
+        const validateParams: any = ValidateAllInputs(data, inputList);
+        const player = this.state._getPlayerBySessionId(client.sessionId);
+        if (player === undefined) return;
+
+        // insert enemy into the database after inserting then add the enemy to the list. If the insert faild do not add the enemy.
+        ImageCatalogDB.getInstance()
+          // .create(new ImageCatalogDAO(player.userId, data.avatarUri, data.imgWidth, data.imgHeight))
+          .selectByImageName(validateParams.avatarUri)
+          .then((value) => {
+            if (value === undefined) return;
+            SummonsDB.getInstance()
+              .create(new SummonsDao(value.img_catalog_id!, validateParams.name, player.userId))
+              .then((id) => {
+                if (id === undefined) return;
+
+                const mData: any = {
+                  id: +id,
+                  player_id: player.userId,
+                  avatarUri: value.image_name,
+                  name: validateParams.name,
+                  position: validateParams.position,
+                  size: validateParams.size,
+                  health: validateParams.totalHealth,
+                  totalHealth: validateParams.totalHealth,
+                  deathSaves: 0,
+                  lifeSaves: 0,
+                };
+                this.state.addSummon(client.sessionId, mData);
+              })
+              .catch((e) => {});
+          });
+      } catch (error) {
+        console.error(error);
+      }
+    });
+    this.onMessage("deleteSummons", (client, data) => {
+      try {
+        // Player_id as this action can be called on by different people. (host vs player)
+        const inputList: ValidationInputType[] = [
+          { name: "id", type: "number", PostProcess: undefined },
+          { name: "player_id", type: "string", PostProcess: undefined },
+        ];
+
+        const validateParams: any = ValidateAllInputs(data, inputList);
+        if (!this.softAuthenticate(client.sessionId, validateParams.player_id)) {
+          // client.send(`EnemyGhostMovementConfirmation${validateParams.clientToChange}`, false);
+          return;
+        }
+        this.state.removeSummon(client.sessionId, validateParams);
+      } catch (error) {
+        console.error(error);
+      }
+    });
+    this.onMessage("updateSummons", (client, data) => {
+      try {
+        const inputList: ValidationInputType[] = [
+          { name: "id", type: "number", PostProcess: undefined },
+          { name: "name", type: "string", PostProcess: undefined },
+          { name: "avatarUri", type: "string", PostProcess: undefined },
+          { name: "size", type: "number", PostProcess: undefined },
+          { name: "health", type: "number", PostProcess: undefined },
+          { name: "totalHealth", type: "number", PostProcess: undefined },
+        ];
+
+        const validateParams: any = ValidateAllInputs(data, inputList);
+
+        // NOTE: No authentication is required as the sessionId is being used.
+
+        const player = this.state._getPlayerBySessionId(client.sessionId);
+        if (player === undefined) return;
+
+        // insert enemy into the database after inserting then add the enemy to the list. If the insert faild do not add the enemy.
+        ImageCatalogDB.getInstance()
+          // .create(new ImageCatalogDAO(player.userId, data.avatarUri, data.imgWidth, data.imgHeight))
+          .selectByImageName(validateParams.avatarUri)
+          .then((value) => {
+            if (value === undefined) return;
+            SummonsDB.getInstance()
+              .selectById(validateParams.id)
+              .then((summon: SummonsDao | null) => {
+                if (summon === null) return;
+                summon.image_id = value.img_catalog_id!;
+                summon.name = validateParams.name;
+
+                SummonsDB.getInstance().update(summon);
+
+                const mData: any = {
+                  id: +summon.getIdValue()!,
+                  avatarUri: value.image_name,
+                  name: validateParams.name,
+                  size: validateParams.size,
+                  health: validateParams.health,
+                  totalHealth: validateParams.totalHealth,
+                };
+                this.state.updateSummonsInformation(client.sessionId, mData);
+              })
+              .catch((e) => {});
+          });
+      } catch (error) {
+        console.error(error);
+      }
+    });
+
+    this.onMessage("summonHeal", (client, data) => {
+      try {
+        const inputList: ValidationInputType[] = [
+          { name: "id", type: "number", PostProcess: undefined },
+          { name: "heal", type: "number", PostProcess: undefined },
+        ];
+
+        const validateParams: any = ValidateAllInputs(data, inputList);
+
+        // NOTE: No Authentication is required as the sessionId is being used.
+
+        this.state.healSummons(client.sessionId, validateParams);
+      } catch (error) {
+        console.error(error);
+      }
+    });
+
+    this.onMessage("summonDamage", (client, data) => {
+      try {
+        const inputList: ValidationInputType[] = [
+          { name: "id", type: "number", PostProcess: undefined },
+          { name: "damage", type: "number", PostProcess: undefined },
+        ];
+
+        const validateParams: any = ValidateAllInputs(data, inputList);
+
+        // NOTE: No Authentication is required as the sessionId is being used.
+
+        this.state.damageSummons(client.sessionId, validateParams);
+      } catch (error) {
+        console.error(error);
+      }
+    });
+    this.onMessage("summonDeathAdd", (client, data) => {
+      try {
+        const inputList: ValidationInputType[] = [
+          { name: "id", type: "number", PostProcess: undefined },
+        ];
+
+        const validateParams: any = ValidateAllInputs(data, inputList);
+
+        // NOTE: No Authentication is required as the sessionId is being used.
+
+        this.state.addSummonsDeath(client.sessionId, validateParams);
+      } catch (error) {
+        console.error(error);
+      }
+    });
+    this.onMessage("summonDeathRemove", (client, data) => {
+      try {
+        const inputList: ValidationInputType[] = [
+          { name: "id", type: "number", PostProcess: undefined },
+        ];
+
+        const validateParams: any = ValidateAllInputs(data, inputList);
+
+        // NOTE: No Authentication is required as the sessionId is being used.
+
+        this.state.removeSummonsDeath(client.sessionId, validateParams);
+      } catch (error) {
+        console.error(error);
+      }
+    });
+    this.onMessage("summonSaveAdd", (client, data) => {
+      try {
+        const inputList: ValidationInputType[] = [
+          { name: "id", type: "number", PostProcess: undefined },
+        ];
+
+        const validateParams: any = ValidateAllInputs(data, inputList);
+
+        // NOTE: No Authentication is required as the sessionId is being used.
+
+        this.state.addSummonsSave(client.sessionId, validateParams);
+      } catch (error) {
+        console.error(error);
+      }
+    });
+    this.onMessage("summonSaveRemove", (client, data) => {
+      try {
+        const inputList: ValidationInputType[] = [
+          { name: "id", type: "number", PostProcess: undefined },
+        ];
+
+        const validateParams: any = ValidateAllInputs(data, inputList);
+
+        // NOTE: No Authentication is required as the sessionId is being used.
+
+        this.state.removeSummonsSave(client.sessionId, validateParams);
+      } catch (error) {
+        console.error(error);
+      }
+    });
+    this.onMessage("toggleSummonVisibility", (client, data) => {
+      try {
+        // Include player_id as this action can be called by multiple users (host vs player).
+        const inputList: ValidationInputType[] = [
+          { name: "id", type: "number", PostProcess: undefined },
+          { name: "player_id", type: "string", PostProcess: undefined },
+        ];
+
+        const validateParams: any = ValidateAllInputs(data, inputList);
+
+        // NOTE: No Authentication is required as the sessionId is being used.
+
+        this.state.toggleSummonsVisibility(client.sessionId, validateParams);
+      } catch (error) {
+        console.error(error);
+      }
+    });
+
     // EXPORT and IMPORT
 
     // sets a new map
@@ -832,7 +1122,7 @@ export class StateHandlerRoom extends Room<State> {
     // this will get all saves from a specific user and return those to the client that called
     this.onMessage("getSaves", (client, _data) => {
       SaveHistoryDB.getInstance()
-        .selectById(_data.user_id)
+        .selectByPlayerId(_data.user_id)
         .then((value: SaveHistoryDAO[] | undefined) => {
           const sendData: LoadSaveHistory[] | undefined = value?.map((val) => {
             return { id: val.id ?? -1, date: val.date, map: val.map, player_size: val.player_size };
@@ -955,6 +1245,9 @@ delete from Public."Map" where player_id = 'temp';
         const ininitiativePromise = InitiativeHistoryDB.getInstance().selectByHistoryId(
           validateParams.history_id,
         );
+        const summonsPromise = SummonsHistoryDB.getInstance().selectByHistoryId(
+          validateParams.history_id,
+        );
 
         const savedHistoryData = await Promise.all([
           mapPromise,
@@ -962,6 +1255,7 @@ delete from Public."Map" where player_id = 'temp';
           enemyHistoryPromise,
           fogHistoryPromise,
           ininitiativePromise,
+          summonsPromise,
         ]);
 
         if (savedHistoryData[0] === undefined) return; // if the map is not present the rest of the data is useless
@@ -975,6 +1269,7 @@ delete from Public."Map" where player_id = 'temp';
         this.state.loadPlayerData(savedHistoryData[1] ?? []);
         this.state.loadEnemyData(savedHistoryData[2] ?? []);
         this.state.loadFogData(savedHistoryData[3] ?? []);
+        this.state.loadSummonsData(savedHistoryData[5] ?? []);
       } catch (error) {
         console.error(error);
       }
@@ -1134,8 +1429,8 @@ delete from Public."Map" where player_id = 'temp';
     // TODO: This should be transformed into a transaction on the database side for now this is ok for test purposes.
     SaveHistoryDB.getInstance()
       .create(new SaveHistoryDAO(new Date(), data.map.id!, host_id, data.map.iconHeight))
-      .then((index) => {
-        if (index === undefined) return; // required data is not inserted in the database we need to leave.
+      .then((history_id) => {
+        if (history_id === undefined) return; // required data is not inserted in the database we need to leave.
         //we have the save history index we now need to insert into all other databases
 
         // Create a checkpoint for all players in the player_movement_history DB
@@ -1149,7 +1444,7 @@ delete from Public."Map" where player_id = 'temp';
           const lifeSaves = p.lifeSaves;
           PlayerMovementHistoryDB.getInstance().create(
             new PlayerMovementHistoryDAO(
-              index,
+              history_id,
               key,
               position,
               initiative,
@@ -1159,6 +1454,32 @@ delete from Public."Map" where player_id = 'temp';
               lifeSaves,
             ),
           );
+
+          p.summons.forEach((curSummon: Summons): void => {
+            const summons_id: number = curSummon.id;
+            const size: number = curSummon.size;
+            const position: mLatLng = curSummon.position;
+            const health: number = curSummon.health;
+            const totalHealth: number = curSummon.totalHealth;
+            const deathSaves: number = curSummon.deathSaves;
+            const lifeSaves: number = curSummon.lifeSaves;
+            const isVisible: boolean = curSummon.isVisible;
+
+            SummonsHistoryDB.getInstance().create(
+              new SummonsHistoryDao(
+                history_id,
+                summons_id,
+                p.userId,
+                size,
+                position,
+                health,
+                totalHealth,
+                deathSaves,
+                lifeSaves,
+                isVisible,
+              ),
+            );
+          });
         });
 
         // Create a checkpoint for all enemies
@@ -1174,7 +1495,7 @@ delete from Public."Map" where player_id = 'temp';
           const isVisible = e.isVisible;
           EnemyMovementHistoryDB.getInstance().create(
             new EnemyMovementHistoryDAO(
-              index,
+              history_id,
               +key,
               size,
               position,
@@ -1191,11 +1512,11 @@ delete from Public."Map" where player_id = 'temp';
         // Time for fogs
         [...data.map.fogs.keys()].forEach((key) => {
           const visible = data.map.fogs.get(key)!.isVisible;
-          FogStateHistoryDB.getInstance().create(new FogStateHistoryDAO(index, +key, visible));
+          FogStateHistoryDB.getInstance().create(new FogStateHistoryDAO(history_id, +key, visible));
         });
 
         InitiativeHistoryDB.getInstance().create(
-          new InitiativeHistoryDAO(index, data.map.initiativeIndex),
+          new InitiativeHistoryDAO(history_id, data.map.initiativeIndex),
         );
       });
   }
@@ -1213,8 +1534,6 @@ delete from Public."Map" where player_id = 'temp';
     if (issuer === undefined) return false;
     if (reciever === undefined) return false;
 
-    // console.log(this.authenticateHostAction(issuer_session_id));
-    // console.log(issuer.userId === reciever.userId);
     return this.authenticateHostAction(issuer_session_id) || issuer.userId === reciever.userId;
   }
 
@@ -1222,10 +1541,7 @@ delete from Public."Map" where player_id = 'temp';
     // console.log("start authentication")
     const user = this.state._getPlayerBySessionId(session_id);
     if (user === undefined) return false;
-    // console.log("user exist");
-    // console.log(this.state.currentHostUserId !== undefined);
-    // console.log(user.isHost);
-    // console.log(this.state.currentHostUserId === user.userId);
+
     return (
       this.state.currentHostUserId !== undefined &&
       user.isHost &&

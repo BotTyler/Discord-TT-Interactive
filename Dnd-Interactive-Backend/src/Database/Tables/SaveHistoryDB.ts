@@ -42,7 +42,7 @@ export class SaveHistoryDB extends DatabaseBase<SaveHistoryDAO> {
     super("Save_History");
   }
 
-  async selectById(player_id: string): Promise<SaveHistoryDAO[] | undefined> {
+  async selectByPlayerId(player_id: string): Promise<SaveHistoryDAO[] | undefined> {
     const query = `SELECT * FROM public."Save_History" where player_id = $1;`;
     console.log(query);
 

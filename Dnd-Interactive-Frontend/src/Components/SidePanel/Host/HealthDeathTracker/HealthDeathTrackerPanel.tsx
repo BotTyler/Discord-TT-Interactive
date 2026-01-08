@@ -35,7 +35,10 @@ export default function HealthDeathTrackerPanel() {
         {Object.values(enemyList).map((val) => {
           return (
             <li className="list-group-item p-0" key={`HealthDeathTrackerElement-Enemy-${val.id}`}>
-              <HealthDeathTrackerElement item={val} isPlayer={false} />
+              <HealthDeathTrackerElement
+                item={val}
+                itemType="enemy"
+              />
             </li>
           );
         })}
@@ -43,7 +46,10 @@ export default function HealthDeathTrackerPanel() {
           if (val.isHost) return <div key={"HealthDeathTrackerElement-Player-HOST"}></div>;
           return (
             <li className="list-group-item p-0" key={`HealthDeathTrackerElement-Player-${val.userId}`}>
-              <HealthDeathTrackerElement item={val} isPlayer={true} />
+              <HealthDeathTrackerElement
+                item={val}
+                itemType="player"
+              />
             </li>
           );
         })}
