@@ -97,10 +97,10 @@ export const GameMapContextHandler = React.forwardRef(function GameMapContextHan
   }, [map]);
   React.useEffect(() => {
     emitFieldChangeEvent(`EnemiesChanged`, enemies);
-  }, [connectedEnemies]);
+  }, [enemies]);
   React.useEffect(() => {
     emitFieldChangeEvent(`FogsChanged`, fogs);
-  }, [connectedFogs]);
+  }, [enemies]);
   React.useEffect(() => {
     emitFieldChangeEvent(`IconHeightChanged`, iconHeight);
   }, [iconHeight]);
@@ -111,13 +111,13 @@ export const GameMapContextHandler = React.forwardRef(function GameMapContextHan
     });
     window.dispatchEvent(event);
   }, [initiativeIndex]);
-  React.useEffect(()=>{
+  React.useEffect(() => {
     emitFieldChangeEvent("MapMovementChanged", mapMovement);
   }, [mapMovement]);
-  React.useEffect(()=>{
+  React.useEffect(() => {
     emitFieldChangeEvent("GridDisplayChange", gridShowing);
   }, [gridShowing]);
-  React.useEffect(()=>{
+  React.useEffect(() => {
     emitFieldChangeEvent("GridColorChange", gridColor);
   }, [gridColor]);
 

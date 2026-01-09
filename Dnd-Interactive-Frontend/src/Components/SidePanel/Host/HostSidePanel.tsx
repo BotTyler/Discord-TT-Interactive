@@ -1,8 +1,6 @@
 import React from "react";
 import SimpleNavbar from "../../SimpleNavbar/SimpleNavbar";
-import AudioBox from "../General/AudioBox/AudioBox";
 import ChatBox from "../General/Chatbox/Chat";
-import EnemyListPanel from "./EnemyList/EnemyListPanel";
 import HandoutsPanel from "./Handouts/HandoutsPanels";
 import HealthDeathTrackerPanel from "./HealthDeathTracker/HealthDeathTrackerPanel";
 import ImportExport from "./ImportExport";
@@ -12,11 +10,10 @@ import PlayerProfilePanel from "../Player/PlayerProfile/PlayerProfilePanel";
 
 export default function HostSidePanel() {
   const contentList: { title: string; content: React.ReactNode }[] = [
-    { title: "Enemy List", content: <EnemyListPanel /> },
-    { title: "Initiative Tracker", content: <InitiativeTrackerPanel /> },
+    { title: "Enemies", content: <HealthDeathTrackerPanel /> },
+    { title: "Initiative", content: <InitiativeTrackerPanel /> },
     { title: "Chat", content: <ChatBox /> },
-    { title: "Audio", content: <AudioBox /> },
-    { title: "HP", content: <HealthDeathTrackerPanel /> },
+    // { title: "Audio", content: <AudioBox /> }, // This may not be so useful anymore
     { title: "Handout", content: <HandoutsPanel /> },
     { title: "Settings", content: <SettingsPanel /> },
     { title: "Player", content: <PlayerProfilePanel /> },

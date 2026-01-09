@@ -1,36 +1,27 @@
 import { useState } from "react";
 import TextToInput from "../../../TextToInput/TextToInput";
 
-export default function HealthComponent(
-  { name, health, totalHealth, HealthClick, DamageClick, HealthChange, TotalHealthChange }:
+export default function HealthNamePlate(
+  { name, health, totalHealth, HealthChange, TotalHealthChange }:
     {
       name: string,
       health: number;
       totalHealth: number;
-      HealthClick: (val: number) => void;
-      DamageClick: (val: number) => void;
       HealthChange: (val: number) => void;
       TotalHealthChange: (val: number) => void;
     }
 ) {
   return (
-    <div className="w-100 h-100 row g-0 p-0 m-0 gap-0">
-      {/* HP values */}
-      <div className="col-8 d-flex flex-column justify-content-center align-items-center fs-6 border-start border-end">
-        <p className="m-0">{name}</p>
-        <div className="overflow-hidden w-100 d-flex justify-content-center">
-          <TextToInput type="number" value={health} onSubmit={(val: string): void => {
-            HealthChange!(+val);
-          }} />
-          <p className="h-100 m-0 fs-5">/</p>
-          <TextToInput type="number" value={totalHealth} onSubmit={(val: string): void => {
-            TotalHealthChange!(+val);
-          }} />
-        </div>
-      </div>
-      {/* HP/Dmg Input */}
-      <div className="col-4">
-        <HealDamageComponent HealthClick={HealthClick} DamageClick={DamageClick} />
+    <div className="w-100 h-100 d-flex flex-column justify-content-center align-items-center border-start border-end" style={{ fontSize: 12 }}>
+      <p className="m-0">{name}</p>
+      <div className="overflow-hidden w-100 d-flex justify-content-center">
+        <TextToInput type="number" value={health} onSubmit={(val: string): void => {
+          HealthChange!(+val);
+        }} />
+        <p className="h-100 m-0 fs-5">/</p>
+        <TextToInput type="number" value={totalHealth} onSubmit={(val: string): void => {
+          TotalHealthChange!(+val);
+        }} />
       </div>
     </div>
   );

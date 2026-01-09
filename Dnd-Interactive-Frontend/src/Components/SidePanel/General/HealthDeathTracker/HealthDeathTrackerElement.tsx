@@ -1,13 +1,14 @@
-import { Player } from "../../../../../src/shared/Player";
-import { Enemy } from "../../../../../src/shared/Enemy";
 import { useEffect, useState } from "react";
-import { useAuthenticatedContext } from "../../../../ContextProvider/useAuthenticatedContext";
-import DeathComponent from "./DeathComponent";
-import HealthComponent from "./HealthComponent";
-import { ProgressDiv } from "../../../ProgressBar/ProgressBarComponent";
+import { Enemy } from "../../../../../src/shared/Enemy";
+import { Player } from "../../../../../src/shared/Player";
 import { useGameState } from "../../../../ContextProvider/GameStateContext/GameStateProvider";
+import { useAuthenticatedContext } from "../../../../ContextProvider/useAuthenticatedContext";
 import { Summons } from "../../../../shared/Summons";
 import EditCharacterModal from "../../../Modal/SummonedCharacterModal";
+import { ProgressDiv } from "../../../ProgressBar/ProgressBarComponent";
+import DeathComponent from "./DeathComponent";
+import HealthNamePlate, { HealDamageComponent } from "./HealthComponent";
+import { mLatLng } from "../../../../shared/PositionInterface";
 
 export default function HealthDeathTrackerElement({ item, itemType }:
   {
@@ -25,6 +26,7 @@ export default function HealthDeathTrackerElement({ item, itemType }:
   const [totalHealth, setTotalHealth] = useState<number>(item.totalHealth);
   const [deathSaves, setDeathSaves] = useState<number>(item.deathSaves);
   const [lifeSaves, setLifeSaves] = useState<number>(item.lifeSaves);
+  const [isVisible, setVisibility] = useState<boolean>((item as Enemy | Summons).isVisible ?? true);
 
   const [showEditCharacter, setShowEditCharacter] = useState<boolean>(false);
 
@@ -71,6 +73,10 @@ export default function HealthDeathTrackerElement({ item, itemType }:
       setSize(val.detail.val);
     }
 
+    const handleVisibilityChange = (val: any) => {
+      setVisibility(val.detail.val)
+    }
+
     window.addEventListener(`${updateString}-name`, handleNameChange);
     window.addEventListener(`${updateString}-avatarUri`, handleImageChange);
     window.addEventListener(`${updateString}-health`, handleHealthChange);
@@ -78,6 +84,7 @@ export default function HealthDeathTrackerElement({ item, itemType }:
     window.addEventListener(`${updateString}-deathSaves`, handleDeathSavesChange);
     window.addEventListener(`${updateString}-lifeSaves`, handleLifeSavesChange);
     window.addEventListener(`${updateString}-size`, handleSizeChange);
+    window.addEventListener(`${updateString}-isVisible`, handleVisibilityChange);
     return () => {
       window.removeEventListener(`${updateString}-name`, handleNameChange);
       window.removeEventListener(`${updateString}-avatarUri`, handleImageChange);
@@ -86,21 +93,223 @@ export default function HealthDeathTrackerElement({ item, itemType }:
       window.removeEventListener(`${updateString}-deathSaves`, handleDeathSavesChange);
       window.removeEventListener(`${updateString}-lifeSaves`, handleLifeSavesChange);
       window.removeEventListener(`${updateString}-size`, handleSizeChange);
+      window.removeEventListener(`${updateString}-isVisible`, handleVisibilityChange);
     };
   }, []);
+
+  const healthnamePlate = (
+    <HealthNamePlate
+      name={name}
+      health={health}
+      totalHealth={totalHealth}
+      HealthChange={(val: number): void => {
+        switch (itemType) {
+          case "player":
+            break;
+          case "enemy":
+            authContext.room.send("updateEnemy", {
+              id: `${id}`,
+              name: name,
+              size: size,
+              avatarUri: avatarUri,
+              health: val,
+              totalHealth: totalHealth,
+            })
+            break;
+          case "summons":
+            authContext.room.send("updateSummons", {
+              id: +id,
+              name: name,
+              size: size,
+              avatarUri: avatarUri,
+              health: val,
+              totalHealth: totalHealth,
+            })
+            break;
+        }
+      }}
+      TotalHealthChange={(val: number): void => {
+        switch (itemType) {
+          case "player":
+            break;
+          case "enemy":
+            authContext.room.send("updateEnemy", {
+              id: `${id}`,
+              name: name,
+              size: size,
+              avatarUri: avatarUri,
+              health: health,
+              totalHealth: val,
+            })
+            break;
+          case "summons":
+            authContext.room.send("updateSummons", {
+              id: +id,
+              name: name,
+              size: size,
+              avatarUri: avatarUri,
+              health: health,
+              totalHealth: val,
+            })
+            break;
+        }
+      }}
+    />
+  );
+
+  const deathElement = (
+    <DeathComponent
+      deathNumber={deathSaves}
+      saveNumber={lifeSaves}
+      id={id}
+      deathAdd={
+        () => {
+          switch (itemType) {
+            case "player":
+              break;
+            case "enemy":
+              authContext.room.send("enemyDeathAdd", { clientToChange: `${id}` });
+              break;
+            case "summons":
+              authContext.room.send("summonDeathAdd", { id: +id });
+              break;
+          }
+        }}
+      deathRemove={() => {
+        switch (itemType) {
+          case "player":
+            break;
+          case "enemy":
+            authContext.room.send("enemyDeathRemove", { clientToChange: `${id}` });
+            break;
+          case "summons":
+            authContext.room.send("summonDeathRemove", { id: +id });
+            break;
+        }
+      }}
+      saveAdd={() => {
+        switch (itemType) {
+          case "player":
+            break;
+          case "enemy":
+            authContext.room.send("enemySaveAdd", { clientToChange: `${id}` });
+            break;
+          case "summons":
+            authContext.room.send("summonSaveAdd", { id: +id });
+            break;
+        }
+      }}
+      saveRemove={() => {
+        switch (itemType) {
+          case "player":
+            break;
+          case "enemy":
+            authContext.room.send("enemySaveRemove", { clientToChange: `${id}` });
+            break;
+          case "summons":
+            authContext.room.send("summonSaveRemove", { id: +id });
+            break;
+        }
+      }}
+    />
+  );
+
+  const healDamageElement = (
+    <HealDamageComponent
+      HealthClick={(val: number) => {
+        switch (itemType) {
+          case "player":
+            break;
+          case "enemy":
+            authContext.room.send("enemyHeal", { clientToChange: `${id}`, heal: val });
+            break;
+          case "summons":
+            authContext.room.send("summonHeal", { id: +id, heal: val });
+            break;
+        }
+      }}
+      DamageClick={(val: number) => {
+        switch (itemType) {
+          case "player":
+            break;
+          case "enemy":
+            authContext.room.send("enemyDamage", { clientToChange: `${id}`, damage: val });
+            break;
+          case "summons":
+            authContext.room.send("summonDamage", { id: +id, damage: val });
+            break;
+        }
+      }}
+    />
+  );
+
+  const handleEditCallback = () => {
+    //show modal
+    setShowEditCharacter(true);
+    // Send the data
+  };
+
+  const handleDuplicateCallback = () => {
+    switch (itemType) {
+      case "player":
+        break;
+      case "enemy":
+        authContext.room.send("addEnemy", {
+          avatarUri: avatarUri,
+          name: name,
+          position: new mLatLng(0, 0),
+          size: size,
+          totalHealth: totalHealth,
+        });
+        break;
+      case "summons":
+        authContext.room.send("addSummons", {
+          avatarUri: avatarUri,
+          name: name,
+          position: new mLatLng(0, 0),
+          size: size,
+          totalHealth: totalHealth,
+        });
+        break;
+    }
+  };
+  const handleDeleteCallback = () => {
+    switch (itemType) {
+      case "player":
+        break;
+      case "enemy":
+        authContext.room.send("deleteEnemy", { id: `${id}` });
+        break;
+      case "summons":
+        authContext.room.send("deleteSummons", { id: +id, player_id: `${(item as Summons).player_id}` });
+        break;
+    }
+  };
+  const handleVisibilityToggle = (): void => {
+    switch (itemType) {
+      case "player":
+        break;
+      case "enemy":
+        authContext.room.send("toggleEnemyVisibility", { clientToChange: `${id}` })
+        break;
+      case "summons":
+        authContext.room.send("toggleSummonVisibility", { id: +id, player_id: `${(item as Summons).player_id}` })
+        break;
+    }
+  }
 
   return (
     <>
 
-      <div className="">
+      <div className="w-100 h-auto">
         <div className="w-100" style={{ height: "5px" }}>
           <ProgressDiv current={health} max={totalHealth} />
         </div>
-        <div className="d-flex">
+        <div className="row g-0">
           {/* Image */}
           <div
-            className="d-flex justify-content-center align-items-center h-auto"
-            style={{ minWidth: "50px", maxWidth: "80px", cursor: "pointer" }}
+            className="d-flex justify-content-center align-items-center h-auto col-2"
+            style={{ cursor: "pointer" }}
             onClick={() => {
               setShowEditCharacter(true);
             }}
@@ -109,144 +318,33 @@ export default function HealthDeathTrackerElement({ item, itemType }:
           </div>
 
           {/* content */}
-          <div className="flex-grow-1">
-            {health > 0 ? (
-              <HealthComponent
-                name={name}
-                health={health}
-                totalHealth={totalHealth}
-                HealthClick={(val: number) => {
-                  switch (itemType) {
-                    case "player":
-                      break;
-                    case "enemy":
-                      authContext.room.send("enemyHeal", { clientToChange: `${id}`, heal: val });
-                      break;
-                    case "summons":
-                      authContext.room.send("summonHeal", { id: +id, heal: val });
-                      break;
-                  }
-                }}
-                DamageClick={(val: number) => {
-                  switch (itemType) {
-                    case "player":
-                      break;
-                    case "enemy":
-                      authContext.room.send("enemyDamage", { clientToChange: `${id}`, damage: val });
-                      break;
-                    case "summons":
-                      authContext.room.send("summonDamage", { id: +id, damage: val });
-                      break;
-                  }
-                }}
-                HealthChange={(val: number): void => {
-                  switch (itemType) {
-                    case "player":
-                      break;
-                    case "enemy":
-                      authContext.room.send("updateEnemy", {
-                        id: `${id}`,
-                        name: name,
-                        size: size,
-                        avatarUri: avatarUri,
-                        health: val,
-                        totalHealth: totalHealth,
-                      })
-                      break;
-                    case "summons":
-                      authContext.room.send("updateSummons", {
-                        id: +id,
-                        name: name,
-                        size: size,
-                        avatarUri: avatarUri,
-                        health: val,
-                        totalHealth: totalHealth,
-                      })
-                      break;
-                  }
-                }}
-                TotalHealthChange={(val: number): void => {
-                  switch (itemType) {
-                    case "player":
-                      break;
-                    case "enemy":
-                      authContext.room.send("updateEnemy", {
-                        id: `${id}`,
-                        name: name,
-                        size: size,
-                        avatarUri: avatarUri,
-                        health: health,
-                        totalHealth: val,
-                      })
-                      break;
-                    case "summons":
-                      authContext.room.send("updateSummons", {
-                        id: +id,
-                        name: name,
-                        size: size,
-                        avatarUri: avatarUri,
-                        health: health,
-                        totalHealth: val,
-                      })
-                      break;
-                  }
-                }}
-              />
-            ) : (
-              <DeathComponent
-                deathNumber={deathSaves}
-                saveNumber={lifeSaves}
-                id={id}
-                deathAdd={() => {
-                  switch (itemType) {
-                    case "player":
-                      break;
-                    case "enemy":
-                      authContext.room.send("enemyDeathAdd", { clientToChange: `${id}` });
-                      break;
-                    case "summons":
-                      authContext.room.send("summonDeathAdd", { id: +id });
-                      break;
-                  }
-                }}
-                deathRemove={() => {
-                  switch (itemType) {
-                    case "player":
-                      break;
-                    case "enemy":
-                      authContext.room.send("enemyDeathRemove", { clientToChange: `${id}` });
-                      break;
-                    case "summons":
-                      authContext.room.send("summonDeathRemove", { id: +id });
-                      break;
-                  }
-                }}
-                saveAdd={() => {
-                  switch (itemType) {
-                    case "player":
-                      break;
-                    case "enemy":
-                      authContext.room.send("enemySaveAdd", { clientToChange: `${id}` });
-                      break;
-                    case "summons":
-                      authContext.room.send("summonSaveAdd", { id: +id });
-                      break;
-                  }
-                }}
-                saveRemove={() => {
-                  switch (itemType) {
-                    case "player":
-                      break;
-                    case "enemy":
-                      authContext.room.send("enemySaveRemove", { clientToChange: `${id}` });
-                      break;
-                    case "summons":
-                      authContext.room.send("summonSaveRemove", { id: +id });
-                      break;
-                  }
-                }}
-              />
-            )}
+          <div className="col-6 d-flex flex-column">
+            <div className="w-100 flex-grow-1">
+              {health > 0 ? healthnamePlate : deathElement}
+            </div>
+            <div className="w-100 h-fit mb-1">
+              <div className="row gap-1 p-0 g-0 m-0 justify-content-center">
+                {/* Place button */}
+                <button className="col-1 btn btn-primary w-auto h-auto p-1" onClick={() => handleEditCallback()}>
+                  <i className="bi bi-pencil-square"></i>
+                </button>
+                {/* Duplicate button */}
+                <button className="col-1 btn btn-primary w-auto h-auto p-1" onClick={() => handleDuplicateCallback()}>
+                  <i className="bi bi-copy"></i>
+                </button>
+                {/* Visibility */}
+                <button className="col-1 btn btn-primary w-auto h-auto p-1" onClick={() => handleVisibilityToggle()}>
+                  {isVisible ? <i className="bi bi-eye-fill"></i> : <i className="bi bi-eye-slash-fill"></i>}
+                </button>
+                {/* Remove */}
+                <button className="col-1 btn btn-danger w-auto h-auto p-1" onClick={() => handleDeleteCallback()}>
+                  <i className="bi bi-trash"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div className="col-4">
+            {healDamageElement}
           </div>
         </div>
       </div>
@@ -272,7 +370,7 @@ export default function HealthDeathTrackerElement({ item, itemType }:
                   break;
                 case "summons":
                   authContext.room.send(`updateSummons`, {
-                    id: id + "",
+                    id: +id,
                     name: data.name,
                     size: data.size,
                     avatarUri: data.avatarUri,

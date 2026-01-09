@@ -51,11 +51,12 @@ export default function ChatInput() {
         />
         <span className="input-group-text" id="basic-addon1">
           <button
+            className="btn btn-primary"
             onClick={() => {
               sendMessage();
             }}
           >
-            -&gt;
+            <i className="bi bi-envelope-arrow-up-fill"></i>
           </button>
         </span>
       </div>

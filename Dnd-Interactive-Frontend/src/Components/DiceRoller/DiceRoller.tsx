@@ -19,9 +19,10 @@ export const DiceRoller = React.forwardRef(function DiceRoller({ fullScreen }: {
   useImperativeHandle(ref, () => ({
     refresh() {
       if (dice == undefined) return;
+      if (refresh === true) return;
       setRefresh(true);
     },
-  }));
+  }), [refresh]);
 
   // Initialize the dicebox
   React.useEffect(() => {

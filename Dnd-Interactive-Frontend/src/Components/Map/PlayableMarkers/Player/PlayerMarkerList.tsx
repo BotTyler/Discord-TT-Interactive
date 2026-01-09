@@ -144,7 +144,7 @@ function SummonsControllerListElement({ _player }: { _player: Player }) {
   return (
     <>
       {summons.map((val: Summons) => {
-        <div key={`SummonControlElement-${val.id}`}>
+        return <div key={`SummonControlElement-${val.id}`}>
           {getControllerElement(val)}
         </div>
       })};
