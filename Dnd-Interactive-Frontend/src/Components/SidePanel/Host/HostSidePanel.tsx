@@ -13,7 +13,6 @@ export default function HostSidePanel() {
     { title: "Enemies", content: <HealthDeathTrackerPanel /> },
     { title: "Initiative", content: <InitiativeTrackerPanel /> },
     { title: "Chat", content: <ChatBox /> },
-    // { title: "Audio", content: <AudioBox /> }, // This may not be so useful anymore
     { title: "Handout", content: <HandoutsPanel /> },
     { title: "Settings", content: <SettingsPanel /> },
     { title: "Player", content: <PlayerProfilePanel /> },

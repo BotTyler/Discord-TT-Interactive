@@ -2,7 +2,6 @@ import { createContext, forwardRef, useContext, useEffect, useImperativeHandle, 
 import { Accordion, Col, Image, Offcanvas, Row } from "react-bootstrap";
 import { getFileNameFromMinioString } from "../../Util/Util";
 import { useAuthenticatedContext } from "../useAuthenticatedContext";
-import { AudioHandler } from "./AudioHandler";
 
 export interface SettingsProviderInterface {
   getQueue: () => string[];
@@ -66,34 +65,16 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
 
 const SettingsContainer = forwardRef(function SettingsContainer({ embeddedRefReadyCallback }: { embeddedRefReadyCallback: (status: boolean) => void }, ref: any) {
-  const audioRef = useRef<any>(null);
   const [showSettingsPanel, setShowSettingsPanel] = useState<boolean>(false);
 
   useImperativeHandle(ref, () => ({
-    //getAllMessage(): MessageInterface[] {
-    //  return allMessage;
-    //},
-    getQueue() {
-      if (!audioRef.current) {
-        console.warn("This was accessed before the ref was ready! >:(");
-        return [];
-      }
-      return audioRef.current.getQueue();
-    },
-    getCurrentIndex() {
-      if (!audioRef.current) {
-        console.warn("This method was accessed before the ref was ready! >:(");
-        return 0;
-      }
-      return audioRef.current.getCurrentIndex();
-    }
 
   }));
   useEffect(() => {
-    const audioRefReady = audioRef.current != null;
-
-    embeddedRefReadyCallback(audioRefReady);
-  }, [audioRef]);
+    // NOTE: INCLUDE ANY REFS THAT NEED TO BE WAITED FOR HERE.
+    // MAKE SURE TO INCLUDE THEM IN THE DEPS ARRAY.
+    embeddedRefReadyCallback(true);
+  }, []);
 
   return (<div className="position-relative">
     <div
@@ -110,20 +91,13 @@ const SettingsContainer = forwardRef(function SettingsContainer({ embeddedRefRea
 
     </div>
     {/* Audio Handler has to be here as the accordion will unmount on close */}
-    <AudioHandler ref={audioRef} />
     <Offcanvas show={showSettingsPanel} onHide={() => setShowSettingsPanel(false)}>
       <Offcanvas.Header closeButton>
         <Offcanvas.Title>Settings</Offcanvas.Title>
       </Offcanvas.Header>
       <Offcanvas.Body>
         <Accordion defaultActiveKey="0" className="h-100 w-100 overflow-hidden d-flex flex-column">
-          <Accordion.Item eventKey="0">
-            <Accordion.Header>AudioHandler</Accordion.Header>
-            <Accordion.Body>
-              <AudioDisplayer />
-            </Accordion.Body>
-          </Accordion.Item>
-          <Accordion.Item eventKey="1" className="d-flex flex-column" style={{ maxHeight: '750px' }}>
+          <Accordion.Item eventKey="0" className="d-flex flex-column" style={{ maxHeight: '750px' }}>
             <Accordion.Header>Asset Manager</Accordion.Header>
             <Accordion.Body className="overflow-auto" style={{ flex: '1 1 auto', height: '1px' }}>
               <AssetManager />
@@ -166,14 +140,4 @@ function AssetManager() {
     </Row>
   </div>
 
-}
-
-
-function AudioDisplayer() {
-
-  return (
-    <div className="w-100 h-auto">
-      Audio AudioDisplayer
-    </div>
-  )
 }

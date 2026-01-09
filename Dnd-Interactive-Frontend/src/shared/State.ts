@@ -1,5 +1,4 @@
 import { MapSchema, Schema, type } from "@colyseus/schema";
-import { Audio as gameAudio } from "./Audio";
 import { MapData } from "./Map";
 import { Player } from "./Player";
 
@@ -29,9 +28,6 @@ export class State extends Schema {
   @type({ map: "string" })
   sessionToUserId = new MapSchema<string>();
 
-  @type(gameAudio)
-  gameAudio: gameAudio = new gameAudio();
-
   @type("string")
   mapMovement: MapMovementType = "free";
 
@@ -58,5 +54,4 @@ export class State extends Schema {
     this.roomName = attributes.roomName;
     this.channelId = attributes.channelId;
   }
-
 }

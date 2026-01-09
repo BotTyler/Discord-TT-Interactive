@@ -4,7 +4,7 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle";
 import { ErrorBoundary } from "react-error-boundary";
-import { SettingsProvider } from "./ContextProvider/AudioContext/SettingsProvider";
+import { SettingsProvider } from "./ContextProvider/SettingsContext/SettingsProvider";
 import { GameStateContextProvider } from "./ContextProvider/GameStateContext/GameStateProvider";
 import { MessageContextProvider } from "./ContextProvider/Messages/MessageContextProvider";
 import { PlayersContextProvider } from "./ContextProvider/PlayersContext/PlayersContext";
