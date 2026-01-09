@@ -1,5 +1,5 @@
-import { ArraySchema, MapSchema, Schema, type } from "@colyseus/schema";
-import { Audio as gameAudio } from "./Audio";
+import { MapSchema, Schema, type } from "@colyseus/schema";
+import { ShJoinInterface } from "../Database/Tables/SummonsHistoryDB";
 import { ArcDrawing, BeamDrawing, CircleDrawing, CubeDrawing } from "./DrawingInterface";
 import { Enemy } from "./Enemy";
 import { ExportDataInterface } from "./ExportDataInterface";
@@ -13,7 +13,6 @@ import { MapData, MapFogPolygon } from "./Map";
 import { Player, TPlayerOptions } from "./Player";
 import { mLatLng } from "./PositionInterface";
 import { Summons } from "./Summons";
-import { ShJoinInterface } from "../Database/Tables/SummonsHistoryDB";
 
 export interface IState {
   roomName: string;
@@ -40,9 +39,6 @@ export class State extends Schema {
 
   @type({ map: "string" })
   sessionToUserId = new MapSchema<string>();
-
-  @type(gameAudio)
-  gameAudio: gameAudio = new gameAudio();
 
   @type("string")
   mapMovement: MapMovementType = "free";
@@ -141,6 +137,11 @@ export class State extends Schema {
     if (player === undefined) return false;
 
     player.color = data.color;
+
+    // Make sure to update the summons
+    player.summons.forEach((val: Summons) => {
+      val.color = data.color;
+    });
     return true;
   }
 
@@ -678,6 +679,7 @@ export class State extends Schema {
       health: data.health,
       totalHealth: data.totalHealth,
       size: data.size,
+      color: player.color,
       player_id: player.userId,
       lifeSaves: data.lifeSaves,
       deathSaves: data.deathSaves,
@@ -981,6 +983,7 @@ export class State extends Schema {
         name: val.name,
         position: new mLatLng(val.position_lat, val.position_lng),
         size: +val.size,
+        color: currentPlayer.color,
         player_id: currentPlayer.userId,
         health: +val.health,
         totalHealth: +val.total_health,
@@ -993,56 +996,5 @@ export class State extends Schema {
   }
   //#endregion
 
-  //#endregion
-
-  //#region Audio
-  changeAudio(sessionId: string, data: { index: number }): boolean {
-    this.gameAudio.currentAudioIndex = data.index;
-    this.gameAudio.currentTimestamp = 0;
-    this.gameAudio.isPlaying = false;
-    return true;
-  }
-
-  addToAudioQueue(sessionId: string, data: { audioName: string }) {
-    //TODO: provide a check to make sure the audioName is within the database
-
-    this.gameAudio.queue = new ArraySchema<string>(...this.gameAudio.queue, data.audioName);
-    return true;
-  }
-
-  removeFromAudioQueue(sessionId: string, data: { audioName: string; index: number }) {
-    const newQueue = this.gameAudio.queue;
-    if (newQueue.at(data.index) !== data.audioName) return; // For some reason this value was deleted, could be that 2 players pressed it at the same time.
-    newQueue.splice(data.index, 1);
-    this.gameAudio.queue = new ArraySchema<string>(...newQueue);
-
-    const nArrayLength = this.gameAudio.queue.length;
-    var nIndex = this.gameAudio.currentAudioIndex;
-
-    if (nIndex >= nArrayLength) {
-      nIndex = nArrayLength - 1;
-    }
-
-    if (nIndex < 0) {
-      nIndex = 0;
-    }
-
-    this.gameAudio.currentAudioIndex = nIndex;
-  }
-
-  playVideo(sessionId: string): boolean {
-    this.gameAudio.isPlaying = true;
-    return true;
-  }
-
-  pauseVideo(sessionId: string): boolean {
-    this.gameAudio.isPlaying = false;
-    return true;
-  }
-
-  setTimestamp(sessionId: string, data: { timestamp: number }): boolean {
-    this.gameAudio.currentTimestamp = data.timestamp;
-    return true;
-  }
   //#endregion
 }

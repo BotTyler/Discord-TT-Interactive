@@ -1,6 +1,5 @@
 import { Client, Room } from "colyseus";
 import * as crypto from "crypto";
-import { AudioCatalogDAO, AudioCatalogDB } from "../Database/Tables/AudioCatalogDB";
 import { EnemyDAO, EnemyDB } from "../Database/Tables/EnemyDB";
 import {
   EnemyMovementHistoryDAO,
@@ -1203,21 +1202,6 @@ delete from Public."Map" where player_id = 'temp';
         });
     });
 
-    // A method to gather all audio files that were submitted by the user.
-    // This should be used with the appropriate express endpoint to load the file.
-    this.onMessage("getAudioList", (client, _data) => {
-      const player = this.state._getPlayerBySessionId(client.sessionId);
-      if (player === undefined) return;
-      AudioCatalogDB.getInstance()
-        .selectAllAudioByPlayerId(player.userId)
-        .then((value: AudioCatalogDAO[] | undefined) => {
-          const strList = value?.map((val: AudioCatalogDAO) => {
-            return val.audio_name;
-          });
-          client.send("getAudioListResult", strList ?? []);
-        });
-    });
-
     // Function that will set all the values of a room based on the chosen save
     this.onMessage("loadMap", async (client, data) => {
       if (!this.authenticateHostAction(client.sessionId)) return;
@@ -1270,71 +1254,6 @@ delete from Public."Map" where player_id = 'temp';
         this.state.loadEnemyData(savedHistoryData[2] ?? []);
         this.state.loadFogData(savedHistoryData[3] ?? []);
         this.state.loadSummonsData(savedHistoryData[5] ?? []);
-      } catch (error) {
-        console.error(error);
-      }
-    });
-
-    // AUDIO
-    this.onMessage("ChangeAudio", (client, data) => {
-      try {
-        const inputList: ValidationInputType[] = [
-          { name: "index", type: "number", PostProcess: undefined },
-        ];
-
-        const validateParams: any = ValidateAllInputs(data, inputList);
-        this.state.changeAudio(client.sessionId, validateParams);
-      } catch (error) {
-        console.error(error);
-      }
-    });
-
-    this.onMessage("PlayAudio", (client, _data) => {
-      if (!this.authenticateHostAction(client.sessionId)) return;
-      this.state.playVideo(client.sessionId);
-    });
-
-    this.onMessage("PauseAudio", (client, _data) => {
-      if (!this.authenticateHostAction(client.sessionId)) return;
-      this.state.pauseVideo(client.sessionId);
-    });
-
-    this.onMessage("SetTimestamp", (client, data) => {
-      if (!this.authenticateHostAction(client.sessionId)) return;
-      try {
-        const inputList: ValidationInputType[] = [
-          { name: "timestamp", type: "number", PostProcess: undefined },
-        ];
-
-        const validateParams: any = ValidateAllInputs(data, inputList);
-        this.state.setTimestamp(client.sessionId, validateParams);
-      } catch (error) {
-        console.error(error);
-      }
-    });
-
-    this.onMessage("AddAudio", (client, data) => {
-      try {
-        const inputList: ValidationInputType[] = [
-          { name: "audioName", type: "string", PostProcess: undefined },
-        ];
-
-        const validateParams: any = ValidateAllInputs(data, inputList);
-        this.state.addToAudioQueue(client.sessionId, validateParams);
-      } catch (error) {
-        console.error(error);
-      }
-    });
-
-    this.onMessage("RemoveAudio", (client, data) => {
-      try {
-        const inputList: ValidationInputType[] = [
-          { name: "audioName", type: "string", PostProcess: undefined },
-          { name: "index", type: "number", PostProcess: undefined },
-        ];
-
-        const validateParams: any = ValidateAllInputs(data, inputList);
-        this.state.removeFromAudioQueue(client.sessionId, validateParams);
       } catch (error) {
         console.error(error);
       }

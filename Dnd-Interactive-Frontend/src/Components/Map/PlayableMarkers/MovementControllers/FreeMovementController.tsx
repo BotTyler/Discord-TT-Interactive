@@ -1,5 +1,5 @@
 import { LatLng, LeafletEvent, LeafletMouseEvent } from "leaflet";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Pane, useMapEvents } from "react-leaflet";
 import { useGameState } from "../../../../ContextProvider/GameStateContext/GameStateProvider";
 import { Tools, useGameToolContext } from "../../../../ContextProvider/GameToolProvider";
@@ -11,21 +11,13 @@ import DistanceLine from "../DistanceLine";
 import MarkerDisplay from "../MarkerDisplay";
 import { Summons } from "../../../../shared/Summons";
 
-export default function FreeMovementController({ controllableUser, userType, colorOverride, onPositionChange, onGhostPositionChange }:
+export default function FreeMovementController({ controllableUser, userType, onPositionChange, onGhostPositionChange }:
   {
     controllableUser: Player | Enemy | Summons;
     userType: "player" | "enemy" | "summon";
-    colorOverride?: string;
     onPositionChange: (position: LatLng) => void;
     onGhostPositionChange: (position: LatLng[]) => void
   }) {
-
-  const getInitColor = useCallback((): string => {
-    if (colorOverride != null) return colorOverride;
-    return (markerUser as Player).color ?? "#f00";
-
-  }, [colorOverride])
-
   const [markerUser, setMarkerUser] = useState<any>(controllableUser);
 
   const mapContext = useGameState();
@@ -41,7 +33,7 @@ export default function FreeMovementController({ controllableUser, userType, col
   const [position, setPosition] = useState<LatLng>(new LatLng(markerUser.position.lat, markerUser.position.lng));
   const [toPosition, setToPosition] = useState<LatLng[]>([position]);
   const [isConnected, setConnected] = useState<boolean>((markerUser as Player).isConnected ?? true);
-  const [color, setColor] = useState<string>(getInitColor());
+  const [color, setColor] = useState<string>((markerUser as Player | Summons).color ?? "#f00");
   const [isMoving, setIsMoving] = useState<boolean>(false);
   const [isVisible, setVisibility] = useState<boolean>((markerUser as Enemy).isVisible ?? true); // Only enemy visibility can change
 
@@ -171,6 +163,9 @@ export default function FreeMovementController({ controllableUser, userType, col
     const updateSize = (value: any) => {
       setMarkerSize(value.detail.val);
     };
+    const updateColor = (value: any) => {
+      setColor(value.detail.val);
+    };
     const updateAvatar = (value: any) => {
       setAvatarUri(value.detail.val);
     };
@@ -190,6 +185,7 @@ export default function FreeMovementController({ controllableUser, userType, col
     window.addEventListener(`SummonUpdate-${tempSummon.id}-name`, updateName);
     window.addEventListener(`SummonUpdate-${tempSummon.id}-position`, updatePosition);
     window.addEventListener(`SummonUpdate-${tempSummon.id}-size`, updateSize);
+    window.addEventListener(`SummonUpdate-${tempSummon.id}-color`, updateColor);
     window.addEventListener(`IconHeightChanged`, handleIconHeightChange);
     window.addEventListener(`SummonUpdate-${tempSummon.id}-avatarUri`, updateAvatar);
     window.addEventListener(`SummonUpdate-${tempSummon.id}-toPosition`, setNewToPosition);
@@ -198,6 +194,7 @@ export default function FreeMovementController({ controllableUser, userType, col
       window.removeEventListener(`SummonUpdate-${tempSummon.id}-name`, updateName);
       window.removeEventListener(`SummonUpdate-${tempSummon.id}-position`, updatePosition);
       window.removeEventListener(`SummonUpdate-${tempSummon.id}-size`, updateSize);
+      window.removeEventListener(`SummonUpdate-${tempSummon.id}-color`, updateColor);
       window.removeEventListener(`SummonUpdate-${tempSummon.id}-avatarUri`, updateAvatar);
       window.removeEventListener(`IconHeightChanged`, handleIconHeightChange);
       window.removeEventListener(`SummonUpdate-${tempSummon.id}-toPosition`, setNewToPosition);

@@ -94,7 +94,10 @@ export class SummonsHistoryDB extends DatabaseBase<SummonsHistoryDao> {
   }
 
   async selectByHistoryId(history_id: number) {
-    const query = `SELECT * FROM public."Summons_History" as SH join public."Summons" as S on SH.summons_id = S.summons_id join public."Image_Catalog" as IC on S.image_id = IC.img_catalog_id where SH.history_id = $1;`;
+    const query = `SELECT * FROM public."Summons_History" as SH 
+      join public."Summons" as S on SH.summons_id = S.summons_id 
+      join public."Image_Catalog" as IC on S.image_id = IC.img_catalog_id 
+        where SH.history_id = $1;`;
     console.log(query);
 
     const result: QueryResult<ShJoinInterface> | undefined = await Database.getInstance()

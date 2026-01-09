@@ -2,16 +2,12 @@ import config from "@colyseus/tools";
 import { StateHandlerRoom } from "./rooms/StateHandlerRoom";
 // import multer from "multer";
 // import * as Minio from "minio";
-import { playground } from "@colyseus/playground";
-import { monitor } from "@colyseus/monitor";
 import { JWT } from "@colyseus/auth";
 import { WebSocketTransport } from "@colyseus/ws-transport";
 import MinioClient from "./Minio/MinioClient";
 import multer from "multer";
 import sharp from "sharp";
-import ytdl from "@distube/ytdl-core";
 import { ImageCatalogDAO, ImageCatalogDB } from "./Database/Tables/ImageCatalogDB";
-import { AudioCatalogDAO, AudioCatalogDB } from "./Database/Tables/AudioCatalogDB";
 import { GAME_NAME } from "./shared/Constants";
 
 export default config({
@@ -159,74 +155,6 @@ export default config({
       } catch (e: any) {
         console.error(e);
         res.destroy(e);
-      }
-    });
-
-    app.get("/getAudio/:userId/audio/:audioName", async (req, res) => {
-      try {
-        const audioName = req.params.audioName;
-        const userId = req.params.userId;
-        const bucket = process.env.MINIO_BUCKET!;
-        if (!audioName) return res.status(400).json({ error: "File name is required" });
-        if (!MinioClient.getInstance().bucketExists(bucket))
-          return res.status(400).json({ error: "BUCKET DOES NOT EXIST" });
-
-        // call out to minio to grab the image
-        const stream = await MinioClient.getInstance().getObject(
-          `${bucket}`,
-          `${userId}/audio/${audioName}`,
-        );
-        stream.pipe(res);
-      } catch (e) {
-        console.error(`Something went wrong with getAudio`);
-        console.error(e);
-      }
-    });
-
-    app.post("/uploadAudio/:userId", upload.single("audio"), async (req, res) => {
-      const bucket = process.env.MINIO_BUCKET!;
-      const userId = req.params.userId;
-      if (!req.file) return res.status(400).send("No file uploaded");
-      if (!(await MinioClient.getInstance().bucketExists(bucket)))
-        return res.status(400).json({ error: "BUCKET DOES NOT EXIST" });
-
-      const file = req.file;
-      const fileName = `${userId}/audio/${Date.now()}-${file.originalname}`;
-      const fileStream = file.buffer;
-
-      await AudioCatalogDB.getInstance().create(new AudioCatalogDAO(userId, fileName));
-      await MinioClient.getInstance().putObject(bucket, `${fileName}`, fileStream, file.size);
-      const response = {
-        fileName: fileName,
-      };
-      res.status(200).send(response);
-    });
-
-    app.post("/uploadAudio/:userId/youtube", async (req, res) => {
-      try {
-        const userId = req.params.userId;
-        const youtubeUrl = req.body.link;
-        const bucket = process.env.MINIO_BUCKET!;
-
-        if (!(await MinioClient.getInstance().bucketExists(bucket)))
-          return res.status(400).json({ error: "BUCKET DOES NOT EXIST" });
-        if (youtubeUrl === undefined) return res.status(400).json({ error: "No URL provided." });
-
-        // get basic youtube information
-        const videoInfo = await ytdl.getBasicInfo(youtubeUrl);
-        const videoName = `${userId}/audio/${Date.now()}-${videoInfo.videoDetails.title}.mp3`;
-        const youtubeStream = ytdl(youtubeUrl, { filter: "audioonly", quality: "highestaudio" });
-
-        await AudioCatalogDB.getInstance().create(new AudioCatalogDAO(userId, videoName));
-        await MinioClient.getInstance().putObject(bucket, videoName, youtubeStream);
-
-        const response = {
-          fileName: videoName,
-        };
-        res.status(200).send(response);
-      } catch (e) {
-        console.error(e);
-        res.status(400).json({ error: "Something went wrong" });
       }
     });
 

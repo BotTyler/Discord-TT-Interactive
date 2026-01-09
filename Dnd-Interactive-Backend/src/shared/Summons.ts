@@ -9,6 +9,7 @@ export type TSummonsOptions = Pick<
   | "name"
   | "position"
   | "size"
+  | "color"
   | "health"
   | "totalHealth"
   | "lifeSaves"
@@ -31,6 +32,9 @@ export class Summons extends Schema {
 
   @type("number")
   public size: number;
+
+  @type("string")
+  public color: string;
 
   @type(mLatLng)
   public position: mLatLng;
@@ -63,6 +67,7 @@ export class Summons extends Schema {
     name,
     position,
     size,
+    color,
     player_id,
     health,
     totalHealth,
@@ -76,6 +81,7 @@ export class Summons extends Schema {
     this.name = name;
     this.position = position ?? new mLatLng(0, 0);
     this.size = size;
+    this.color = color;
     this.player_id = player_id;
     this.health = health ?? 1;
     this.totalHealth = totalHealth ?? 1;

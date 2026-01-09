@@ -12,6 +12,7 @@ export default function SummonsElementHandler({ summon, onValueChanged }: { summ
   const [position, setPosition] = React.useState<mLatLng>(summon.position);
   const [toPosition, setToPosition] = React.useState<mLatLng[]>([]);
   const [size, setSize] = React.useState<number>(summon.size);
+  const [color, setColor] = React.useState<string>(summon.color);
   const [health, setHealth] = React.useState<number>(summon.health);
   const [totalHealth, setTotalHealth] = React.useState<number>(summon.totalHealth);
   const [lifeSaves, setLifeSaves] = React.useState<number>(summon.lifeSaves);
@@ -49,6 +50,9 @@ export default function SummonsElementHandler({ summon, onValueChanged }: { summ
   React.useEffect(() => {
     emitFieldChangeEvent("size", size);
   }, [size]);
+  React.useEffect(() => {
+    emitFieldChangeEvent("color", color);
+  }, [color]);
   React.useEffect(() => {
     emitFieldChangeEvent("health", health);
   }, [health]);
@@ -88,6 +92,9 @@ export default function SummonsElementHandler({ summon, onValueChanged }: { summ
     const sizeListener = summon.listen("size", (value: number) => {
       setSize(value);
     });
+    const colorListener = summon.listen("color", (value: string) => {
+      setColor(value);
+    });
     const healthListener = summon.listen("health", (value: number) => {
       setHealth(value);
     });
@@ -113,7 +120,7 @@ export default function SummonsElementHandler({ summon, onValueChanged }: { summ
       positionListener();
       toPositionListener();
       sizeListener();
-      sizeListener();
+      colorListener();
       healthListener();
       totalHealthListener();
       lifeSavesListener();

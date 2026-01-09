@@ -13,7 +13,13 @@ import MarkerDisplay from "../MarkerDisplay";
 import { Summons } from "../../../../shared/Summons";
 
 export default function GridMovementController({ controllableUser, userType, onPositionChange, onGhostPositionChange }:
-  { controllableUser: Player | Enemy | Summons; userType: "player" | "enemy" | "summon"; onPositionChange: (position: LatLng) => void; onGhostPositionChange: (position: LatLng[]) => void }) {
+  {
+    controllableUser: Player | Enemy | Summons;
+    userType: "player" | "enemy" | "summon";
+    onPositionChange: (position: LatLng) => void;
+    onGhostPositionChange: (position: LatLng[]) => void
+  }) {
+
   const [markerUser, setMarkerUser] = useState<any>(controllableUser);
 
   const leafletMap = useMap();
@@ -200,6 +206,9 @@ export default function GridMovementController({ controllableUser, userType, onP
     const updateSize = (value: any) => {
       setMarkerSize(value.detail.val);
     };
+    const updateColor = (value: any) => {
+      setColor(value.detail.val);
+    };
     const handleIconHeightChange = (value: any) => {
       setIconSize(value.detail.val);
     };
@@ -218,6 +227,7 @@ export default function GridMovementController({ controllableUser, userType, onP
     window.addEventListener(`SummonUpdate-${tempSummon.id}-name`, updateName);
     window.addEventListener(`SummonUpdate-${tempSummon.id}-position`, updatePosition);
     window.addEventListener(`SummonUpdate-${tempSummon.id}-size`, updateSize);
+    window.addEventListener(`SummonUpdate-${tempSummon.id}-color`, updateColor);
     window.addEventListener(`IconHeightChanged`, handleIconHeightChange);
     window.addEventListener(`SummonUpdate-${tempSummon.id}-avatarUri`, updateAvatar);
     window.addEventListener(`SummonUpdate-${tempSummon.id}-toPosition`, setNewToPosition);
@@ -226,6 +236,7 @@ export default function GridMovementController({ controllableUser, userType, onP
       window.removeEventListener(`SummonUpdate-${tempSummon.id}-name`, updateName);
       window.removeEventListener(`SummonUpdate-${tempSummon.id}-position`, updatePosition);
       window.removeEventListener(`SummonUpdate-${tempSummon.id}-size`, updateSize);
+      window.removeEventListener(`SummonUpdate-${tempSummon.id}-color`, updateColor);
       window.removeEventListener(`IconHeightChanged`, handleIconHeightChange);
       window.removeEventListener(`SummonUpdate-${tempSummon.id}-avatarUri`, updateAvatar);
       window.removeEventListener(`SummonUpdate-${tempSummon.id}-toPosition`, setNewToPosition);
