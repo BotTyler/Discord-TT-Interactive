@@ -15,21 +15,21 @@ export default function HealthDeathTrackerPanel() {
 
   const [isAddingEnemy, setIsAddingEnemy] = useState<boolean>(false);
   const [enemyList, setEnemyList] = useState<{ [key: string]: Enemy }>(mapContext.getEnemies());
-  const [playerList, setPlayerList] = useState<{ [key: string]: Player }>(playerContext.getAllPlayers());
+  // const [playerList, setPlayerList] = useState<{ [key: string]: Player }>(playerContext.getAllPlayers());
 
   useEffect(() => {
     const handleEnemyListChange = (val: any) => {
       setEnemyList(val.detail.val);
     };
-    const handlePlayerListChange = (val: any) => {
-      setPlayerList(val.detail.val);
-    };
+    // const handlePlayerListChange = (val: any) => {
+    //   setPlayerList(val.detail.val);
+    // };
 
     window.addEventListener(`EnemiesChanged`, handleEnemyListChange);
-    window.addEventListener(`PlayersChanged`, handlePlayerListChange);
+    // window.addEventListener(`PlayersChanged`, handlePlayerListChange);
     return () => {
       window.removeEventListener(`EnemiesChanged`, handleEnemyListChange);
-      window.removeEventListener(`PlayersChanged`, handlePlayerListChange);
+      // window.removeEventListener(`PlayersChanged`, handlePlayerListChange);
     };
   }, [authContext.room]);
   return (
@@ -46,17 +46,17 @@ export default function HealthDeathTrackerPanel() {
               </li>
             );
           })}
-          {Object.values(playerList).map((val) => {
-            if (val.isHost) return <div key={"HealthDeathTrackerElement-Player-HOST"}></div>;
-            return (
-              <li className="list-group-item p-0" key={`HealthDeathTrackerElement-Player-${val.userId}`}>
-                <HealthDeathTrackerElement
-                  item={val}
-                  itemType="player"
-                />
-              </li>
-            );
-          })}
+          {/* {Object.values(playerList).map((val) => { */}
+          {/*   if (val.isHost) return <div key={"HealthDeathTrackerElement-Player-HOST"}></div>; */}
+          {/*   return ( */}
+          {/*     <li className="list-group-item p-0" key={`HealthDeathTrackerElement-Player-${val.userId}`}> */}
+          {/*       <HealthDeathTrackerElement */}
+          {/*         item={val} */}
+          {/*         itemType="player" */}
+          {/*       /> */}
+          {/*     </li> */}
+          {/*   ); */}
+          {/* })} */}
         </ul>
         <button
           className="btn btn-primary p-1 m-0 g-0 w-100"

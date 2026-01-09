@@ -1,5 +1,5 @@
 import { LatLng, LeafletEvent, LeafletMouseEvent } from "leaflet";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Pane, useMapEvents } from "react-leaflet";
 import { useGameState } from "../../../../ContextProvider/GameStateContext/GameStateProvider";
 import { Tools, useGameToolContext } from "../../../../ContextProvider/GameToolProvider";
@@ -11,8 +11,21 @@ import DistanceLine from "../DistanceLine";
 import MarkerDisplay from "../MarkerDisplay";
 import { Summons } from "../../../../shared/Summons";
 
-export default function FreeMovementController({ controllableUser, userType, onPositionChange, onGhostPositionChange }:
-  { controllableUser: Player | Enemy | Summons; userType: "player" | "enemy" | "summon"; onPositionChange: (position: LatLng) => void; onGhostPositionChange: (position: LatLng[]) => void }) {
+export default function FreeMovementController({ controllableUser, userType, colorOverride, onPositionChange, onGhostPositionChange }:
+  {
+    controllableUser: Player | Enemy | Summons;
+    userType: "player" | "enemy" | "summon";
+    colorOverride?: string;
+    onPositionChange: (position: LatLng) => void;
+    onGhostPositionChange: (position: LatLng[]) => void
+  }) {
+
+  const getInitColor = useCallback((): string => {
+    if (colorOverride != null) return colorOverride;
+    return (markerUser as Player).color ?? "#f00";
+
+  }, [colorOverride])
+
   const [markerUser, setMarkerUser] = useState<any>(controllableUser);
 
   const mapContext = useGameState();
@@ -28,7 +41,7 @@ export default function FreeMovementController({ controllableUser, userType, onP
   const [position, setPosition] = useState<LatLng>(new LatLng(markerUser.position.lat, markerUser.position.lng));
   const [toPosition, setToPosition] = useState<LatLng[]>([position]);
   const [isConnected, setConnected] = useState<boolean>((markerUser as Player).isConnected ?? true);
-  const [color, setColor] = useState<string>((markerUser as Player).color ?? "#f00");
+  const [color, setColor] = useState<string>(getInitColor());
   const [isMoving, setIsMoving] = useState<boolean>(false);
   const [isVisible, setVisibility] = useState<boolean>((markerUser as Enemy).isVisible ?? true); // Only enemy visibility can change
 
