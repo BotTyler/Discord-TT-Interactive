@@ -56,3 +56,21 @@ export interface LoadCampaign {
   height: number;
   width: number;
 }
+
+export interface LoadSummonsInterface {
+  id: number;
+  summons_id: number;
+  history_id: number;
+  player_id: string;
+  size: number;
+  enemy_id: number;
+  position_lat: number;
+  position_lng: number;
+  name: string;
+  image_name: string;
+  health: number;
+  total_health: number;
+  death_saves: number;
+  life_saves: number;
+  is_visible: boolean;
+}

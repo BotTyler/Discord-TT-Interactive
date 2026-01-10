@@ -17,13 +17,19 @@ FROM node:18-alpine3.17 AS builder
 ARG VITE_CLIENT_ID
 ENV VITE_CLIENT_ID=$VITE_CLIENT_ID
 
-RUN echo "Client Id inside Dockerfile: $VITE_CLIENT_ID"
-
 WORKDIR /app
 
 # Install dependencies
 # COPY package.json package-lock.json ./
-COPY . .
+COPY Dnd-Interactive-Frontend .
+
+# This is a sym link to the backend repo.
+# Keeping this will mess up paths within the build process.
+RUN rm src/shared
+
+# Replace the shared folder contents where the sym link was.
+Copy Dnd-Interactive-Backend/src/shared ./src/shared
+
 RUN npm ci
 
 # Copy source and build
@@ -36,7 +42,7 @@ FROM nginx:stable-alpine
 
 # Remove default nginx config and add our own
 RUN rm /etc/nginx/conf.d/default.conf
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY Dnd-Interactive-Frontend/nginx.conf /etc/nginx/conf.d/default.conf
 
 # Copy build output to nginx html folder
 COPY --from=builder /app/dist /usr/share/nginx/html

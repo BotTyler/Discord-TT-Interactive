@@ -1,5 +1,4 @@
 import { MapSchema, Schema, type } from "@colyseus/schema";
-import { ShJoinInterface } from "../Database/Tables/SummonsHistoryDB";
 import { ArcDrawing, BeamDrawing, CircleDrawing, CubeDrawing } from "./DrawingInterface";
 import { Enemy } from "./Enemy";
 import { ExportDataInterface } from "./ExportDataInterface";
@@ -8,6 +7,7 @@ import {
   LoadFogInterface,
   LoadMapInterface,
   LoadPlayerInterface,
+  LoadSummonsInterface,
 } from "./LoadDataInterfaces";
 import { MapData, MapFogPolygon } from "./Map";
 import { Player, TPlayerOptions } from "./Player";
@@ -966,12 +966,12 @@ export class State extends Schema {
     });
   }
 
-  loadSummonsData(summons: ShJoinInterface[]): void {
+  loadSummonsData(summons: LoadSummonsInterface[]): void {
     // Reset or instantiate summons
     this.players.forEach((player: Player): void => {
       player.summons = [];
     });
-    summons.forEach((val: ShJoinInterface): void => {
+    summons.forEach((val: LoadSummonsInterface): void => {
       if (!this.players.has(val.player_id)) {
         console.log("Not the right player");
         return;
