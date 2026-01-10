@@ -325,15 +325,24 @@ export default function GridMovementController({ controllableUser, userType, onP
           color={color}
           position={position}
           size={markerSize}
+          health={1}
+          totalHealth={1}
           className={isVisible ? "opacity-100" : "opacity-50"} />
       </Pane>
       <DistanceLineGrid positions={toPosition} color={color} playerSize={markerSize} />
       <Pane name={`Grid-${userType}-Ghost-Marker-${id}`} style={{ zIndex: 501 }}>
         {/* size needs to be at least the iconSize due to issues with mouse up event */}
-        <MarkerDisplay name={name} avatarURI={userType === "player" ? avatarUri : `/colyseus/getImage/${avatarUri}`} color={color} position={toPosition[toPosition.length - 1] ?? position} size={isMoving ? Math.max(markerSize, iconSize) : markerSize}
+        <MarkerDisplay
+          name={name}
+          avatarURI={userType === "player" ? avatarUri : `/colyseus/getImage/${avatarUri}`}
+          color={color}
+          position={toPosition[toPosition.length - 1] ?? position}
+          size={isMoving ? Math.max(markerSize, iconSize) : markerSize}
           isDraggable={true}
           className={`opacity-50`}
           displayName={false}
+          health={1}
+          totalHealth={1}
           eventFunctions={{
             dragstart: (event: LeafletEvent) => {
               setIsMoving(true);

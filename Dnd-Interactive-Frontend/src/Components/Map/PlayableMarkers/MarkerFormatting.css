@@ -1,33 +1,60 @@
-.icon-text {
-  font-size: large;
-  font-weight: 700;
-  color: black;
-  text-shadow:
-    -1px -1px 0 white,
-    1px -1px 0 white,
-    1px 1px 0 white,
-    1px 1px 0 white;
-  /*left: -1000%;*/
-  /*right: -1000%;*/
-  top: 110%;
-  width: auto;
-  height: auto;
-  user-select: none;
-  pointer-events: none;
-}
-
 .marker-container {
   display: flex;
   justify-content: center;
 }
 
-.markerNameTag {
-  width: auto;
-  height: auto;
+.markerNameTagDiv {
+  position: absolute;
+  top: 105%;
+  left: -10%;
+  right: -10%;
+  max-height: 100%;
   padding: 0;
   margin: 0;
   user-select: none;
   pointer-events: none;
+}
+
+.markerStatusBox {
+  /* position: relative; */
+  /* bottom: 105%; */
+  /* left: -10%; */
+  /* right: -10%; */
+  user-select: none;
+  pointer-events: none;
+}
+
+.statusImageDiv {
+  width: 30%;
+}
+
+.statusImageDiv1 {
+  position: absolute;
+  bottom: 105%;
+  left: 50%;
+  transform: translate(-50%, 0);
+}
+.statusImageDiv2 {
+  position: absolute;
+  bottom: 85%;
+  left: 85%;
+}
+.statusImageDiv3 {
+  position: absolute;
+  right: 85%;
+  bottom: 85%;
+}
+.statusImageDiv4 {
+  position: absolute;
+  right: 105%;
+  top: 50%;
+  transform: translate(0, -50%);
+}
+.statusImageDiv5 {
+  position: absolute;
+  left: 105%;
+  top: 50%;
+  transform: translate(0, -50%);
 }
 
 .marker-imager {

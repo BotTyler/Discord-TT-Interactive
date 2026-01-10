@@ -62,7 +62,6 @@ export default function PlayerElementHandler({ player, onValueChanged }: { playe
   }, [color]);
   React.useEffect(() => {
     // 2 events need to be fired so that the initiative list handler can update
-    // TODO: ish I may be able to remove this event by listening for the initiative property in the respective components.
     const event = new CustomEvent(`PlayersInitiativeChange`, {
       detail: { val: `PlayersChanged` },
     });
