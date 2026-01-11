@@ -1,20 +1,10 @@
 import { Schema, type } from "@colyseus/schema";
 import { mLatLng } from "./PositionInterface";
+import { CharacterStatus } from "./StatusTypes";
 
 export type TSummonsOptions = Pick<
   Summons,
-  | "id"
-  | "player_id"
-  | "avatarUri"
-  | "name"
-  | "position"
-  | "size"
-  | "color"
-  | "health"
-  | "totalHealth"
-  | "lifeSaves"
-  | "deathSaves"
-  | "isVisible"
+  "id" | "player_id" | "avatarUri" | "name" | "size" | "color"
 >;
 
 export class Summons extends Schema {
@@ -60,33 +50,25 @@ export class Summons extends Schema {
   @type("boolean")
   public isVisible: boolean;
 
+  @type([CharacterStatus])
+  public statuses: CharacterStatus[];
+
   // Init
-  constructor({
-    avatarUri,
-    id,
-    name,
-    position,
-    size,
-    color,
-    player_id,
-    health,
-    totalHealth,
-    lifeSaves,
-    deathSaves,
-    isVisible,
-  }: TSummonsOptions) {
+  constructor({ player_id, id, avatarUri, name, size, color }: TSummonsOptions) {
     super();
     this.id = id;
+    this.player_id = player_id;
     this.avatarUri = avatarUri;
     this.name = name;
-    this.position = position ?? new mLatLng(0, 0);
     this.size = size;
     this.color = color;
-    this.player_id = player_id;
-    this.health = health ?? 1;
-    this.totalHealth = totalHealth ?? 1;
-    this.lifeSaves = lifeSaves ?? 0;
-    this.deathSaves = deathSaves ?? 0;
-    this.isVisible = isVisible ?? true;
+
+    this.position = new mLatLng(0, 0);
+    this.health = 1;
+    this.totalHealth = 1;
+    this.lifeSaves = 0;
+    this.deathSaves = 0;
+    this.isVisible = true;
+    this.statuses = [];
   }
 }

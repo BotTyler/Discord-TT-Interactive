@@ -24,6 +24,7 @@ import { SummonsDao, SummonsDB } from "../Database/Tables/SummonsDb";
 import { SummonsHistoryDao, SummonsHistoryDB } from "../Database/Tables/SummonsHistoryDB";
 import { Summons } from "../shared/Summons";
 import { mLatLng } from "../shared/PositionInterface";
+import { CharacterStatus } from "../shared/StatusTypes";
 
 export class StateHandlerRoom extends Room<State> {
   maxClients = 1000;
@@ -1361,6 +1362,9 @@ delete from Public."Map" where player_id = 'temp';
           const totalHealth = p.totalHealth;
           const deathSaves = p.deathSaves;
           const lifeSaves = p.lifeSaves;
+          const statuses: string[] = p.statuses.map((val: CharacterStatus): string => {
+            return val.toString();
+          });
           PlayerMovementHistoryDB.getInstance().create(
             new PlayerMovementHistoryDAO(
               history_id,
@@ -1371,6 +1375,7 @@ delete from Public."Map" where player_id = 'temp';
               totalHealth,
               deathSaves,
               lifeSaves,
+              statuses,
             ),
           );
 
@@ -1383,6 +1388,9 @@ delete from Public."Map" where player_id = 'temp';
             const deathSaves: number = curSummon.deathSaves;
             const lifeSaves: number = curSummon.lifeSaves;
             const isVisible: boolean = curSummon.isVisible;
+            const statuses: string[] = curSummon.statuses.map((val: CharacterStatus): string => {
+              return val.toString();
+            });
 
             SummonsHistoryDB.getInstance().create(
               new SummonsHistoryDao(
@@ -1396,6 +1404,7 @@ delete from Public."Map" where player_id = 'temp';
                 deathSaves,
                 lifeSaves,
                 isVisible,
+                statuses,
               ),
             );
           });
@@ -1412,6 +1421,10 @@ delete from Public."Map" where player_id = 'temp';
           const deathSaves = e.deathSaves;
           const lifeSaves = e.lifeSaves;
           const isVisible = e.isVisible;
+          const statuses: string[] = e.statuses.map((val: CharacterStatus): string => {
+            return val.toString();
+          });
+
           EnemyMovementHistoryDB.getInstance().create(
             new EnemyMovementHistoryDAO(
               history_id,
@@ -1424,6 +1437,7 @@ delete from Public."Map" where player_id = 'temp';
               deathSaves,
               lifeSaves,
               isVisible,
+              statuses,
             ),
           );
         });

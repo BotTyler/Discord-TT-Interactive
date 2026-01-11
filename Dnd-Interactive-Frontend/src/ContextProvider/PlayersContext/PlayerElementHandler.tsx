@@ -5,6 +5,7 @@ import React from "react";
 import { useAuthenticatedContext } from "../useAuthenticatedContext";
 import { Summons } from "../../shared/Summons";
 import SummonsElementHandler from "./SummonsElementHandler";
+import { CharacterStatus } from "../../shared/StatusTypes";
 
 // this class def can be simpler
 export default function PlayerElementHandler({ player, onValueChanged }: { player: Player; onValueChanged: (field: string, value: unknown) => void }) {
@@ -22,11 +23,12 @@ export default function PlayerElementHandler({ player, onValueChanged }: { playe
   const [deathSaves, setDeathSaves] = React.useState<number>(player.deathSaves);
   const [lifeSaves, setLifeSaves] = React.useState<number>(player.lifeSaves);
   const [drawings, setDrawings] = React.useState<mLatLng[]>(player.drawings);
-  const [cubeDrawings, setCubeDrawings] = React.useState<CubeDrawing | undefined>(player.cubeDrawing);
-  const [circleDrawings, setCircleDrawings] = React.useState<CircleDrawing | undefined>(player.circleDrawing);
-  const [arcDrawings, setArcDrawings] = React.useState<ArcDrawing | undefined>(player.arcDrawing);
-  const [beamDrawing, setBeamDrawing] = React.useState<BeamDrawing | undefined>(player.beamDrawing);
+  const [cubeDrawings, setCubeDrawings] = React.useState<CubeDrawing | null>(player.cubeDrawing);
+  const [circleDrawings, setCircleDrawings] = React.useState<CircleDrawing | null>(player.circleDrawing);
+  const [arcDrawings, setArcDrawings] = React.useState<ArcDrawing | null>(player.arcDrawing);
+  const [beamDrawing, setBeamDrawing] = React.useState<BeamDrawing | null>(player.beamDrawing);
   const [isConnected, setConnected] = React.useState<boolean>(player.isConnected);
+  const [statuses, setStatuses] = React.useState<CharacterStatus[]>(player.statuses);
 
   const [summons, setSummons] = React.useState<Summons[]>(player.summons);
   const [connectedSummons, setConnectedSummons] = React.useState<Summons[]>(player.summons);
@@ -105,6 +107,9 @@ export default function PlayerElementHandler({ player, onValueChanged }: { playe
     emitFieldChangeEvent("isConnected", isConnected);
   }, [isConnected]);
   React.useEffect(() => {
+    emitFieldChangeEvent("statuses", statuses);
+  }, [statuses]);
+  React.useEffect(() => {
     emitFieldChangeEvent("summons", summons);
   }, [summons]);
 
@@ -152,20 +157,23 @@ export default function PlayerElementHandler({ player, onValueChanged }: { playe
     const drawingsListener = player.listen("drawings", (value: mLatLng[]) => {
       setDrawings(value);
     });
-    const cubeDrawingListener = player.listen("cubeDrawing", (value: CubeDrawing | undefined) => {
-      setCubeDrawings(value ?? undefined);
+    const cubeDrawingListener = player.listen("cubeDrawing", (value: CubeDrawing | null) => {
+      setCubeDrawings(value ?? null);
     });
-    const circleDrawingListener = player.listen("circleDrawing", (value: CircleDrawing | undefined) => {
-      setCircleDrawings(value ?? undefined);
+    const circleDrawingListener = player.listen("circleDrawing", (value: CircleDrawing | null) => {
+      setCircleDrawings(value ?? null);
     });
-    const arcDrawingListener = player.listen("arcDrawing", (value: ArcDrawing | undefined) => {
-      setArcDrawings(value ?? undefined);
+    const arcDrawingListener = player.listen("arcDrawing", (value: ArcDrawing | null) => {
+      setArcDrawings(value ?? null);
     });
-    const beamDrawingListener = player.listen("beamDrawing", (value: BeamDrawing | undefined) => {
-      setBeamDrawing(value ?? undefined);
+    const beamDrawingListener = player.listen("beamDrawing", (value: BeamDrawing | null) => {
+      setBeamDrawing(value ?? null);
     });
     const connectionListener = player.listen("isConnected", (value: boolean) => {
       setConnected(value);
+    });
+    const statusesListener = player.listen("statuses", (value: CharacterStatus[]) => {
+      setStatuses(value);
     });
     const summonsListener = player.listen("summons", (value: Summons[]) => {
       setSummons([...value]);
@@ -193,6 +201,7 @@ export default function PlayerElementHandler({ player, onValueChanged }: { playe
       arcDrawingListener();
       beamDrawingListener();
       connectionListener();
+      statusesListener();
       summonsListener();
     };
   }, [authContext.room, player]);

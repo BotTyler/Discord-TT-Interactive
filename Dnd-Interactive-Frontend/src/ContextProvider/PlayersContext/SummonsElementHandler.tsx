@@ -2,6 +2,7 @@ import React from "react";
 import { useAuthenticatedContext } from "../useAuthenticatedContext";
 import { Summons } from "../../shared/Summons";
 import { mLatLng } from "../../shared/PositionInterface";
+import { CharacterStatus } from "../../shared/StatusTypes";
 
 // this class def can be simpler
 export default function SummonsElementHandler({ summon, onValueChanged }: { summon: Summons; onValueChanged: (field: string, value: unknown) => void }) {
@@ -18,6 +19,7 @@ export default function SummonsElementHandler({ summon, onValueChanged }: { summ
   const [lifeSaves, setLifeSaves] = React.useState<number>(summon.lifeSaves);
   const [deathSaves, setDeathSaves] = React.useState<number>(summon.deathSaves);
   const [isVisible, setIsVisible] = React.useState<boolean>(summon.isVisible);
+  const [statuses, setStatuses] = React.useState<CharacterStatus[]>(summon.statuses);
   const authContext = useAuthenticatedContext();
 
   // below effects are used to emit events when the value is finalized
@@ -68,6 +70,9 @@ export default function SummonsElementHandler({ summon, onValueChanged }: { summ
   React.useEffect(() => {
     emitFieldChangeEvent("isVisible", isVisible);
   }, [isVisible]);
+  React.useEffect(() => {
+    emitFieldChangeEvent("statuses", statuses);
+  }, [statuses]);
 
   React.useEffect(() => {
     // set all listeners with the colyseus backend
@@ -110,6 +115,9 @@ export default function SummonsElementHandler({ summon, onValueChanged }: { summ
     const isVisibleListener = summon.listen("isVisible", (value: boolean) => {
       setIsVisible(value);
     });
+    const statusesListener = summon.listen("statuses", (value: CharacterStatus[]) => {
+      setStatuses(value);
+    });
 
 
     return () => {
@@ -126,6 +134,7 @@ export default function SummonsElementHandler({ summon, onValueChanged }: { summ
       lifeSavesListener();
       deathSavesListener();
       isVisibleListener();
+      statusesListener();
     };
   }, [authContext.room, summon]);
   return <></>;

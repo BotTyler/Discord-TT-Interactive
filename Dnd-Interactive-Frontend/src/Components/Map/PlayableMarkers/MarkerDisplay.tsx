@@ -4,23 +4,7 @@ import { useEffect, useState } from "react";
 import { Marker, useMap } from "react-leaflet";
 import "./MarkerFormatting.css"
 import { renderToStaticMarkup } from "react-dom/server";
-
-export type CHARACTER_STATUS_TYPE =
-  "BLINDED"
-  | "CHARMED"
-  | "DEAFENED"
-  | "EXHAUSTION"
-  | "FRIGHTENED"
-  | "GRAPPLED"
-  | "INCAPACITATED"
-  | "PARALYZED"
-  | "PETRIFIED"
-  | "POISONED"
-  | "PRONE"
-  | "RESTRAINED"
-  | "STUNNED"
-  | "UNCONSCIOUS"
-
+import { CharacterStatus } from "../../../shared/StatusTypes";
 
 export default function MarkerDisplay(
   { name,
@@ -30,6 +14,7 @@ export default function MarkerDisplay(
     color,
     health,
     totalHealth,
+    statuses,
     className = "",
     isDraggable = false,
     displayName = true,
@@ -42,6 +27,7 @@ export default function MarkerDisplay(
       color: string;
       health: number;
       totalHealth: number;
+      statuses: CharacterStatus[];
       className: string;
       isDraggable?: boolean;
       displayName?: boolean;
@@ -58,7 +44,7 @@ export default function MarkerDisplay(
   const [markerHealth, setMarkerHealth] = useState<number>(health)
   const [markerTotalHealth, setMarkerTotalHealth] = useState<number>(totalHealth);
   const [id, setId] = useState<UUID>(crypto.randomUUID());
-  const [statuses, setStatuses] = useState<CHARACTER_STATUS_TYPE[]>(["BLINDED", "CHARMED", "DEAFENED", "EXHAUSTION", "FRIGHTENED"]);
+  const [markerStatuses, setMarkerStatuses] = useState<CharacterStatus[]>(statuses);
 
   useEffect(() => {
     setName(name);
@@ -71,16 +57,19 @@ export default function MarkerDisplay(
   }, [avatarURI]);
   useEffect(() => {
     setPosition(position);
-  }, [position])
+  }, [position]);
   useEffect(() => {
     setColor(color);
-  }, [color])
+  }, [color]);
   useEffect(() => {
     setMarkerHealth(health);
-  }, [health])
+  }, [health]);
   useEffect(() => {
     setMarkerTotalHealth(totalHealth);
-  }, [totalHealth])
+  }, [totalHealth]);
+  useEffect(() => {
+    setMarkerStatuses(statuses);
+  }, [statuses]);
 
   useEffect(() => {
     const zoomEnd = () => {
@@ -119,36 +108,60 @@ export default function MarkerDisplay(
         </div>
         {displayName ? (
           <div className="markerStatusBox">
-            <div className="statusImageDiv statusImageDiv1">
-              <img
-                className="rounded-circle img-fluid"
-                src="Assets/placeholder.png"
-              />
-            </div>
-            <div className="statusImageDiv statusImageDiv2">
-              <img
-                className="rounded-circle img-fluid"
-                src="Assets/placeholder.png"
-              />
-            </div>
-            <div className="statusImageDiv statusImageDiv3">
-              <img
-                className="rounded-circle img-fluid"
-                src="Assets/placeholder.png"
-              />
-            </div>
-            <div className="statusImageDiv statusImageDiv4">
-              <img
-                className="rounded-circle img-fluid"
-                src="Assets/placeholder.png"
-              />
-            </div>
-            <div className="statusImageDiv statusImageDiv5">
-              <img
-                className="rounded-circle img-fluid"
-                src="Assets/placeholder.png"
-              />
-            </div>
+            {
+              markerStatuses.map((status: CharacterStatus, index: number) => {
+                if (index < 5) {
+                  return (
+                    <div className={`statusImageDiv statusImageDiv${index}`}>
+                      <img
+                        className="rounded-circle img-fluid"
+                        src="Assets/placeholder.png"
+                      />
+                    </div>
+                  );
+                } else if (index === 5) {
+                  const remaining: number = markerStatuses.length - index;
+                  if (remaining === 0) {
+                    // This is the last one perfectly fine to render as is.
+                    return (
+                      <div className={`statusImageDiv statusImageDiv${index}`}>
+                        <img
+                          className="rounded-circle img-fluid"
+                          src="Assets/placeholder.png"
+                        />
+                      </div>
+                    );
+                  }
+                } else {
+                  // This is going to fall under "overflow".
+                  return <></>;
+                }
+              })
+            }
+            {/* <div className="statusImageDiv statusImageDiv2"> */}
+            {/*   <img */}
+            {/*     className="rounded-circle img-fluid" */}
+            {/*     src="Assets/placeholder.png" */}
+            {/*   /> */}
+            {/* </div> */}
+            {/* <div className="statusImageDiv statusImageDiv3"> */}
+            {/*   <img */}
+            {/*     className="rounded-circle img-fluid" */}
+            {/*     src="Assets/placeholder.png" */}
+            {/*   /> */}
+            {/* </div> */}
+            {/* <div className="statusImageDiv statusImageDiv4"> */}
+            {/*   <img */}
+            {/*     className="rounded-circle img-fluid" */}
+            {/*     src="Assets/placeholder.png" */}
+            {/*   /> */}
+            {/* </div> */}
+            {/* <div className="statusImageDiv statusImageDiv5"> */}
+            {/*   <img */}
+            {/*     className="rounded-circle img-fluid" */}
+            {/*     src="Assets/placeholder.png" */}
+            {/*   /> */}
+            {/* </div> */}
           </div>
         ) : ""}
 

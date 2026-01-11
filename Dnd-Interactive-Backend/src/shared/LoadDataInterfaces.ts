@@ -15,6 +15,7 @@ export interface LoadPlayerInterface {
   totalHealth: number;
   deathSaves: number;
   lifeSaves: number;
+  statuses: string[];
 }
 
 export interface LoadEnemyInterface {
@@ -30,6 +31,7 @@ export interface LoadEnemyInterface {
   death_saves: number;
   life_saves: number;
   is_visible: boolean;
+  statuses: string[];
 }
 
 export interface LoadFogInterface {
@@ -73,4 +75,5 @@ export interface LoadSummonsInterface {
   death_saves: number;
   life_saves: number;
   is_visible: boolean;
+  statuses: string[];
 }

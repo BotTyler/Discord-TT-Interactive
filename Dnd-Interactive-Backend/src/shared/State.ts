@@ -13,6 +13,7 @@ import { MapData, MapFogPolygon } from "./Map";
 import { Player, TPlayerOptions } from "./Player";
 import { mLatLng } from "./PositionInterface";
 import { Summons } from "./Summons";
+import { CharacterStatus, Conditions } from "./StatusTypes";
 
 export interface IState {
   roomName: string;
@@ -323,7 +324,7 @@ export class State extends Schema {
   removeCube(sessionId: string): boolean {
     const player = this._getPlayerBySessionId(sessionId);
     if (player === undefined) return false;
-    player.cubeDrawing = undefined;
+    player.cubeDrawing = null;
     return true;
   }
   //#endregion
@@ -341,7 +342,7 @@ export class State extends Schema {
   removeCircle(sessionId: string): boolean {
     const player = this._getPlayerBySessionId(sessionId);
     if (player === undefined) return false;
-    player.circleDrawing = undefined;
+    player.circleDrawing = null;
     return true;
   }
   //#endregion
@@ -363,7 +364,7 @@ export class State extends Schema {
   removeArc(sessionId: string): boolean {
     const player = this._getPlayerBySessionId(sessionId);
     if (player === undefined) return false;
-    player.arcDrawing = undefined;
+    player.arcDrawing = null;
     return true;
   }
   //#endregion
@@ -383,7 +384,7 @@ export class State extends Schema {
   removeBeam(sessionId: string): boolean {
     const player = this._getPlayerBySessionId(sessionId);
     if (player === undefined) return false;
-    player.beamDrawing = undefined;
+    player.beamDrawing = null;
     return true;
   }
   //#endregion
@@ -491,22 +492,22 @@ export class State extends Schema {
     },
   ): boolean {
     if (this.map === undefined) return false;
-    this.map.enemy.set(
-      `${data.id}`,
-      new Enemy({
-        id: data.id,
-        avatarUri: data.avatarUri,
-        name: data.name,
-        position: new mLatLng(data.position.lat, data.position.lng),
-        size: data.size,
-        initiative: 0,
-        health: data.health,
-        totalHealth: data.totalHealth,
-        deathSaves: data.deathSaves,
-        lifeSaves: data.lifeSaves,
-        isVisible: true,
-      }),
-    );
+
+    const newEnemy: Enemy = new Enemy({
+      id: data.id,
+      avatarUri: data.avatarUri,
+      name: data.name,
+      size: data.size,
+    });
+    newEnemy.position = new mLatLng(data.position.lat, data.position.lng);
+    newEnemy.health = data.health;
+    newEnemy.totalHealth = data.totalHealth;
+    newEnemy.deathSaves = data.deathSaves;
+    newEnemy.lifeSaves = data.lifeSaves;
+    newEnemy.isVisible = true;
+    newEnemy.initiative = 0;
+
+    this.map.enemy.set(`${data.id}`, newEnemy);
     return true;
   }
   removeEnemy(sessionId: string, data: { id: string }): boolean {
@@ -672,20 +673,20 @@ export class State extends Schema {
     if (player === undefined) return false;
 
     const insertSummon: Summons = new Summons({
+      player_id: player.userId,
       id: data.id,
       avatarUri: data.avatarUri,
       name: data.name,
-      position: new mLatLng(data.position.lat, data.position.lng),
-      health: data.health,
-      totalHealth: data.totalHealth,
       size: data.size,
       color: player.color,
-      player_id: player.userId,
-      lifeSaves: data.lifeSaves,
-      deathSaves: data.deathSaves,
-      isVisible: true,
     });
-    console.log("inserting summon");
+
+    insertSummon.position = new mLatLng(data.position.lat, data.position.lng);
+    insertSummon.health = data.health;
+    insertSummon.totalHealth = data.totalHealth;
+    insertSummon.lifeSaves = data.lifeSaves;
+    insertSummon.deathSaves = data.deathSaves;
+    insertSummon.isVisible = true;
 
     player.summons = [...player.summons, insertSummon];
     return true;
@@ -923,31 +924,38 @@ export class State extends Schema {
         // TODO: Set this, no reason to not estimate the player if they were here before.
         return;
       }
+      const player: Player = this.players.get(val.player_id)!;
 
-      this.players.get(val.player_id)!.position = new mLatLng(val.position_lat, val.position_lng);
-      this.players.get(val.player_id)!.initiative = +val.initiative;
+      player.position = new mLatLng(val.position_lat, val.position_lng);
+      player.initiative = +val.initiative;
+      player.statuses = val.statuses.map((status: string): CharacterStatus => {
+        return new CharacterStatus(status as Conditions);
+      });
     });
   }
 
   loadEnemyData(enemies: LoadEnemyInterface[]) {
     if (this.map === undefined) return; // this should not be null just checking to satisfy ts
     enemies.forEach((enemy) => {
-      this.map!.enemy.set(
-        enemy.enemy_id + "",
-        new Enemy({
-          avatarUri: enemy.image_name,
-          id: +enemy.enemy_id,
-          name: enemy.name,
-          position: new mLatLng(enemy.position_lat, enemy.position_lng),
-          size: +enemy.size,
-          initiative: +enemy.initiative,
-          health: +enemy.health,
-          totalHealth: +enemy.total_health,
-          deathSaves: +enemy.death_saves,
-          lifeSaves: +enemy.life_saves,
-          isVisible: enemy.is_visible,
-        }),
-      );
+      const insertEnemy: Enemy = new Enemy({
+        avatarUri: enemy.image_name,
+        id: +enemy.enemy_id,
+        name: enemy.name,
+        size: +enemy.size,
+      });
+
+      insertEnemy.position = new mLatLng(enemy.position_lat, enemy.position_lng);
+      insertEnemy.initiative = +enemy.initiative;
+      insertEnemy.health = +enemy.health;
+      insertEnemy.totalHealth = +enemy.total_health;
+      insertEnemy.deathSaves = +enemy.death_saves;
+      insertEnemy.lifeSaves = +enemy.life_saves;
+      insertEnemy.isVisible = enemy.is_visible;
+      insertEnemy.statuses = enemy.statuses.map((status: string): CharacterStatus => {
+        return new CharacterStatus(status as Conditions);
+      });
+
+      this.map!.enemy.set(`${enemy.enemy_id}`, insertEnemy);
     });
   }
 
@@ -978,20 +986,23 @@ export class State extends Schema {
       }
       const currentPlayer: Player = this.players.get(val.player_id)!;
       const summon: Summons = new Summons({
-        avatarUri: val.image_name,
         id: +val.summons_id,
+        player_id: currentPlayer.userId,
+        avatarUri: val.image_name,
         name: val.name,
-        position: new mLatLng(val.position_lat, val.position_lng),
         size: +val.size,
         color: currentPlayer.color,
-        player_id: currentPlayer.userId,
-        health: +val.health,
-        totalHealth: +val.total_health,
-        lifeSaves: +val.life_saves,
-        deathSaves: +val.death_saves,
-        isVisible: val.is_visible,
       });
+      summon.position = new mLatLng(val.position_lat, val.position_lng);
+      summon.health = +val.health;
+      summon.totalHealth = +val.total_health;
+      summon.lifeSaves = +val.life_saves;
+      summon.deathSaves = +val.death_saves;
+      summon.isVisible = val.is_visible;
       currentPlayer.summons = [...currentPlayer.summons, summon];
+      summon.statuses = val.statuses.map((status: string): CharacterStatus => {
+        return new CharacterStatus(status as Conditions);
+      });
     });
   }
   //#endregion
