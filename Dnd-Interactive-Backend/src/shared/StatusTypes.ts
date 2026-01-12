@@ -14,7 +14,7 @@ export class CharacterStatus extends Schema {
   }
 }
 
-export type Conditions = GeneralCondition | SpellCondition;
+export type Conditions = GeneralCondition | Buffs | DeBuf;
 
 export type GeneralCondition =
   | "Blinded"
@@ -31,6 +31,9 @@ export type GeneralCondition =
   | "Restrained"
   | "Stunned"
   | "Unconscious"
-  | "Exhaustion";
+  | "Exhausted"
+  | "Bleeding";
 
-export type SpellCondition = "Bless";
+export type Buffs = "Bless";
+
+export type DeBuf = "Baned";

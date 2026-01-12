@@ -14,8 +14,9 @@ export default function MarkerDisplay(
     color,
     health,
     totalHealth,
-    statuses,
     className = "",
+    statuses = [],
+    isHovering = false,
     isDraggable = false,
     displayName = true,
     eventFunctions }:
@@ -27,8 +28,9 @@ export default function MarkerDisplay(
       color: string;
       health: number;
       totalHealth: number;
-      statuses: CharacterStatus[];
       className: string;
+      statuses?: CharacterStatus[];
+      isHovering?: boolean;
       isDraggable?: boolean;
       displayName?: boolean;
       eventFunctions?: LeafletEventHandlerFnMap
@@ -45,6 +47,7 @@ export default function MarkerDisplay(
   const [markerTotalHealth, setMarkerTotalHealth] = useState<number>(totalHealth);
   const [id, setId] = useState<UUID>(crypto.randomUUID());
   const [markerStatuses, setMarkerStatuses] = useState<CharacterStatus[]>(statuses);
+
 
   useEffect(() => {
     setName(name);
@@ -95,77 +98,123 @@ export default function MarkerDisplay(
         <div className="position-absolute"
           style={{ top: 0, left: 0, right: 0, bottom: 0, background: "transparent" }}
         >
+          {
+            markerHealth <= 0 ?
+
+              <div className={"rounded-circle"} style={{
+                position: "absolute",
+                left: 0,
+                right: 0,
+                top: 0,
+                bottom: 0,
+                userSelect: "none",
+                background: "gray",
+                opacity: "40%",
+              }}>
+                <img
+                  className="rounded-circle img-fluid"
+                  src={`Assets/Skull_and_crossbones_vector.svg`}
+                  draggable="false"
+                />
+              </div>
+              :
+              ""
+          }
         </div>
-        <div className="markerNameTagDiv text-center icon-text">
+        <div
+          className="markerNameTagDiv text-center"
+        >
           {displayName ?
             (
-              <p className="text-nowrap text-capitalize text-break m-0 p-1" style={{ color: "#fff", zIndex: 0, fontSize: "12px" }}>
+              <p className="text-nowrap text-capitalize text-break m-0 p-1"
+                style={{
+                  color: "white",
+                  zIndex: 0,
+                  fontSize: "1.3em",
+                  fontWeight: 900,
+                  WebkitTextStroke: "1px black",
+                }}>
                 {markerName}
               </p>
             )
             : ""
           }
         </div>
-        {displayName ? (
-          <div className="markerStatusBox">
-            {
-              markerStatuses.map((status: CharacterStatus, index: number) => {
-                if (index < 5) {
-                  return (
-                    <div className={`statusImageDiv statusImageDiv${index}`}>
-                      <img
-                        className="rounded-circle img-fluid"
-                        src="Assets/placeholder.png"
-                      />
-                    </div>
-                  );
-                } else if (index === 5) {
-                  const remaining: number = markerStatuses.length - index;
-                  if (remaining === 0) {
-                    // This is the last one perfectly fine to render as is.
+        {
+          displayName ? (
+            <div className="markerStatusBox" key={`DisplayMarker-${id}-${name}`}>
+              {
+                markerStatuses.map((status: CharacterStatus, index: number) => {
+                  if (index < 4) {
                     return (
-                      <div className={`statusImageDiv statusImageDiv${index}`}>
+                      <div className={`statusImageDiv statusImageDiv${index + 1}`} key={`MarkerStatus-${id}-${status.toString()}-${index}`}>
                         <img
                           className="rounded-circle img-fluid"
-                          src="Assets/placeholder.png"
+                          src={`Assets/Conditions/${status.toString()}.png`}
                         />
                       </div>
                     );
-                  }
-                } else {
-                  // This is going to fall under "overflow".
-                  return <></>;
-                }
-              })
-            }
-            {/* <div className="statusImageDiv statusImageDiv2"> */}
-            {/*   <img */}
-            {/*     className="rounded-circle img-fluid" */}
-            {/*     src="Assets/placeholder.png" */}
-            {/*   /> */}
-            {/* </div> */}
-            {/* <div className="statusImageDiv statusImageDiv3"> */}
-            {/*   <img */}
-            {/*     className="rounded-circle img-fluid" */}
-            {/*     src="Assets/placeholder.png" */}
-            {/*   /> */}
-            {/* </div> */}
-            {/* <div className="statusImageDiv statusImageDiv4"> */}
-            {/*   <img */}
-            {/*     className="rounded-circle img-fluid" */}
-            {/*     src="Assets/placeholder.png" */}
-            {/*   /> */}
-            {/* </div> */}
-            {/* <div className="statusImageDiv statusImageDiv5"> */}
-            {/*   <img */}
-            {/*     className="rounded-circle img-fluid" */}
-            {/*     src="Assets/placeholder.png" */}
-            {/*   /> */}
-            {/* </div> */}
-          </div>
-        ) : ""}
+                  } else if (index === 5) { // Only 5 can show at a time.
 
-      </div>
+                    const remaining: number = markerStatuses.length - index;
+                    if (remaining === 0) {
+                      // This is the last one perfectly fine to render as is.
+                      return (
+                        <div className={`statusImageDiv statusImageDiv5`} key={`MarkerStatus-${id}-${status.toString()}-${index}`}>
+                          <img
+                            className="rounded-circle img-fluid"
+                            src={`Assets/Conditions/${status.toString()}.png`}
+                          />
+                        </div>
+                      );
+                    } else {
+                      // There are too many to display. lets start the overflow.
+                      const remainingList: CharacterStatus[] = markerStatuses.slice(index);
+                      return (
+                        <div
+                          key={`MarkerStatus-${id}-${status}-${index}`}
+                        >
+                          <div
+                            className={`statusImageDiv statusImageDiv5 rounded-circle overflow-hidden d-flex justify-content-center align-items-center`}
+                            style={{
+                              color: "black",
+                              background: "white",
+                              border: "2px solid black"
+                            }}
+                          >
+                            <p className="p-0 m-0" style={{
+                              fontSize: "1em",
+                              fontWeight: 900
+                            }}>{remaining}</p>
+                          </div>
+                          {isHovering ?
+                            <div
+                              className={`statusOverflowDiv row g-0 rounded`}
+                            >
+                              {remainingList.map((val: CharacterStatus, overflowIndex: number) => {
+                                return (
+                                  <div className="col-3" key={`OverflowContainer-${val.toString()}-${overflowIndex}`}>
+                                    <img
+                                      className="rounded-circle img-fluid"
+                                      src={`Assets/Conditions/${val.toString()}.png`}
+                                    />
+                                  </div>
+                                )
+                              })}
+                            </div>
+                            :
+                            ""}
+                        </div>
+                      );
+                    }
+                  }
+                })
+              }
+            </div>
+          ) : ""
+        }
+
+      </div >
     );
 
   const icon = new DivIcon({
@@ -175,6 +224,7 @@ export default function MarkerDisplay(
     iconAnchor: [markerScaled[1] / 2, markerScaled[1] / 2],
     className: "border-none bg-transparent user-select-none",
   });
+
   return (
     <Marker
       position={markerPosition}
@@ -182,6 +232,8 @@ export default function MarkerDisplay(
       draggable={isDraggable}
       key={`PlayableMarker-${id}-marker`}
       eventHandlers={eventFunctions}
-    />
+    >
+
+    </Marker>
   )
 }

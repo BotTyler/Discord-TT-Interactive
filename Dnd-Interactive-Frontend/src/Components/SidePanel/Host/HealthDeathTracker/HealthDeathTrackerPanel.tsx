@@ -46,17 +46,6 @@ export default function HealthDeathTrackerPanel() {
               </li>
             );
           })}
-          {/* {Object.values(playerList).map((val) => { */}
-          {/*   if (val.isHost) return <div key={"HealthDeathTrackerElement-Player-HOST"}></div>; */}
-          {/*   return ( */}
-          {/*     <li className="list-group-item p-0" key={`HealthDeathTrackerElement-Player-${val.userId}`}> */}
-          {/*       <HealthDeathTrackerElement */}
-          {/*         item={val} */}
-          {/*         itemType="player" */}
-          {/*       /> */}
-          {/*     </li> */}
-          {/*   ); */}
-          {/* })} */}
         </ul>
         <button
           className="btn btn-primary p-1 m-0 g-0 w-100"

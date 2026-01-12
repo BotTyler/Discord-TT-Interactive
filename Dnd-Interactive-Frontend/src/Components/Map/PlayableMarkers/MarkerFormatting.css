@@ -6,13 +6,12 @@
 .markerNameTagDiv {
   position: absolute;
   top: 105%;
-  left: -10%;
-  right: -10%;
-  max-height: 100%;
+  width: fit-content;
   padding: 0;
   margin: 0;
   user-select: none;
   pointer-events: none;
+  text-overflow: ellipsis;
 }
 
 .markerStatusBox {
@@ -26,6 +25,7 @@
 
 .statusImageDiv {
   width: 30%;
+  height: 30%;
 }
 
 .statusImageDiv1 {
@@ -55,6 +55,17 @@
   left: 105%;
   top: 50%;
   transform: translate(0, -50%);
+}
+
+.statusOverflowDiv {
+  width: 100%;
+  position: absolute;
+  left: 105%;
+  bottom: 50%;
+  transform: translate(35%, 50%);
+
+  border: 2px solid black;
+  background: lightgray;
 }
 
 .marker-imager {

@@ -10,6 +10,7 @@ import { Player } from "../../../../shared/Player";
 import DistanceLine from "../DistanceLine";
 import MarkerDisplay from "../MarkerDisplay";
 import { Summons } from "../../../../shared/Summons";
+import { CharacterStatus } from "../../../../shared/StatusTypes";
 
 export default function FreeMovementController({ controllableUser, userType, onPositionChange, onGhostPositionChange }:
   {
@@ -38,6 +39,12 @@ export default function FreeMovementController({ controllableUser, userType, onP
   const [isVisible, setVisibility] = useState<boolean>((markerUser as Enemy).isVisible ?? true); // Only enemy visibility can change
   const [health, setHealth] = useState<number>(controllableUser.health);
   const [totalHealth, setTotalHealth] = useState<number>(controllableUser.totalHealth);
+  const [statuses, setStatuses] = useState<CharacterStatus[]>(controllableUser.statuses);
+
+  // handles hovering for the status effect overflow.
+  // Required in this component due to how react leaflet is rendered.
+  // Once the component is created, there is no way to modify the component without updating a parameter.
+  const [isHovering, setHovering] = useState<boolean>(false);
 
   useEffect(() => {
     setMarkerUser(controllableUser);
@@ -85,6 +92,9 @@ export default function FreeMovementController({ controllableUser, userType, onP
     const handleTotalHealthChange = (value: any) => {
       setTotalHealth(value.detail.val);
     }
+    const handleStatusChange = (value: any) => {
+      setStatuses(value.detail.val);
+    }
 
     window.addEventListener(`update-${tempUser.userId}-isConnected`, handleConnectionChange);
     window.addEventListener(`update-${tempUser.userId}-name`, handleNameChange);
@@ -95,6 +105,7 @@ export default function FreeMovementController({ controllableUser, userType, onP
     window.addEventListener(`update-${tempUser.userId}-toPosition`, setNewToPosition);
     window.addEventListener(`update-${tempUser.userId}-health`, handleHealthChange);
     window.addEventListener(`update-${tempUser.userId}-totalHealth`, handleTotalHealthChange);
+    window.addEventListener(`update-${tempUser.userId}-statuses`, handleStatusChange);
     return () => {
       window.removeEventListener(`update-${tempUser.userId}-isConnected`, handleConnectionChange);
       window.removeEventListener(`update-${tempUser.userId}-name`, handleNameChange);
@@ -105,6 +116,7 @@ export default function FreeMovementController({ controllableUser, userType, onP
       window.removeEventListener(`update-${tempUser.userId}-toPosition`, setNewToPosition);
       window.removeEventListener(`update-${tempUser.userId}-health`, handleHealthChange);
       window.removeEventListener(`update-${tempUser.userId}-totalHealth`, handleTotalHealthChange);
+      window.removeEventListener(`update-${tempUser.userId}-statuses`, handleStatusChange);
     }
 
   }, [markerUser]);
@@ -146,6 +158,9 @@ export default function FreeMovementController({ controllableUser, userType, onP
     const handleTotalHealthChange = (value: any) => {
       setTotalHealth(value.detail.val);
     }
+    const handleStatusChange = (value: any) => {
+      setStatuses(value.detail.val);
+    }
 
     window.addEventListener(`EnemyUpdate-${tempEnemy.id}-name`, updateName);
     window.addEventListener(`EnemyUpdate-${tempEnemy.id}-position`, updatePosition);
@@ -156,6 +171,7 @@ export default function FreeMovementController({ controllableUser, userType, onP
     window.addEventListener(`EnemyUpdate-${tempEnemy.id}-isVisible`, handleVisibilityChange);
     window.addEventListener(`EnemyUpdate-${tempEnemy.id}-health`, handleHealthChange);
     window.addEventListener(`EnemyUpdate-${tempEnemy.id}-totalHealth`, handleTotalHealthChange);
+    window.addEventListener(`EnemyUpdate-${tempEnemy.id}-statuses`, handleStatusChange);
     return () => {
       window.removeEventListener(`EnemyUpdate-${tempEnemy.id}-name`, updateName);
       window.removeEventListener(`EnemyUpdate-${tempEnemy.id}-position`, updatePosition);
@@ -166,6 +182,7 @@ export default function FreeMovementController({ controllableUser, userType, onP
       window.removeEventListener(`EnemyUpdate-${tempEnemy.id}-isVisible`, handleVisibilityChange);
       window.removeEventListener(`EnemyUpdate-${tempEnemy.id}-health`, handleHealthChange);
       window.removeEventListener(`EnemyUpdate-${tempEnemy.id}-totalHealth`, handleTotalHealthChange);
+      window.removeEventListener(`EnemyUpdate-${tempEnemy.id}-statuses`, handleStatusChange);
     }
 
   }, [markerUser]);
@@ -209,6 +226,9 @@ export default function FreeMovementController({ controllableUser, userType, onP
     const handleTotalHealthChange = (value: any) => {
       setTotalHealth(value.detail.val);
     }
+    const handleStatusChange = (value: any) => {
+      setStatuses(value.detail.val);
+    }
 
     window.addEventListener(`SummonUpdate-${tempSummon.id}-name`, updateName);
     window.addEventListener(`SummonUpdate-${tempSummon.id}-position`, updatePosition);
@@ -220,6 +240,7 @@ export default function FreeMovementController({ controllableUser, userType, onP
     window.addEventListener(`SummonUpdate-${tempSummon.id}-isVisible`, handleVisibilityChange);
     window.addEventListener(`SummonUpdate-${tempSummon.id}-health`, handleHealthChange);
     window.addEventListener(`SummonUpdate-${tempSummon.id}-totalHealth`, handleTotalHealthChange);
+    window.addEventListener(`SummonUpdate-${tempSummon.id}-statuses`, handleStatusChange);
     return () => {
       window.removeEventListener(`SummonUpdate-${tempSummon.id}-name`, updateName);
       window.removeEventListener(`SummonUpdate-${tempSummon.id}-position`, updatePosition);
@@ -231,6 +252,7 @@ export default function FreeMovementController({ controllableUser, userType, onP
       window.removeEventListener(`SummonUpdate-${tempSummon.id}-isVisible`, handleVisibilityChange);
       window.removeEventListener(`SummonUpdate-${tempSummon.id}-health`, handleHealthChange);
       window.removeEventListener(`SummonUpdate-${tempSummon.id}-totalHealth`, handleTotalHealthChange);
+      window.removeEventListener(`SummonUpdate-${tempSummon.id}-statuses`, handleStatusChange);
     }
 
   }, [markerUser]);
@@ -293,7 +315,6 @@ export default function FreeMovementController({ controllableUser, userType, onP
         break
     }
   }
-
   return determineVisibility() ? (
     <>
       <Pane name={`Free-${userType}-Marker-${id}`} style={{ zIndex: 500 }}>
@@ -305,7 +326,10 @@ export default function FreeMovementController({ controllableUser, userType, onP
           size={markerSize}
           health={health}
           totalHealth={totalHealth}
-          className={isVisible ? "opacity-100" : "opacity-50"} />
+          className={isVisible ? "opacity-100" : "opacity-50"}
+          statuses={statuses}
+          isHovering={isHovering && !isMoving}
+        />
       </Pane>
       <DistanceLine start={position} end={toPosition.length > 0 ? toPosition[0] : position} color={color} size={iconSize} />
       <Pane name={`Free-${userType}-Ghost-Marker-${id}`} style={{ zIndex: 501 }}>
@@ -335,6 +359,8 @@ export default function FreeMovementController({ controllableUser, userType, onP
                 setToPosition([new LatLng(position.lat, position.lng)]);
               }
             },
+            mouseover: () => setHovering(true),
+            mouseout: () => setHovering(false)
           }} />
       </Pane>
     </>

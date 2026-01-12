@@ -11,6 +11,7 @@ import { Player } from "../../../../shared/Player";
 import { DistanceLineGrid } from "../DistanceLine";
 import MarkerDisplay from "../MarkerDisplay";
 import { Summons } from "../../../../shared/Summons";
+import { CharacterStatus } from "../../../../shared/StatusTypes";
 
 export default function GridMovementController({ controllableUser, userType, onPositionChange, onGhostPositionChange }:
   {
@@ -20,7 +21,7 @@ export default function GridMovementController({ controllableUser, userType, onP
     onGhostPositionChange: (position: LatLng[]) => void
   }) {
 
-  const [markerUser, setMarkerUser] = useState<any>(controllableUser);
+  const [markerUser, setMarkerUser] = useState<Player | Enemy | Summons>(controllableUser);
 
   const leafletMap = useMap();
   const mapContext = useGameState();
@@ -28,7 +29,7 @@ export default function GridMovementController({ controllableUser, userType, onP
   const playerContext = usePlayers();
   const toolContext = useGameToolContext();
 
-  const [id, setId] = useState<string>(markerUser.userId ?? markerUser.id);
+  const [id, setId] = useState<string>((markerUser as Player).userId ?? (markerUser as Enemy | Summons).id);
   const [name, setName] = useState<string>(markerUser.name);
   const [avatarUri, setAvatarUri] = useState<string>(markerUser.avatarUri);
   const [markerSize, setMarkerSize] = useState<number>((markerUser as Enemy | Summons).size ?? mapContext.getIconHeight());
@@ -39,6 +40,12 @@ export default function GridMovementController({ controllableUser, userType, onP
   const [color, setColor] = useState<string>((markerUser as Player).color ?? "#f00");
   const [isMoving, setIsMoving] = useState<boolean>(false);
   const [isVisible, setIsVisible] = useState<boolean>((markerUser as Enemy | Summons).isVisible ?? true);
+  const [statuses, setStatuses] = useState<CharacterStatus[]>(markerUser.statuses);
+
+  // handles hovering for the status effect overflow.
+  // Required in this component due to how react leaflet is rendered.
+  // Once the component is created, there is no way to modify the component without updating a parameter.
+  const [isHovering, setHovering] = useState<boolean>(false);
 
   // use the map like this may be dangerous, but this component does not load until the map is set.
   const [mapWidth, setMapWidth] = useState<number>(mapContext.getMap()!.width);
@@ -110,6 +117,9 @@ export default function GridMovementController({ controllableUser, userType, onP
       if (!isMovingRef.current)
         setToPosition(value.detail.val == null ? [position] : value.detail.val.map((val: any) => { return new LatLng(val.lat, val.lng) }));
     };
+    const handleStatusChange = (value: any) => {
+      setStatuses(value.detail.val);
+    };
 
     window.addEventListener(`update-${tempUser.userId}-isConnected`, handleConnectionChange);
     window.addEventListener(`update-${tempUser.userId}-name`, handleNameChange);
@@ -119,6 +129,7 @@ export default function GridMovementController({ controllableUser, userType, onP
     window.addEventListener(`IconHeightChanged`, handleIconHeightChange);
     window.addEventListener(`MapUpdate`, handleMapUpdate);
     window.addEventListener(`update-${tempUser.userId}-toPosition`, setNewToPosition);
+    window.addEventListener(`update-${tempUser.userId}-statuses`, handleStatusChange);
     return () => {
       window.removeEventListener(`update-${tempUser.userId}-isConnected`, handleConnectionChange);
       window.removeEventListener(`update-${tempUser.userId}-name`, handleNameChange);
@@ -128,6 +139,7 @@ export default function GridMovementController({ controllableUser, userType, onP
       window.removeEventListener(`IconHeightChanged`, handleIconHeightChange);
       window.removeEventListener(`MapUpdate`, handleMapUpdate);
       window.removeEventListener(`update-${tempUser.userId}-toPosition`, setNewToPosition);
+      window.removeEventListener(`update-${tempUser.userId}-statuses`, handleStatusChange);
     }
 
   }, [markerUser]);
@@ -171,6 +183,9 @@ export default function GridMovementController({ controllableUser, userType, onP
       if (!isMovingRef.current)
         setToPosition(value.detail.val == null ? [position] : value.detail.val.map((val: any) => { return new LatLng(val.lat, val.lng) }));
     };
+    const handleStatusChange = (value: any) => {
+      setStatuses(value.detail.val);
+    };
 
     window.addEventListener(`EnemyUpdate-${tempEnemy.id}-name`, updateName);
     window.addEventListener(`EnemyUpdate-${tempEnemy.id}-position`, updatePosition);
@@ -179,6 +194,7 @@ export default function GridMovementController({ controllableUser, userType, onP
     window.addEventListener(`EnemyUpdate-${tempEnemy.id}-avatarUri`, updateAvatar);
     window.addEventListener(`EnemyUpdate-${tempEnemy.id}-toPosition`, setNewToPosition);
     window.addEventListener(`EnemyUpdate-${tempEnemy.id}-isVisible`, handleVisibilityChange);
+    window.addEventListener(`EnemyUpdate-${tempEnemy.id}-statuses`, handleStatusChange);
     return () => {
       window.removeEventListener(`EnemyUpdate-${tempEnemy.id}-name`, updateName);
       window.removeEventListener(`EnemyUpdate-${tempEnemy.id}-position`, updatePosition);
@@ -187,6 +203,7 @@ export default function GridMovementController({ controllableUser, userType, onP
       window.removeEventListener(`EnemyUpdate-${tempEnemy.id}-avatarUri`, updateAvatar);
       window.removeEventListener(`EnemyUpdate-${tempEnemy.id}-toPosition`, setNewToPosition);
       window.removeEventListener(`EnemyUpdate-${tempEnemy.id}-isVisible`, handleVisibilityChange);
+      window.removeEventListener(`EnemyUpdate-${tempEnemy.id}-statuses`, handleStatusChange);
     }
 
   }, [markerUser]);
@@ -223,6 +240,9 @@ export default function GridMovementController({ controllableUser, userType, onP
       if (!isMovingRef.current)
         setToPosition(value.detail.val == null ? [position] : value.detail.val.map((val: any) => { return new LatLng(val.lat, val.lng) }));
     };
+    const handleStatusChange = (value: any) => {
+      setStatuses(value.detail.val);
+    };
 
     window.addEventListener(`SummonUpdate-${tempSummon.id}-name`, updateName);
     window.addEventListener(`SummonUpdate-${tempSummon.id}-position`, updatePosition);
@@ -232,6 +252,7 @@ export default function GridMovementController({ controllableUser, userType, onP
     window.addEventListener(`SummonUpdate-${tempSummon.id}-avatarUri`, updateAvatar);
     window.addEventListener(`SummonUpdate-${tempSummon.id}-toPosition`, setNewToPosition);
     window.addEventListener(`SummonUpdate-${tempSummon.id}-isVisible`, handleVisibilityChange);
+    window.addEventListener(`SummonUpdate-${tempSummon.id}-statuses`, handleStatusChange);
     return () => {
       window.removeEventListener(`SummonUpdate-${tempSummon.id}-name`, updateName);
       window.removeEventListener(`SummonUpdate-${tempSummon.id}-position`, updatePosition);
@@ -241,6 +262,7 @@ export default function GridMovementController({ controllableUser, userType, onP
       window.removeEventListener(`SummonUpdate-${tempSummon.id}-avatarUri`, updateAvatar);
       window.removeEventListener(`SummonUpdate-${tempSummon.id}-toPosition`, setNewToPosition);
       window.removeEventListener(`SummonUpdate-${tempSummon.id}-isVisible`, handleVisibilityChange);
+      window.removeEventListener(`SummonUpdate-${tempSummon.id}-statuses`, handleStatusChange);
     }
 
   }, [markerUser]);
@@ -289,7 +311,7 @@ export default function GridMovementController({ controllableUser, userType, onP
           authContext.room.send("toggleEnemyVisibility", { clientToChange: `${id}` });
           break;
         case "summon":
-          authContext.room.send("toggleSummonVisibility", { id: +id, player_id: markerUser.player_id });
+          authContext.room.send("toggleSummonVisibility", { id: +id, player_id: (markerUser as Summons).player_id });
           break;
       }
     }
@@ -302,7 +324,7 @@ export default function GridMovementController({ controllableUser, userType, onP
           authContext.room.send("deleteEnemy", { id: `${id}` });
           break;
         case "summon":
-          authContext.room.send("deleteSummons", { id: +id, player_id: markerUser.player_id });
+          authContext.room.send("deleteSummons", { id: +id, player_id: (markerUser as Summons).player_id });
           break;
       }
     }
@@ -327,7 +349,10 @@ export default function GridMovementController({ controllableUser, userType, onP
           size={markerSize}
           health={1}
           totalHealth={1}
-          className={isVisible ? "opacity-100" : "opacity-50"} />
+          className={isVisible ? "opacity-100" : "opacity-50"}
+          statuses={statuses}
+          isHovering={isHovering && !isMoving}
+        />
       </Pane>
       <DistanceLineGrid positions={toPosition} color={color} playerSize={markerSize} />
       <Pane name={`Grid-${userType}-Ghost-Marker-${id}`} style={{ zIndex: 501 }}>
@@ -362,7 +387,9 @@ export default function GridMovementController({ controllableUser, userType, onP
                 onPositionChange(position);
                 setToPosition([new LatLng(position.lat, position.lng)]);
               }
-            }
+            },
+            mouseover: () => setHovering(true),
+            mouseout: () => setHovering(false)
           }} />
       </Pane>
     </>

@@ -23,10 +23,10 @@ export default function PlayerElementHandler({ player, onValueChanged }: { playe
   const [deathSaves, setDeathSaves] = React.useState<number>(player.deathSaves);
   const [lifeSaves, setLifeSaves] = React.useState<number>(player.lifeSaves);
   const [drawings, setDrawings] = React.useState<mLatLng[]>(player.drawings);
-  const [cubeDrawings, setCubeDrawings] = React.useState<CubeDrawing | null>(player.cubeDrawing);
-  const [circleDrawings, setCircleDrawings] = React.useState<CircleDrawing | null>(player.circleDrawing);
-  const [arcDrawings, setArcDrawings] = React.useState<ArcDrawing | null>(player.arcDrawing);
-  const [beamDrawing, setBeamDrawing] = React.useState<BeamDrawing | null>(player.beamDrawing);
+  const [cubeDrawings, setCubeDrawings] = React.useState<CubeDrawing | null>(player.cubeDrawing ?? null);
+  const [circleDrawings, setCircleDrawings] = React.useState<CircleDrawing | null>(player.circleDrawing ?? null);
+  const [arcDrawings, setArcDrawings] = React.useState<ArcDrawing | null>(player.arcDrawing ?? null);
+  const [beamDrawing, setBeamDrawing] = React.useState<BeamDrawing | null>(player.beamDrawing ?? null);
   const [isConnected, setConnected] = React.useState<boolean>(player.isConnected);
   const [statuses, setStatuses] = React.useState<CharacterStatus[]>(player.statuses);
 

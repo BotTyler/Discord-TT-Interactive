@@ -80,7 +80,7 @@ export class Player extends Schema {
 
     // Preset values
     this.position = new mLatLng(0, 0);
-    this.color = "#" + (0x1000000 + Math.random() * 0xffffff).toString(16).substring(1, 6);
+    this.color = "#" + (0x1000000 + Math.random() * 0xffffff).toString(16).substring(0, 6);
     this.drawings = [];
     this.initiative = 0;
     this.circleDrawing = null;

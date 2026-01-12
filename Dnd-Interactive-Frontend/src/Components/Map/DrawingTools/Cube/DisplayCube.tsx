@@ -18,6 +18,7 @@ export default function DisplayCube({ player }: { player: Player }) {
 
   const [cube, setCube] = useState<CubeDrawing | null>(players.getPlayer(player.userId)!.cubeDrawing);
   const [color, setColor] = useState<string>(player.color);
+
   useEffect(() => {
     const setValue = (value: any) => {
       setCube(value.detail.val);

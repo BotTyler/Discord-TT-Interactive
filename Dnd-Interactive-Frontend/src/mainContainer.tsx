@@ -12,6 +12,7 @@ import { AuthenticatedContextProvider } from "./ContextProvider/useAuthenticated
 import { ErrorHandlerProvider } from "./ErrorHandlerContext";
 
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
+
 root.render(
   <div className="w-100 h-100" style={{ fontSize: "14px" }}>
     {/* <React.StrictMode> */}
