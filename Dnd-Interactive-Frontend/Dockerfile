@@ -28,7 +28,7 @@ COPY Dnd-Interactive-Frontend .
 RUN rm src/shared
 
 # Replace the shared folder contents where the sym link was.
-Copy Dnd-Interactive-Backend/src/shared ./src/shared
+COPY Dnd-Interactive-Backend/src/shared ./src/shared
 
 RUN npm ci
 
