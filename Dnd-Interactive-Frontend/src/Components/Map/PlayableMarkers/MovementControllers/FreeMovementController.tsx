@@ -37,9 +37,9 @@ export default function FreeMovementController({ controllableUser, userType, onP
   const [color, setColor] = useState<string>((markerUser as Player | Summons).color ?? "#f00");
   const [isMoving, setIsMoving] = useState<boolean>(false);
   const [isVisible, setVisibility] = useState<boolean>((markerUser as Enemy).isVisible ?? true); // Only enemy visibility can change
-  const [health, setHealth] = useState<number>(controllableUser.health);
-  const [totalHealth, setTotalHealth] = useState<number>(controllableUser.totalHealth);
-  const [statuses, setStatuses] = useState<CharacterStatus[]>(controllableUser.statuses);
+  const [health, setHealth] = useState<number>(markerUser.health);
+  const [totalHealth, setTotalHealth] = useState<number>(markerUser.totalHealth);
+  const [statuses, setStatuses] = useState<CharacterStatus[]>(markerUser.statuses);
 
   // handles hovering for the status effect overflow.
   // Required in this component due to how react leaflet is rendered.

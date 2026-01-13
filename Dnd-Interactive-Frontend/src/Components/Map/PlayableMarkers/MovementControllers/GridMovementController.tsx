@@ -40,6 +40,8 @@ export default function GridMovementController({ controllableUser, userType, onP
   const [color, setColor] = useState<string>((markerUser as Player).color ?? "#f00");
   const [isMoving, setIsMoving] = useState<boolean>(false);
   const [isVisible, setIsVisible] = useState<boolean>((markerUser as Enemy | Summons).isVisible ?? true);
+  const [health, setHealth] = useState<number>(markerUser.health);
+  const [totalHealth, setTotalHealth] = useState<number>(markerUser.totalHealth);
   const [statuses, setStatuses] = useState<CharacterStatus[]>(markerUser.statuses);
 
   // handles hovering for the status effect overflow.
@@ -117,6 +119,12 @@ export default function GridMovementController({ controllableUser, userType, onP
       if (!isMovingRef.current)
         setToPosition(value.detail.val == null ? [position] : value.detail.val.map((val: any) => { return new LatLng(val.lat, val.lng) }));
     };
+    const handleHealthChange = (value: any) => {
+      setHealth(value.detail.val);
+    }
+    const handleTotalHealthChange = (value: any) => {
+      setTotalHealth(value.detail.val);
+    }
     const handleStatusChange = (value: any) => {
       setStatuses(value.detail.val);
     };
@@ -129,6 +137,8 @@ export default function GridMovementController({ controllableUser, userType, onP
     window.addEventListener(`IconHeightChanged`, handleIconHeightChange);
     window.addEventListener(`MapUpdate`, handleMapUpdate);
     window.addEventListener(`update-${tempUser.userId}-toPosition`, setNewToPosition);
+    window.addEventListener(`update-${tempUser.userId}-health`, handleHealthChange);
+    window.addEventListener(`update-${tempUser.userId}-totalHealth`, handleTotalHealthChange);
     window.addEventListener(`update-${tempUser.userId}-statuses`, handleStatusChange);
     return () => {
       window.removeEventListener(`update-${tempUser.userId}-isConnected`, handleConnectionChange);
@@ -139,6 +149,8 @@ export default function GridMovementController({ controllableUser, userType, onP
       window.removeEventListener(`IconHeightChanged`, handleIconHeightChange);
       window.removeEventListener(`MapUpdate`, handleMapUpdate);
       window.removeEventListener(`update-${tempUser.userId}-toPosition`, setNewToPosition);
+      window.removeEventListener(`update-${tempUser.userId}-health`, handleHealthChange);
+      window.removeEventListener(`update-${tempUser.userId}-totalHealth`, handleTotalHealthChange);
       window.removeEventListener(`update-${tempUser.userId}-statuses`, handleStatusChange);
     }
 
@@ -183,6 +195,12 @@ export default function GridMovementController({ controllableUser, userType, onP
       if (!isMovingRef.current)
         setToPosition(value.detail.val == null ? [position] : value.detail.val.map((val: any) => { return new LatLng(val.lat, val.lng) }));
     };
+    const handleHealthChange = (value: any) => {
+      setHealth(value.detail.val);
+    }
+    const handleTotalHealthChange = (value: any) => {
+      setTotalHealth(value.detail.val);
+    }
     const handleStatusChange = (value: any) => {
       setStatuses(value.detail.val);
     };
@@ -194,6 +212,8 @@ export default function GridMovementController({ controllableUser, userType, onP
     window.addEventListener(`EnemyUpdate-${tempEnemy.id}-avatarUri`, updateAvatar);
     window.addEventListener(`EnemyUpdate-${tempEnemy.id}-toPosition`, setNewToPosition);
     window.addEventListener(`EnemyUpdate-${tempEnemy.id}-isVisible`, handleVisibilityChange);
+    window.addEventListener(`EnemyUpdate-${tempEnemy.id}-health`, handleHealthChange);
+    window.addEventListener(`EnemyUpdate-${tempEnemy.id}-totalHealth`, handleTotalHealthChange);
     window.addEventListener(`EnemyUpdate-${tempEnemy.id}-statuses`, handleStatusChange);
     return () => {
       window.removeEventListener(`EnemyUpdate-${tempEnemy.id}-name`, updateName);
@@ -203,6 +223,8 @@ export default function GridMovementController({ controllableUser, userType, onP
       window.removeEventListener(`EnemyUpdate-${tempEnemy.id}-avatarUri`, updateAvatar);
       window.removeEventListener(`EnemyUpdate-${tempEnemy.id}-toPosition`, setNewToPosition);
       window.removeEventListener(`EnemyUpdate-${tempEnemy.id}-isVisible`, handleVisibilityChange);
+      window.removeEventListener(`EnemyUpdate-${tempEnemy.id}-health`, handleHealthChange);
+      window.removeEventListener(`EnemyUpdate-${tempEnemy.id}-totalHealth`, handleTotalHealthChange);
       window.removeEventListener(`EnemyUpdate-${tempEnemy.id}-statuses`, handleStatusChange);
     }
 
@@ -240,6 +262,12 @@ export default function GridMovementController({ controllableUser, userType, onP
       if (!isMovingRef.current)
         setToPosition(value.detail.val == null ? [position] : value.detail.val.map((val: any) => { return new LatLng(val.lat, val.lng) }));
     };
+    const handleHealthChange = (value: any) => {
+      setHealth(value.detail.val);
+    }
+    const handleTotalHealthChange = (value: any) => {
+      setTotalHealth(value.detail.val);
+    }
     const handleStatusChange = (value: any) => {
       setStatuses(value.detail.val);
     };
@@ -252,6 +280,8 @@ export default function GridMovementController({ controllableUser, userType, onP
     window.addEventListener(`SummonUpdate-${tempSummon.id}-avatarUri`, updateAvatar);
     window.addEventListener(`SummonUpdate-${tempSummon.id}-toPosition`, setNewToPosition);
     window.addEventListener(`SummonUpdate-${tempSummon.id}-isVisible`, handleVisibilityChange);
+    window.addEventListener(`SummonUpdate-${tempSummon.id}-health`, handleHealthChange);
+    window.addEventListener(`SummonUpdate-${tempSummon.id}-totalHealth`, handleTotalHealthChange);
     window.addEventListener(`SummonUpdate-${tempSummon.id}-statuses`, handleStatusChange);
     return () => {
       window.removeEventListener(`SummonUpdate-${tempSummon.id}-name`, updateName);
@@ -262,6 +292,8 @@ export default function GridMovementController({ controllableUser, userType, onP
       window.removeEventListener(`SummonUpdate-${tempSummon.id}-avatarUri`, updateAvatar);
       window.removeEventListener(`SummonUpdate-${tempSummon.id}-toPosition`, setNewToPosition);
       window.removeEventListener(`SummonUpdate-${tempSummon.id}-isVisible`, handleVisibilityChange);
+      window.removeEventListener(`SummonUpdate-${tempSummon.id}-health`, handleHealthChange);
+      window.removeEventListener(`SummonUpdate-${tempSummon.id}-totalHealth`, handleTotalHealthChange);
       window.removeEventListener(`SummonUpdate-${tempSummon.id}-statuses`, handleStatusChange);
     }
 
@@ -347,8 +379,8 @@ export default function GridMovementController({ controllableUser, userType, onP
           color={color}
           position={position}
           size={markerSize}
-          health={1}
-          totalHealth={1}
+          health={health}
+          totalHealth={totalHealth}
           className={isVisible ? "opacity-100" : "opacity-50"}
           statuses={statuses}
           isHovering={isHovering && !isMoving}
@@ -366,8 +398,8 @@ export default function GridMovementController({ controllableUser, userType, onP
           isDraggable={true}
           className={`opacity-50`}
           displayName={false}
-          health={1}
-          totalHealth={1}
+          health={health}
+          totalHealth={totalHealth}
           eventFunctions={{
             dragstart: (event: LeafletEvent) => {
               setIsMoving(true);

@@ -31,7 +31,6 @@ export default function PlayerElementHandler({ player, onValueChanged }: { playe
   const [statuses, setStatuses] = React.useState<CharacterStatus[]>(player.statuses);
 
   const [summons, setSummons] = React.useState<Summons[]>(player.summons);
-  const [connectedSummons, setConnectedSummons] = React.useState<Summons[]>(player.summons);
 
   const authContext = useAuthenticatedContext();
 
@@ -177,7 +176,7 @@ export default function PlayerElementHandler({ player, onValueChanged }: { playe
     });
     const summonsListener = player.listen("summons", (value: Summons[]) => {
       setSummons([...value]);
-      setConnectedSummons([...value]);
+      // setConnectedSummons([...value]);
     });
 
 
@@ -206,21 +205,8 @@ export default function PlayerElementHandler({ player, onValueChanged }: { playe
     };
   }, [authContext.room, player]);
   return <>
-    {connectedSummons.map((item: Summons) => {
-      return <SummonsElementHandler summon={item} key={`Player-${userId}-Summon-${item.id}`} onValueChanged={(field: string, value: unknown): void => {
-        setSummons((prev: Summons[]): Summons[] => {
-          const summonsUpdate: Summons[] = prev.map((val: Summons): Summons => {
-            if (val.id !== item.id) return val;
-
-            // Note: this is bad.
-            const _summons: any = { ...val };
-            _summons[field] = value;
-            return _summons;
-          })
-
-          return summonsUpdate;
-        })
-      }} />
+    {summons.map((item: Summons) => {
+      return <SummonsElementHandler summon={item} key={`Player-${userId}-Summon-${item.id}`} />
     })}
   </>;
 }

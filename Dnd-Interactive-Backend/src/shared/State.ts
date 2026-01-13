@@ -449,6 +449,7 @@ export class State extends Schema {
 
     this.players.forEach((player: Player): void => {
       player.summons = [];
+      player.statuses = [];
     });
     return false;
   }
@@ -953,6 +954,13 @@ export class State extends Schema {
       },
       +data.id!,
     );
+
+    // Reset map specific fields
+    this.players.forEach((player: Player): void => {
+      player.summons = [];
+      player.statuses = [];
+      player.initiative = 1;
+    });
   }
 
   loadPlayerData(players: LoadPlayerInterface[]) {
@@ -1012,10 +1020,6 @@ export class State extends Schema {
   }
 
   loadSummonsData(summons: LoadSummonsInterface[]): void {
-    // Reset or instantiate summons
-    this.players.forEach((player: Player): void => {
-      player.summons = [];
-    });
     summons.forEach((val: LoadSummonsInterface): void => {
       if (!this.players.has(val.player_id)) {
         console.log("Not the right player");

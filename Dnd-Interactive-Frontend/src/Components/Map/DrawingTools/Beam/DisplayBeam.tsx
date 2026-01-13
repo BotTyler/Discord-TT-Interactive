@@ -49,7 +49,7 @@ export default function DisplayBeam({ player }: { player: Player }) {
     }
   };
 
-  return beam !== null ? (<Beam key={`BeamDrawing-${player.userId}`}
+  return beam != null ? (<Beam key={`BeamDrawing-${player.userId}`}
     start={new LatLng(beam.start.lat, beam.start.lng)}
     end={new LatLng(beam.end.lat, beam.end.lng)}
     width={beam.width}

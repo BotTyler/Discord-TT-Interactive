@@ -44,5 +44,5 @@ export default function DisplayCircle({ player }: { player: Player }) {
     }
   };
 
-  return circle !== null ? <Circle key={`CircleDraw-${player.userId}`} center={new LatLng(circle!.center.lat, circle!.center.lng)} color={color} radius={circle!.radius} removeCallback={handleRemove} /> : "";
+  return circle != null ? <Circle key={`CircleDraw-${player.userId}`} center={new LatLng(circle!.center.lat, circle!.center.lng)} color={color} radius={circle!.radius} removeCallback={handleRemove} /> : "";
 }

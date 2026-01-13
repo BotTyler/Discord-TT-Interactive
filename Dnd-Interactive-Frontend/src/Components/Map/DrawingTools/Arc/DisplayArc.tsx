@@ -44,5 +44,5 @@ export default function DisplayArc({ player }: { player: Player }) {
     }
   };
 
-  return arc !== null ? <Arc key={`ArcDraw-${player.userId}`} center={new LatLng(arc.center.lat, arc.center.lng)} toLocation={new LatLng(arc.toLocation.lat, arc.toLocation.lng)} angle={arc.angle} color={color} removeCallback={handleRemove} /> : "";
+  return arc != null ? <Arc key={`ArcDraw-${player.userId}`} center={new LatLng(arc.center.lat, arc.center.lng)} toLocation={new LatLng(arc.toLocation.lat, arc.toLocation.lng)} angle={arc.angle} color={color} removeCallback={handleRemove} /> : "";
 }

@@ -5,7 +5,7 @@ import { mLatLng } from "../../shared/PositionInterface";
 import { CharacterStatus } from "../../shared/StatusTypes";
 
 // this class def can be simpler
-export default function SummonsElementHandler({ summon, onValueChanged }: { summon: Summons; onValueChanged: (field: string, value: unknown) => void }) {
+export default function SummonsElementHandler({ summon }: { summon: Summons; }) {
   const [id, setId] = React.useState<number>(summon.id);
   const [player_id, setPlayerId] = React.useState<string>(summon.player_id);
   const [avatarUri, setAvatarUri] = React.useState<string>(summon.avatarUri);
@@ -20,11 +20,11 @@ export default function SummonsElementHandler({ summon, onValueChanged }: { summ
   const [deathSaves, setDeathSaves] = React.useState<number>(summon.deathSaves);
   const [isVisible, setIsVisible] = React.useState<boolean>(summon.isVisible);
   const [statuses, setStatuses] = React.useState<CharacterStatus[]>(summon.statuses);
+
   const authContext = useAuthenticatedContext();
 
   // below effects are used to emit events when the value is finalized
   const emitFieldChangeEvent = (field: string, value: any) => {
-    onValueChanged(field, value);
     const event = new CustomEvent(`SummonUpdate-${id}-${field}`, {
       detail: { val: value },
     });
@@ -136,6 +136,6 @@ export default function SummonsElementHandler({ summon, onValueChanged }: { summ
       isVisibleListener();
       statusesListener();
     };
-  }, [authContext.room, summon]);
+  }, [summon]);
   return <></>;
 }
