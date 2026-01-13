@@ -364,5 +364,5 @@ export default function FreeMovementController({ controllableUser, userType, onP
           }} />
       </Pane>
     </>
-  ) : <></>;
+  ) : <></>
 }

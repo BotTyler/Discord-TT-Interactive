@@ -173,7 +173,7 @@ export default function PlayerElementHandler({ player, onValueChanged }: { playe
       setConnected(value);
     });
     const statusesListener = player.listen("statuses", (value: CharacterStatus[]) => {
-      setStatuses(value);
+      setStatuses([...value]);
     });
     const summonsListener = player.listen("summons", (value: Summons[]) => {
       setSummons([...value]);

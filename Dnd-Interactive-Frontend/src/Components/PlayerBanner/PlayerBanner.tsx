@@ -66,7 +66,6 @@ export default function PlayerBanner({ player, isMain, hostOnClick }: { player: 
   const [modalColor, setModalColor] = useState<string>(color);
 
   function HexToHSL(hex: string): { h: number; s: number; l: number } {
-    console.log(hex)
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
 
     if (!result) {

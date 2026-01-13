@@ -54,7 +54,7 @@ export function ValidateAllInputs(
   reqInputs: Record<string, any>,
   validInputs: ValidationInputType[],
 ): Object {
-  console.log(reqInputs);
+  // console.log(reqInputs);
   const validatedRecord: Record<string, any> = {};
   for (const field of validInputs) {
     const reqValue = reqInputs[field.name];

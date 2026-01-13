@@ -9,6 +9,8 @@ import { ProgressDiv } from "../../../ProgressBar/ProgressBarComponent";
 import DeathComponent from "./DeathComponent";
 import HealthNamePlate, { HealDamageComponent } from "./HealthComponent";
 import { mLatLng } from "../../../../shared/PositionInterface";
+import StatusDropdown from "../../../StatusModal/StatusModal";
+import { CharacterStatus } from "../../../../shared/StatusTypes";
 
 export default function HealthDeathTrackerElement({ item, itemType }:
   {
@@ -27,8 +29,10 @@ export default function HealthDeathTrackerElement({ item, itemType }:
   const [deathSaves, setDeathSaves] = useState<number>(item.deathSaves);
   const [lifeSaves, setLifeSaves] = useState<number>(item.lifeSaves);
   const [isVisible, setVisibility] = useState<boolean>((item as Enemy | Summons).isVisible ?? true);
+  const [statuses, setStatuses] = useState<CharacterStatus[]>(item.statuses);
 
   const [showEditCharacter, setShowEditCharacter] = useState<boolean>(false);
+  const [showStatusModal, setShowStatusModal] = useState<boolean>(false);
 
   useEffect(() => {
     // const updateString = itemType === "player" ? `update-${(item as Player).userId}` : `EnemyUpdate-${(item as Enemy).id}`;
@@ -77,6 +81,10 @@ export default function HealthDeathTrackerElement({ item, itemType }:
       setVisibility(val.detail.val)
     }
 
+    const handleStatusChange = (val: any) => {
+      setStatuses(val.detail.val);
+    }
+
     window.addEventListener(`${updateString}-name`, handleNameChange);
     window.addEventListener(`${updateString}-avatarUri`, handleImageChange);
     window.addEventListener(`${updateString}-health`, handleHealthChange);
@@ -85,6 +93,7 @@ export default function HealthDeathTrackerElement({ item, itemType }:
     window.addEventListener(`${updateString}-lifeSaves`, handleLifeSavesChange);
     window.addEventListener(`${updateString}-size`, handleSizeChange);
     window.addEventListener(`${updateString}-isVisible`, handleVisibilityChange);
+    window.addEventListener(`${updateString}-statuses`, handleStatusChange);
     return () => {
       window.removeEventListener(`${updateString}-name`, handleNameChange);
       window.removeEventListener(`${updateString}-avatarUri`, handleImageChange);
@@ -94,6 +103,7 @@ export default function HealthDeathTrackerElement({ item, itemType }:
       window.removeEventListener(`${updateString}-lifeSaves`, handleLifeSavesChange);
       window.removeEventListener(`${updateString}-size`, handleSizeChange);
       window.removeEventListener(`${updateString}-isVisible`, handleVisibilityChange);
+      window.removeEventListener(`${updateString}-statuses`, handleStatusChange);
     };
   }, []);
 
@@ -249,6 +259,10 @@ export default function HealthDeathTrackerElement({ item, itemType }:
     // Send the data
   };
 
+  const handleStatusClick = () => {
+    setShowStatusModal(true);
+  }
+
   const handleDuplicateCallback = () => {
     switch (itemType) {
       case "player":
@@ -298,6 +312,19 @@ export default function HealthDeathTrackerElement({ item, itemType }:
     }
   }
 
+  const handleStatusRequest = (result: string[]): void => {
+    switch (itemType) {
+      case "player":
+        break;
+      case "enemy":
+        authContext.room.send("setEnemyStatuses", { statuses: result, clientToChange: `${id}` });
+        break;
+      case "summons":
+        authContext.room.send("setSummonsStatuses", { statuses: result, id: +id });
+        break;
+    }
+  }
+
   return (
     <>
 
@@ -322,8 +349,12 @@ export default function HealthDeathTrackerElement({ item, itemType }:
             <div className="w-100 flex-grow-1">
               {health > 0 ? healthnamePlate : deathElement}
             </div>
-            <div className="w-100 h-fit mb-1">
-              <div className="row gap-1 p-0 g-0 m-0 justify-content-center">
+            <div className="w-100 h-fit mb-1 d-flex">
+              {/* Remove */}
+              <button className="mx-3 btn btn-danger w-auto h-auto p-1" style={{ maxHeight: "fit-content" }} onClick={() => handleDeleteCallback()}>
+                <i className="bi bi-trash"></i>
+              </button>
+              <div className="row w-100 gap-1 p-0 pe-1 g-0 m-0 justify-content-end">
                 {/* Place button */}
                 <button className="col-1 btn btn-primary w-auto h-auto p-1" onClick={() => handleEditCallback()}>
                   <i className="bi bi-pencil-square"></i>
@@ -336,9 +367,8 @@ export default function HealthDeathTrackerElement({ item, itemType }:
                 <button className="col-1 btn btn-primary w-auto h-auto p-1" onClick={() => handleVisibilityToggle()}>
                   {isVisible ? <i className="bi bi-eye-fill"></i> : <i className="bi bi-eye-slash-fill"></i>}
                 </button>
-                {/* Remove */}
-                <button className="col-1 btn btn-danger w-auto h-auto p-1" onClick={() => handleDeleteCallback()}>
-                  <i className="bi bi-trash"></i>
+                <button className="col-1 btn btn-primary w-auto h-auto p-1" onClick={() => handleStatusClick()}>
+                  <i className="bi bi-magic"></i>
                 </button>
               </div>
             </div>
@@ -392,6 +422,18 @@ export default function HealthDeathTrackerElement({ item, itemType }:
             totalHp={totalHealth}
             key={`ChangeChacterStats-${id}`}
           /> : <></>
+      }
+      {
+        showStatusModal ?
+          <StatusDropdown
+            onSubmit={(result: string[]): void => {
+              handleStatusRequest(result);
+              setShowStatusModal(false);
+            }}
+            onClose={() => { setShowStatusModal(false); }}
+            selectedStatuses={statuses.map((ele: CharacterStatus): string => ele.status)}
+          />
+          : ""
       }
     </>
   );

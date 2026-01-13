@@ -243,6 +243,20 @@ export class StateHandlerRoom extends Room<State> {
         console.error(error);
       }
     });
+
+    this.onMessage("setPlayerStatuses", (client, data) => {
+      try {
+        const inputList: ValidationInputType[] = [
+          { name: "statuses", type: "array", PostProcess: undefined },
+        ];
+
+        const validateParams: any = ValidateAllInputs(data, inputList);
+
+        this.state.setPlayerStatuses(client.sessionId, validateParams);
+      } catch (error) {
+        console.error(error);
+      }
+    });
     // this.onMessage("changePlayerTotalHp", (client, data) => {
     //   try {
     //     const inputList: ValidationInputType[] = [
@@ -759,6 +773,22 @@ export class StateHandlerRoom extends Room<State> {
       }
     });
 
+    this.onMessage("setEnemyStatuses", (client, data) => {
+      if (!this.authenticateHostAction(client.sessionId)) return;
+      try {
+        const inputList: ValidationInputType[] = [
+          { name: "statuses", type: "array", PostProcess: undefined },
+          { name: "clientToChange", type: "string", PostProcess: undefined },
+        ];
+
+        const validateParams: any = ValidateAllInputs(data, inputList);
+
+        this.state.setEnemyStatuses(client.sessionId, validateParams);
+      } catch (error) {
+        console.error(error);
+      }
+    });
+
     // Summons
     this.onMessage("updateSummonsPosition", (client, data) => {
       try {
@@ -1012,7 +1042,6 @@ export class StateHandlerRoom extends Room<State> {
         // Include player_id as this action can be called by multiple users (host vs player).
         const inputList: ValidationInputType[] = [
           { name: "id", type: "number", PostProcess: undefined },
-          { name: "player_id", type: "string", PostProcess: undefined },
         ];
 
         const validateParams: any = ValidateAllInputs(data, inputList);
@@ -1020,6 +1049,22 @@ export class StateHandlerRoom extends Room<State> {
         // NOTE: No Authentication is required as the sessionId is being used.
 
         this.state.toggleSummonsVisibility(client.sessionId, validateParams);
+      } catch (error) {
+        console.error(error);
+      }
+    });
+    this.onMessage("setSummonsStatuses", (client, data) => {
+      try {
+        const inputList: ValidationInputType[] = [
+          { name: "statuses", type: "array", PostProcess: undefined },
+          { name: "id", type: "number", PostProcess: undefined },
+        ];
+
+        const validateParams: any = ValidateAllInputs(data, inputList);
+
+        // NOTE: No Authentication is required as the sessionId is being used.
+
+        this.state.setSummonsStatuses(client.sessionId, validateParams);
       } catch (error) {
         console.error(error);
       }

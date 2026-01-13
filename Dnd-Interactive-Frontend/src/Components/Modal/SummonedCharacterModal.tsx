@@ -1,14 +1,17 @@
 import { ChangeEvent, useRef, useState } from "react";
 import { NewLoadImage } from "../NewLoadImage/NewLoadImage";
 import Modal from "./Modal";
+import { useGameState } from "../../ContextProvider/GameStateContext/GameStateProvider";
 
 /**
  * Component responsible for handling any edits needing to be done on an enemy player.
  * This component utilizes the Modal component and will send the data to the server when completed.
  */
-export default function EditCharacterModal({ callback, title, name, size, avatarUri, totalHp }: { name: string; title: string, size: number; avatarUri: string; totalHp: number; callback: (data: { name: string; size: number; avatarUri: string; hp: number } | undefined) => void }) {
+export default function EditCharacterModal({ callback, title, name, avatarUri, totalHp, size }: { name: string; title: string, avatarUri: string; totalHp: number; size?: number; callback: (data: { name: string; size: number; avatarUri: string; hp: number } | undefined) => void }) {
+  const gamestateContext = useGameState();
+
   const [_name, setName] = useState<string>(name);
-  const [_size, setSize] = useState<number>(size);
+  const [_size, setSize] = useState<number>(size ?? gamestateContext.getIconHeight());
   const [_defaultAvatar, setAvatar] = useState<string>(avatarUri);
   const [_totalHp, setTotalHp] = useState<number>(totalHp);
 

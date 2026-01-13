@@ -74,7 +74,6 @@ export default function HealthDeathTrackerPanel() {
           title="Enemy Add"
           avatarUri={""}
           name=""
-          size={25}
           totalHp={1}
           key={`AddEnemyModal`}
         />

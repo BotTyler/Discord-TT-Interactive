@@ -116,7 +116,7 @@ export default function EnemyContextElement({ enemy, onValueChanged }: { enemy: 
       setVisible(value);
     });
     const statusesListener = enemy.listen("statuses", (value: CharacterStatus[]): void => {
-      setStatuses(value);
+      setStatuses([...value]);
     });
 
     return () => {

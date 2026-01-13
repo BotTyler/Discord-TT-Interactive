@@ -116,7 +116,7 @@ export default function SummonsElementHandler({ summon, onValueChanged }: { summ
       setIsVisible(value);
     });
     const statusesListener = summon.listen("statuses", (value: CharacterStatus[]) => {
-      setStatuses(value);
+      setStatuses([...value]);
     });
 
 

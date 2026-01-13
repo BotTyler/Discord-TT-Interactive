@@ -14,26 +14,29 @@ export class CharacterStatus extends Schema {
   }
 }
 
-export type Conditions = GeneralCondition | Buffs | DeBuf;
+export type Conditions =
+  | (typeof GeneralConditionArray)[number]
+  | (typeof BuffsArray)[number]
+  | (typeof DebufArray)[number];
 
-export type GeneralCondition =
-  | "Blinded"
-  | "Charmed"
-  | "Deafened"
-  | "Frightened"
-  | "Grappled"
-  | "Incapacitated"
-  | "Invisible"
-  | "Paralyzed"
-  | "Petrified"
-  | "Poisoned"
-  | "Prone"
-  | "Restrained"
-  | "Stunned"
-  | "Unconscious"
-  | "Exhausted"
-  | "Bleeding";
+export const GeneralConditionArray: string[] = [
+  "Blinded",
+  "Charmed",
+  "Deafened",
+  "Frightened",
+  "Grappled",
+  "Incapacitated",
+  "Paralyzed",
+  "Petrified",
+  "Poisoned",
+  "Prone",
+  "Restrained",
+  "Stunned",
+  "Unconscious",
+  "Exhausted",
+  "Bleeding",
+];
 
-export type Buffs = "Bless";
+export const BuffsArray: string[] = ["Bless"];
 
-export type DeBuf = "Baned";
+export const DebufArray: string[] = ["Baned"];

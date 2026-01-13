@@ -15,7 +15,7 @@ export default function MarkerDisplay(
     health,
     totalHealth,
     className = "",
-    statuses = [],
+    statuses,
     isHovering = false,
     isDraggable = false,
     displayName = true,
@@ -46,7 +46,7 @@ export default function MarkerDisplay(
   const [markerHealth, setMarkerHealth] = useState<number>(health)
   const [markerTotalHealth, setMarkerTotalHealth] = useState<number>(totalHealth);
   const [id, setId] = useState<UUID>(crypto.randomUUID());
-  const [markerStatuses, setMarkerStatuses] = useState<CharacterStatus[]>(statuses);
+  const [markerStatuses, setMarkerStatuses] = useState<CharacterStatus[]>(statuses ?? []);
 
 
   useEffect(() => {
@@ -71,7 +71,7 @@ export default function MarkerDisplay(
     setMarkerTotalHealth(totalHealth);
   }, [totalHealth]);
   useEffect(() => {
-    setMarkerStatuses(statuses);
+    setMarkerStatuses(statuses ?? []);
   }, [statuses]);
 
   useEffect(() => {
@@ -150,20 +150,22 @@ export default function MarkerDisplay(
                       <div className={`statusImageDiv statusImageDiv${index + 1}`} key={`MarkerStatus-${id}-${status.toString()}-${index}`}>
                         <img
                           className="rounded-circle img-fluid"
-                          src={`Assets/Conditions/${status.toString()}.png`}
+                          src={`Assets/Conditions/${status.status}.png`}
                         />
                       </div>
                     );
-                  } else if (index === 5) { // Only 5 can show at a time.
+                    // Only 5 can show at a time so this bubble needs to be reactive.
+                    // index of 4 as indexes are 0 based.
+                  } else if (index === 4) {
 
                     const remaining: number = markerStatuses.length - index;
-                    if (remaining === 0) {
+                    if (remaining === 1) {
                       // This is the last one perfectly fine to render as is.
                       return (
                         <div className={`statusImageDiv statusImageDiv5`} key={`MarkerStatus-${id}-${status.toString()}-${index}`}>
                           <img
                             className="rounded-circle img-fluid"
-                            src={`Assets/Conditions/${status.toString()}.png`}
+                            src={`Assets/Conditions/${status.status}.png`}
                           />
                         </div>
                       );
@@ -196,7 +198,7 @@ export default function MarkerDisplay(
                                   <div className="col-3" key={`OverflowContainer-${val.toString()}-${overflowIndex}`}>
                                     <img
                                       className="rounded-circle img-fluid"
-                                      src={`Assets/Conditions/${val.toString()}.png`}
+                                      src={`Assets/Conditions/${val.status}.png`}
                                     />
                                   </div>
                                 )
@@ -232,8 +234,6 @@ export default function MarkerDisplay(
       draggable={isDraggable}
       key={`PlayableMarker-${id}-marker`}
       eventHandlers={eventFunctions}
-    >
-
-    </Marker>
+    />
   )
 }

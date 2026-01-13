@@ -147,7 +147,7 @@ function SummonsControllerListElement({ _player }: { _player: Player }) {
         return <div key={`SummonControlElement-${val.id}`}>
           {getControllerElement(val)}
         </div>
-      })};
+      })}
     </>
   )
 }

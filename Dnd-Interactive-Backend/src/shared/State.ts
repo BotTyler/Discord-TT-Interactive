@@ -45,7 +45,7 @@ export class State extends Schema {
   mapMovement: MapMovementType = "free";
 
   @type("boolean")
-  gridShowing: boolean = true;
+  gridShowing: boolean = false;
 
   @type("string")
   gridColor: string = "rgba(255, 255, 255, 0.8)";
@@ -153,6 +153,15 @@ export class State extends Schema {
     const player = this._getPlayerByUserId(data.clientToChange);
     if (player === undefined) return false;
     player.initiative = data.initiative;
+    return true;
+  }
+
+  setPlayerStatuses(sessionid: string, data: { statuses: string[] }): boolean {
+    const player = this._getPlayerBySessionId(sessionid);
+    if (player === undefined) return false;
+    player.statuses = data.statuses.map((status: string): CharacterStatus => {
+      return new CharacterStatus(status);
+    });
     return true;
   }
   // changePlayerTotalHp(sessionId: string, data: { totalHp: number }): boolean {
@@ -612,6 +621,19 @@ export class State extends Schema {
     player.isVisible = !player.isVisible;
     return true;
   }
+  setEnemyStatuses(
+    sessionid: string,
+    data: { statuses: string[]; clientToChange: string },
+  ): boolean {
+    if (this.map === undefined) return false;
+
+    const player = this.map.enemy.get(`${data.clientToChange}`);
+    if (player === undefined) return false;
+    player.statuses = data.statuses.map((status: string): CharacterStatus => {
+      return new CharacterStatus(status);
+    });
+    return true;
+  }
 
   //#endregion
 
@@ -840,6 +862,21 @@ export class State extends Schema {
 
     summon.isVisible = !summon.isVisible;
 
+    return true;
+  }
+
+  setSummonsStatuses(sessionId: string, data: { statuses: string[]; id: number }): boolean {
+    if (this.map === undefined) return false;
+
+    const player: Player | undefined = this._getPlayerBySessionId(sessionId);
+    if (player === undefined) return false;
+
+    const summon: Summons | null =
+      player.summons.find((item: Summons): boolean => item.id === data.id) ?? null;
+    if (summon === null) return false;
+    summon.statuses = data.statuses.map((status: string): CharacterStatus => {
+      return new CharacterStatus(status);
+    });
     return true;
   }
 
