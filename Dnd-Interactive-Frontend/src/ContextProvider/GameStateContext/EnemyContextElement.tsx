@@ -2,6 +2,7 @@ import { Enemy } from "../../../src/shared/Enemy"
 import { mLatLng } from "../../../src/shared/PositionInterface"
 import React from "react";
 import { useAuthenticatedContext } from "../useAuthenticatedContext";
+import { CharacterStatus } from "../../shared/StatusTypes";
 
 export default function EnemyContextElement({ enemy, onValueChanged }: { enemy: Enemy; onValueChanged: (field: string, value: unknown) => void }) {
   const [id, setId] = React.useState<number>(enemy.id);
@@ -16,10 +17,10 @@ export default function EnemyContextElement({ enemy, onValueChanged }: { enemy: 
   const [lifeSaves, setLifeSaves] = React.useState<number>(enemy.lifeSaves);
   const [initiative, setInitiative] = React.useState<number>(enemy.initiative);
   const [isVisible, setVisible] = React.useState<boolean>(enemy.isVisible);
+  const [statuses, setStatuses] = React.useState<CharacterStatus[]>(enemy.statuses);
 
   const authContext = useAuthenticatedContext();
   const emitFieldChangeEvent = (field: string, value: any) => {
-    // console.log(`Enemy Updating: "EnemyUpdate-${id}-${field}": ${value}`);
     onValueChanged(field, value);
     const event = new CustomEvent(`EnemyUpdate-${id}-${field}`, {
       detail: { val: value },
@@ -72,6 +73,9 @@ export default function EnemyContextElement({ enemy, onValueChanged }: { enemy: 
     window.dispatchEvent(event);
     emitFieldChangeEvent("initiative", initiative);
   }, [initiative]);
+  React.useEffect(() => {
+    emitFieldChangeEvent("statuses", statuses);
+  }, [statuses]);
 
   React.useEffect(() => {
     // set the listeners to sync with the server
@@ -110,7 +114,10 @@ export default function EnemyContextElement({ enemy, onValueChanged }: { enemy: 
     });
     const isVisibleListener = enemy.listen("isVisible", (value: boolean): void => {
       setVisible(value);
-    })
+    });
+    const statusesListener = enemy.listen("statuses", (value: CharacterStatus[]): void => {
+      setStatuses([...value]);
+    });
 
     return () => {
       idListener();
@@ -125,6 +132,7 @@ export default function EnemyContextElement({ enemy, onValueChanged }: { enemy: 
       lifeSavesListener();
       initiativeListener();
       isVisibleListener();
+      statusesListener();
     };
   }, [authContext.room, enemy]);
 

@@ -14,7 +14,7 @@ export default function DisplayBeam({ player }: { player: Player }) {
   const authContext = useAuthenticatedContext();
   const mapContext = useGameState();
 
-  const [beam, setBeam] = useState<BeamDrawing | undefined>(players.getPlayer(player.userId)!.beamDrawing);
+  const [beam, setBeam] = useState<BeamDrawing | null>(players.getPlayer(player.userId)!.beamDrawing);
   const [playerSize, setPlayerSize] = useState<number>(mapContext.getIconHeight());
   const [color, setColor] = useState<string>(player.color);
 
@@ -49,7 +49,7 @@ export default function DisplayBeam({ player }: { player: Player }) {
     }
   };
 
-  return beam !== undefined ? (<Beam key={`BeamDrawing-${player.userId}`}
+  return beam !== null ? (<Beam key={`BeamDrawing-${player.userId}`}
     start={new LatLng(beam.start.lat, beam.start.lng)}
     end={new LatLng(beam.end.lat, beam.end.lng)}
     width={beam.width}

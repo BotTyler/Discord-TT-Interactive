@@ -1,7 +1,8 @@
 import { Schema, type } from "@colyseus/schema";
 import { mLatLng } from "./PositionInterface";
+import { CharacterStatus } from "./StatusTypes";
 
-export type TEnemyOptions = Pick<Enemy, "id" | "avatarUri" | "name" | "position" | "size" | "initiative" | "health" | "totalHealth" | "lifeSaves" | "deathSaves" | "isVisible" >;
+export type TEnemyOptions = Pick<Enemy, "id" | "avatarUri" | "name" | "size">;
 
 export class Enemy extends Schema {
   @type("number")
@@ -41,19 +42,24 @@ export class Enemy extends Schema {
   @type("boolean")
   public isVisible: boolean;
 
+  @type([CharacterStatus])
+  public statuses: CharacterStatus[];
+
   // Init
-  constructor({ avatarUri, id, name, position, size, initiative, health, totalHealth, lifeSaves, deathSaves, isVisible }: TEnemyOptions) {
+  constructor({ avatarUri, id, name, size }: TEnemyOptions) {
     super();
     this.id = id;
     this.avatarUri = avatarUri;
     this.name = name;
-    this.position = position ?? new mLatLng(0, 0);
     this.size = size;
-    this.initiative = initiative;
-    this.health = health ?? 1;
-    this.totalHealth = totalHealth ?? 1;
-    this.lifeSaves = lifeSaves ?? 0;
-    this.deathSaves = deathSaves ?? 0;
-    this.isVisible = isVisible ?? true;
+
+    this.statuses = [];
+    this.initiative = 1;
+    this.position = new mLatLng(0, 0);
+    this.health = 1;
+    this.totalHealth = 1;
+    this.lifeSaves = 0;
+    this.deathSaves = 0;
+    this.isVisible = true;
   }
 }

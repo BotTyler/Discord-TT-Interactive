@@ -15,6 +15,7 @@ export interface LoadPlayerInterface {
   totalHealth: number;
   deathSaves: number;
   lifeSaves: number;
+  statuses: string[];
 }
 
 export interface LoadEnemyInterface {
@@ -30,6 +31,7 @@ export interface LoadEnemyInterface {
   death_saves: number;
   life_saves: number;
   is_visible: boolean;
+  statuses: string[];
 }
 
 export interface LoadFogInterface {
@@ -55,4 +57,23 @@ export interface LoadCampaign {
   name: string;
   height: number;
   width: number;
+}
+
+export interface LoadSummonsInterface {
+  id: number;
+  summons_id: number;
+  history_id: number;
+  player_id: string;
+  size: number;
+  enemy_id: number;
+  position_lat: number;
+  position_lng: number;
+  name: string;
+  image_name: string;
+  health: number;
+  total_health: number;
+  death_saves: number;
+  life_saves: number;
+  is_visible: boolean;
+  statuses: string[];
 }

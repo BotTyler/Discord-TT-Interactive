@@ -16,7 +16,7 @@ export default function DisplayCircle({ player }: { player: Player }) {
   const toolContext = useGameToolContext();
   const authContext = useAuthenticatedContext();
 
-  const [circle, setCircle] = useState<CircleDrawing | undefined>(players.getPlayer(player.userId)!.circleDrawing);
+  const [circle, setCircle] = useState<CircleDrawing | null>(players.getPlayer(player.userId)!.circleDrawing);
   const [color, setColor] = useState<string>(player.color);
   useEffect(() => {
     const setValue = (value: any) => {
@@ -44,5 +44,5 @@ export default function DisplayCircle({ player }: { player: Player }) {
     }
   };
 
-  return circle !== undefined ? <Circle key={`CircleDraw-${player.userId}`} center={new LatLng(circle!.center.lat, circle!.center.lng)} color={color} radius={circle!.radius} removeCallback={handleRemove} /> : "";
+  return circle !== null ? <Circle key={`CircleDraw-${player.userId}`} center={new LatLng(circle!.center.lat, circle!.center.lng)} color={color} radius={circle!.radius} removeCallback={handleRemove} /> : "";
 }

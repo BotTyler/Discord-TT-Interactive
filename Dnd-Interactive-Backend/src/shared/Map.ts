@@ -26,7 +26,10 @@ export class MapFogPolygon extends Schema {
   }
 }
 
-export type TMapOptions = Pick<MapData, "mapBase64" | "width" | "height" | "iconHeight" | "fogs" | "enemy" | "initiativeIndex">;
+export type TMapOptions = Pick<
+  MapData,
+  "mapBase64" | "width" | "height" | "iconHeight" | "fogs" | "enemy" | "initiativeIndex"
+>;
 
 export class MapData extends Schema {
   public id?: number;
@@ -52,7 +55,10 @@ export class MapData extends Schema {
   public initiativeIndex: number;
 
   // Init
-  constructor({ mapBase64, width, height, iconHeight, fogs, enemy, initiativeIndex }: TMapOptions, id?: number) {
+  constructor(
+    { mapBase64, width, height, iconHeight, fogs, enemy, initiativeIndex }: TMapOptions,
+    id?: number,
+  ) {
     super();
     this.mapBase64 = mapBase64;
     this.width = width;

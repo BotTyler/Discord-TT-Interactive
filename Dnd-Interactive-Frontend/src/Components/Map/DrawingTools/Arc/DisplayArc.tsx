@@ -16,7 +16,7 @@ export default function DisplayArc({ player }: { player: Player }) {
   const toolContext = useGameToolContext();
   const authContext = useAuthenticatedContext();
 
-  const [arc, setArc] = useState<ArcDrawing | undefined>(players.getPlayer(player.userId)!.arcDrawing);
+  const [arc, setArc] = useState<ArcDrawing | null>(players.getPlayer(player.userId)!.arcDrawing);
   const [color, setColor] = useState<string>(player.color);
   useEffect(() => {
     const setValue = (value: any) => {
@@ -44,5 +44,5 @@ export default function DisplayArc({ player }: { player: Player }) {
     }
   };
 
-  return arc !== undefined ? <Arc key={`ArcDraw-${player.userId}`} center={new LatLng(arc.center.lat, arc.center.lng)} toLocation={new LatLng(arc.toLocation.lat, arc.toLocation.lng)} angle={arc.angle} color={color} removeCallback={handleRemove} /> : "";
+  return arc !== null ? <Arc key={`ArcDraw-${player.userId}`} center={new LatLng(arc.center.lat, arc.center.lng)} toLocation={new LatLng(arc.toLocation.lat, arc.toLocation.lng)} angle={arc.angle} color={color} removeCallback={handleRemove} /> : "";
 }

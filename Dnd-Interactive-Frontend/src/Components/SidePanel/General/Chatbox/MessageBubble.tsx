@@ -20,7 +20,7 @@ export default function MessageBubble({ message }: { message: MessageInterface }
           </p>
         </div>
         <div className="container-fluid bg-gradient rounded" style={{ background: "#908f8d" }}>
-          <p className="fs-5 m-0 my-1">{message.message}</p>
+          <p className="m-0 my-1" style={{ fontSize: "16px" }}>{message.message}</p>
         </div>
         <div className="container-fluid text-end p-0 g-0">
           <p style={{ fontSize: "10px" }} className="m-0">
@@ -44,7 +44,7 @@ export default function MessageBubble({ message }: { message: MessageInterface }
           </p>
         </div>
         <div className="container-fluid bg-gradient rounded" style={{ background: "#908f8d" }}>
-          <p className="fs-5 m-0 my-1">{message.message}</p>
+          <p className="m-0 my-1" style={{ fontSize: "16px" }}>{message.message}</p>
         </div>
         <div className="container-fluid text-end p-0 g-0">
           <p style={{ fontSize: "10px" }} className="m-0">

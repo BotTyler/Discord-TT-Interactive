@@ -14,6 +14,7 @@ export class PlayerMovementHistoryDAO extends DAO {
   public readonly totalHealth: number;
   public readonly deathSaves: number;
   public readonly lifeSaves: number;
+  public readonly statuses: string[];
 
   constructor(
     history_id: number,
@@ -24,6 +25,7 @@ export class PlayerMovementHistoryDAO extends DAO {
     totalHealth: number,
     deathSaves: number,
     lifeSaves: number,
+    statuses: string[],
     id?: number,
   ) {
     super();
@@ -37,6 +39,7 @@ export class PlayerMovementHistoryDAO extends DAO {
     this.totalHealth = totalHealth;
     this.deathSaves = deathSaves;
     this.lifeSaves = lifeSaves;
+    this.statuses = statuses;
   }
 
   getKeys(): string[] {
@@ -50,6 +53,7 @@ export class PlayerMovementHistoryDAO extends DAO {
       "total_health",
       "death_saves",
       "life_saves",
+      "statuses",
     ];
   }
   getValues(): any[] {
@@ -63,6 +67,7 @@ export class PlayerMovementHistoryDAO extends DAO {
       this.totalHealth,
       this.deathSaves,
       this.lifeSaves,
+      this.statuses,
     ];
   }
   getIdName(): string {

@@ -3,6 +3,7 @@ import { clamp } from "../../Util/Util";
 export function ProgressDiv({ current, max }: { current: number; max: number; }) {
   type RGB = { r: number; g: number; b: number };
 
+  // This function will generate the proper RGB for the red -> yellow -> green conversion.
   function hsvToRgb(h: number, s: number, v: number): RGB {
     const c = v * s;
     const x = c * (1 - Math.abs(((h / 60) % 2) - 1));

@@ -3,6 +3,9 @@ import { mLatLng } from "../../../src/shared/PositionInterface";
 import { Player } from "../../../src/shared/Player";
 import React from "react";
 import { useAuthenticatedContext } from "../useAuthenticatedContext";
+import { Summons } from "../../shared/Summons";
+import SummonsElementHandler from "./SummonsElementHandler";
+import { CharacterStatus } from "../../shared/StatusTypes";
 
 // this class def can be simpler
 export default function PlayerElementHandler({ player, onValueChanged }: { player: Player; onValueChanged: (field: string, value: unknown) => void }) {
@@ -20,16 +23,20 @@ export default function PlayerElementHandler({ player, onValueChanged }: { playe
   const [deathSaves, setDeathSaves] = React.useState<number>(player.deathSaves);
   const [lifeSaves, setLifeSaves] = React.useState<number>(player.lifeSaves);
   const [drawings, setDrawings] = React.useState<mLatLng[]>(player.drawings);
-  const [cubeDrawings, setCubeDrawings] = React.useState<CubeDrawing | undefined>(player.cubeDrawing);
-  const [circleDrawings, setCircleDrawings] = React.useState<CircleDrawing | undefined>(player.circleDrawing);
-  const [arcDrawings, setArcDrawings] = React.useState<ArcDrawing | undefined>(player.arcDrawing);
-  const [beamDrawing, setBeamDrawing] = React.useState<BeamDrawing | undefined>(player.beamDrawing);
+  const [cubeDrawings, setCubeDrawings] = React.useState<CubeDrawing | null>(player.cubeDrawing ?? null);
+  const [circleDrawings, setCircleDrawings] = React.useState<CircleDrawing | null>(player.circleDrawing ?? null);
+  const [arcDrawings, setArcDrawings] = React.useState<ArcDrawing | null>(player.arcDrawing ?? null);
+  const [beamDrawing, setBeamDrawing] = React.useState<BeamDrawing | null>(player.beamDrawing ?? null);
   const [isConnected, setConnected] = React.useState<boolean>(player.isConnected);
+  const [statuses, setStatuses] = React.useState<CharacterStatus[]>(player.statuses);
+
+  const [summons, setSummons] = React.useState<Summons[]>(player.summons);
+  const [connectedSummons, setConnectedSummons] = React.useState<Summons[]>(player.summons);
+
   const authContext = useAuthenticatedContext();
 
   // below effects are used to emit events when the value is finalized
   const emitFieldChangeEvent = (field: string, value: any) => {
-    // console.log(`Emitting ${userId}:${field}`);
     onValueChanged(field, value);
     const event = new CustomEvent(`update-${userId}-${field}`, {
       detail: { val: value },
@@ -57,7 +64,6 @@ export default function PlayerElementHandler({ player, onValueChanged }: { playe
   }, [color]);
   React.useEffect(() => {
     // 2 events need to be fired so that the initiative list handler can update
-    // TODO: ish I may be able to remove this event by listening for the initiative property in the respective components.
     const event = new CustomEvent(`PlayersInitiativeChange`, {
       detail: { val: `PlayersChanged` },
     });
@@ -100,6 +106,12 @@ export default function PlayerElementHandler({ player, onValueChanged }: { playe
   React.useEffect(() => {
     emitFieldChangeEvent("isConnected", isConnected);
   }, [isConnected]);
+  React.useEffect(() => {
+    emitFieldChangeEvent("statuses", statuses);
+  }, [statuses]);
+  React.useEffect(() => {
+    emitFieldChangeEvent("summons", summons);
+  }, [summons]);
 
   React.useEffect(() => {
     // set all listeners with the colyseus backend
@@ -145,20 +157,27 @@ export default function PlayerElementHandler({ player, onValueChanged }: { playe
     const drawingsListener = player.listen("drawings", (value: mLatLng[]) => {
       setDrawings(value);
     });
-    const cubeDrawingListener = player.listen("cubeDrawing", (value: CubeDrawing | undefined) => {
-      setCubeDrawings(value ?? undefined);
+    const cubeDrawingListener = player.listen("cubeDrawing", (value: CubeDrawing | null) => {
+      setCubeDrawings(value ?? null);
     });
-    const circleDrawingListener = player.listen("circleDrawing", (value: CircleDrawing | undefined) => {
-      setCircleDrawings(value ?? undefined);
+    const circleDrawingListener = player.listen("circleDrawing", (value: CircleDrawing | null) => {
+      setCircleDrawings(value ?? null);
     });
-    const arcDrawingListener = player.listen("arcDrawing", (value: ArcDrawing | undefined) => {
-      setArcDrawings(value ?? undefined);
+    const arcDrawingListener = player.listen("arcDrawing", (value: ArcDrawing | null) => {
+      setArcDrawings(value ?? null);
     });
-    const beamDrawingListener = player.listen("beamDrawing", (value: BeamDrawing | undefined) => {
-      setBeamDrawing(value ?? undefined);
+    const beamDrawingListener = player.listen("beamDrawing", (value: BeamDrawing | null) => {
+      setBeamDrawing(value ?? null);
     });
-    const connectionListener = player.listen("isConnected", (val: boolean) => {
-      setConnected(val);
+    const connectionListener = player.listen("isConnected", (value: boolean) => {
+      setConnected(value);
+    });
+    const statusesListener = player.listen("statuses", (value: CharacterStatus[]) => {
+      setStatuses([...value]);
+    });
+    const summonsListener = player.listen("summons", (value: Summons[]) => {
+      setSummons([...value]);
+      setConnectedSummons([...value]);
     });
 
 
@@ -181,8 +200,27 @@ export default function PlayerElementHandler({ player, onValueChanged }: { playe
       circleDrawingListener();
       arcDrawingListener();
       beamDrawingListener();
-      connectionListener;
+      connectionListener();
+      statusesListener();
+      summonsListener();
     };
   }, [authContext.room, player]);
-  return <></>;
+  return <>
+    {connectedSummons.map((item: Summons) => {
+      return <SummonsElementHandler summon={item} key={`Player-${userId}-Summon-${item.id}`} onValueChanged={(field: string, value: unknown): void => {
+        setSummons((prev: Summons[]): Summons[] => {
+          const summonsUpdate: Summons[] = prev.map((val: Summons): Summons => {
+            if (val.id !== item.id) return val;
+
+            // Note: this is bad.
+            const _summons: any = { ...val };
+            _summons[field] = value;
+            return _summons;
+          })
+
+          return summonsUpdate;
+        })
+      }} />
+    })}
+  </>;
 }

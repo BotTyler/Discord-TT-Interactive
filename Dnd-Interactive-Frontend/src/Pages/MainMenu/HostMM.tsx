@@ -34,7 +34,7 @@ export default function HostMM({ otherPlayers }: { otherPlayers: Player[] }) {
         {/* Campaign Select */}
         <div className="h-auto rounded-3 p-1 pb-2 px-3 border border-2 border-secondary bg-dark-subtle">
           <div className="w-100 h-auto d-flex justify-content-center mb-1 h3">
-            <p className="m-0">Campaign Select</p>
+            <p className="m-0">Map Select</p>
           </div>
           <div className="p-0 overflow-hidden container-fluid m-0 rounded-4 border border-2 border-secondary" style={{ height: "150px", backgroundColor: `var(--bs-light-bg-subtle)` }}>
             <ul className="list-group list-group-horizontal overflow-x-auto w-100 h-100 user-select-none">

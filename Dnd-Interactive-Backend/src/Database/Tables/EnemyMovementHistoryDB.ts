@@ -16,6 +16,7 @@ export class EnemyMovementHistoryDAO extends DAO {
   private deathSaves: number;
   private lifeSaves: number;
   private isVisible: boolean;
+  private statuses: string[];
 
   constructor(
     history_id: number,
@@ -28,6 +29,7 @@ export class EnemyMovementHistoryDAO extends DAO {
     deathsaves: number,
     lifeSaves: number,
     isVisible: boolean,
+    statuses: string[],
     id?: number,
   ) {
     super();
@@ -43,6 +45,7 @@ export class EnemyMovementHistoryDAO extends DAO {
     this.deathSaves = deathsaves;
     this.lifeSaves = lifeSaves;
     this.isVisible = isVisible;
+    this.statuses = statuses;
   }
 
   getKeys(): string[] {
@@ -58,6 +61,7 @@ export class EnemyMovementHistoryDAO extends DAO {
       "death_saves",
       "life_saves",
       "is_visible",
+      "statuses",
     ];
   }
   getValues(): any[] {
@@ -73,6 +77,7 @@ export class EnemyMovementHistoryDAO extends DAO {
       this.deathSaves,
       this.lifeSaves,
       this.isVisible,
+      this.statuses,
     ];
   }
   getIdName(): string {
@@ -123,4 +128,5 @@ export interface EmhJoinInterface {
   death_saves: number;
   life_saves: number;
   is_visible: boolean;
+  statuses: string[];
 }

@@ -2,12 +2,14 @@ import React from "react";
 import SimpleNavbar from "../../SimpleNavbar/SimpleNavbar";
 import ChatBox from "../General/Chatbox/Chat";
 import PlayerInitiativeTrackerPanel from "./PlayerInitiativeTracker/PlayerInitiativeTrackerPanel";
+import PlayerProfilePanel from "./PlayerProfile/PlayerProfilePanel";
 
 export default function PlayerSidePanel() {
 
   const contentList: { title: string; content: React.ReactNode }[] = [
     { title: "Chat", content: <ChatBox /> },
     { title: "Initiative", content: <PlayerInitiativeTrackerPanel /> },
+    { title: "Player", content: <PlayerProfilePanel /> },
   ];
   const [curContent, setContent] = React.useState<React.ReactNode>(contentList[0].content);
   return (

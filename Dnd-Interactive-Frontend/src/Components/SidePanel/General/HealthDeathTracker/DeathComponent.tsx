@@ -1,8 +1,9 @@
-export default function DeathComponent({ saveNumber, deathNumber, id, deathAdd, deathRemove, saveAdd, saveRemove }: { saveNumber: number; deathNumber: number; id: string; deathAdd: () => void; deathRemove: () => void; saveAdd: () => void; saveRemove: () => void }) {
+export default function DeathComponent({ saveNumber, deathNumber, id, deathAdd, deathRemove, saveAdd, saveRemove }:
+  { saveNumber: number; deathNumber: number; id: string; deathAdd: () => void; deathRemove: () => void; saveAdd: () => void; saveRemove: () => void }) {
   return (
     <div className="w-100 d-flex flex-column justify-content-center align-items-center py-2 gap-3">
       {/* Success Saving Throws */}
-      <div className="w-auto d-flex gap-5">
+      <div className="w-auto d-flex gap-2">
         {[1, 2, 3].map((val) => {
           return (
             <div key={`SaveOption-${val}`}>
@@ -32,7 +33,7 @@ export default function DeathComponent({ saveNumber, deathNumber, id, deathAdd, 
         })}
       </div>
       {/* Death Saving Throws */}
-      <div className="w-auto d-flex gap-5">
+      <div className="w-auto d-flex gap-2">
         {[1, 2, 3].map((val) => {
           return (
             <div key={`DeathSaveOption-${val}`}>

@@ -110,5 +110,5 @@ function WaitingComponent() {
       clearInterval(dotsInterval);
     };
   }, []);
-  return <p className="display-6 text-break fw-bold">Waiting {dots}</p>;
+  return <p className="text-break fw-bold fs-4">Waiting {dots}</p>;
 }

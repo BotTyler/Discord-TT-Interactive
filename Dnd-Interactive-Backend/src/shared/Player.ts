@@ -1,27 +1,9 @@
-import { ArraySchema, Schema, type } from "@colyseus/schema";
-import { mLatLng } from "./PositionInterface";
+import { Schema, type } from "@colyseus/schema";
 import { ArcDrawing, BeamDrawing, CircleDrawing, CubeDrawing } from "./DrawingInterface";
-export type TPlayerOptions = Pick<
-  Player,
-  | "name"
-  | "sessionId"
-  | "userId"
-  | "avatarUri"
-  | "position"
-  | "color"
-  | "drawings"
-  | "initiative"
-  | "circleDrawing"
-  | "cubeDrawing"
-  | "arcDrawing"
-  | "beamDrawing"
-  | "health"
-  | "totalHealth"
-  | "lifeSaves"
-  | "deathSaves"
-  | "isConnected"
->;
-
+import { mLatLng } from "./PositionInterface";
+import { CharacterStatus } from "./StatusTypes";
+import { Summons } from "./Summons";
+export type TPlayerOptions = Pick<Player, "name" | "sessionId" | "userId" | "avatarUri">;
 export class Player extends Schema {
   @type("string")
   public name: string;
@@ -57,16 +39,16 @@ export class Player extends Schema {
   public drawings: mLatLng[];
 
   @type(CircleDrawing)
-  public circleDrawing: CircleDrawing | undefined;
+  public circleDrawing: CircleDrawing | null;
 
   @type(CubeDrawing)
-  public cubeDrawing: CubeDrawing | undefined;
+  public cubeDrawing: CubeDrawing | null;
 
   @type(ArcDrawing)
-  public arcDrawing: ArcDrawing | undefined;
+  public arcDrawing: ArcDrawing | null;
 
   @type(BeamDrawing)
-  public beamDrawing: BeamDrawing | undefined;
+  public beamDrawing: BeamDrawing | null;
 
   @type("number")
   public initiative: number;
@@ -83,45 +65,34 @@ export class Player extends Schema {
   @type("number")
   public deathSaves: number;
 
-  constructor({
-    name,
-    userId,
-    avatarUri,
-    sessionId,
-    position,
-    color,
-    drawings,
-    initiative,
-    circleDrawing,
-    cubeDrawing,
-    arcDrawing,
-    beamDrawing,
-    health,
-    totalHealth,
-    lifeSaves,
-    deathSaves,
-    isConnected,
-  }: TPlayerOptions) {
+  @type([Summons])
+  public summons: Summons[];
+
+  @type([CharacterStatus])
+  public statuses: CharacterStatus[];
+
+  constructor({ name, userId, avatarUri, sessionId }: TPlayerOptions) {
     super();
     this.userId = userId;
     this.avatarUri = avatarUri;
     this.name = name;
     this.sessionId = sessionId;
-    this.position = position ?? new mLatLng(0, 0);
-    this.color = color ?? "#" + (0x1000000 + Math.random() * 0xffffff).toString(16).substr(1, 6);
-    this.drawings = drawings ?? new ArraySchema<mLatLng>();
-    // this.toPosition = toPosition ?? new ArraySchema<mLatLng>();
-    this.initiative = initiative ?? 0;
 
-    // possibility of undefined value
-    this.circleDrawing = circleDrawing;
-    this.cubeDrawing = cubeDrawing;
-    this.arcDrawing = arcDrawing;
-    this.beamDrawing = beamDrawing;
-    this.health = health ?? 1;
-    this.totalHealth = totalHealth ?? 1;
-    this.lifeSaves = lifeSaves ?? 0;
-    this.deathSaves = deathSaves ?? 0;
-    this.isConnected = isConnected ?? true;
+    // Preset values
+    this.position = new mLatLng(0, 0);
+    this.color = "#" + (0x1000000 + Math.random() * 0xffffff).toString(16).substring(0, 6);
+    this.drawings = [];
+    this.initiative = 0;
+    this.circleDrawing = null;
+    this.cubeDrawing = null;
+    this.arcDrawing = null;
+    this.beamDrawing = null;
+    this.statuses = [];
+    this.health = 1;
+    this.totalHealth = 1;
+    this.lifeSaves = 0;
+    this.deathSaves = 0;
+    this.isConnected = true;
+    this.summons = [];
   }
 }

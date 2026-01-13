@@ -1,23 +1,21 @@
 import React from "react";
 import SimpleNavbar from "../../SimpleNavbar/SimpleNavbar";
-import AudioBox from "../General/AudioBox/AudioBox";
 import ChatBox from "../General/Chatbox/Chat";
-import EnemyListPanel from "./EnemyList/EnemyListPanel";
 import HandoutsPanel from "./Handouts/HandoutsPanels";
 import HealthDeathTrackerPanel from "./HealthDeathTracker/HealthDeathTrackerPanel";
 import ImportExport from "./ImportExport";
 import InitiativeTrackerPanel from "./InitiativeTracker/InitiativeTrackerPanel";
 import SettingsPanel from "./Settings/SettingsPanel";
+import PlayerProfilePanel from "../Player/PlayerProfile/PlayerProfilePanel";
 
 export default function HostSidePanel() {
   const contentList: { title: string; content: React.ReactNode }[] = [
-    { title: "Enemy List", content: <EnemyListPanel /> },
-    { title: "Initiative Tracker", content: <InitiativeTrackerPanel /> },
+    { title: "Enemies", content: <HealthDeathTrackerPanel /> },
+    { title: "Initiative", content: <InitiativeTrackerPanel /> },
     { title: "Chat", content: <ChatBox /> },
-    { title: "Audio", content: <AudioBox /> },
-    { title: "HP", content: <HealthDeathTrackerPanel /> },
     { title: "Handout", content: <HandoutsPanel /> },
     { title: "Settings", content: <SettingsPanel /> },
+    { title: "Player", content: <PlayerProfilePanel /> },
   ];
   const [curContent, setContent] = React.useState<React.ReactNode>(contentList[0].content);
   return (

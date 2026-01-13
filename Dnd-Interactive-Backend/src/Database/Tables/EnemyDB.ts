@@ -1,17 +1,12 @@
-import {
-  DAO,
-  DatabaseBase,
-} from "../Interface/DatabaseObjectInterface";
+import { QueryResult } from "pg";
+import { DAO, DatabaseBase } from "../Interface/DatabaseObjectInterface";
+import Database from "../Database";
 
 export class EnemyDAO extends DAO {
-  private enemy_id?: number;
-  private image_id: number;
-  private name: string;
-  constructor(
-    image_id: number,
-    name: string,
-    enemy_id?: number,
-  ) {
+  public enemy_id?: number;
+  public image_id: number;
+  public name: string;
+  constructor(image_id: number, name: string, enemy_id?: number) {
     super();
     this.enemy_id = enemy_id;
     this.image_id = image_id;
@@ -35,13 +30,28 @@ export class EnemyDAO extends DAO {
 }
 
 export class EnemyDB extends DatabaseBase<EnemyDAO> {
-  private static instance: EnemyDB | undefined =
-    undefined;
+  private static instance: EnemyDB | undefined = undefined;
   public static getInstance(): EnemyDB {
-    if (EnemyDB.instance === undefined)
-      EnemyDB.instance = new EnemyDB();
+    if (EnemyDB.instance === undefined) EnemyDB.instance = new EnemyDB();
     return EnemyDB.instance;
   }
+
+  async selectById(id: number): Promise<EnemyDAO | null> {
+    const query = `SELECT * FROM public."${this.tableName}" where enemy_id = $1;`;
+    console.log(query);
+
+    const result: QueryResult<EnemyDAO> | undefined = await Database.getInstance()
+      .query(query, [id])
+      .catch((e) => {
+        console.error(`Could not ***select*** by ID (${this.tableName})\n\t${e}`);
+        return undefined;
+      });
+    const rowResult: EnemyDAO | null = result?.rows[0] ?? null;
+    if (rowResult === null) return null;
+
+    return new EnemyDAO(rowResult.image_id, rowResult.name, rowResult.enemy_id);
+  }
+
   constructor() {
     super("Enemy");
   }

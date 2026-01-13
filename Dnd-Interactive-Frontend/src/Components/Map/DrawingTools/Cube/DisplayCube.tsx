@@ -16,8 +16,9 @@ export default function DisplayCube({ player }: { player: Player }) {
   const toolContext = useGameToolContext();
   const authContext = useAuthenticatedContext();
 
-  const [cube, setCube] = useState<CubeDrawing | undefined>(players.getPlayer(player.userId)!.cubeDrawing);
+  const [cube, setCube] = useState<CubeDrawing | null>(players.getPlayer(player.userId)!.cubeDrawing);
   const [color, setColor] = useState<string>(player.color);
+
   useEffect(() => {
     const setValue = (value: any) => {
       setCube(value.detail.val);
@@ -44,5 +45,5 @@ export default function DisplayCube({ player }: { player: Player }) {
     }
   };
 
-  return cube !== undefined ? <Cube key={`CubeDraw-${player.userId}`} center={new LatLng(cube.center.lat, cube.center.lng)} color={color} radius={cube!.radius} removeCallback={handleRemove} /> : "";
+  return cube !== null ? <Cube key={`CubeDraw-${player.userId}`} center={new LatLng(cube.center.lat, cube.center.lng)} color={color} radius={cube!.radius} removeCallback={handleRemove} /> : "";
 }

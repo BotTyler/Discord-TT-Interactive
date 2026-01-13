@@ -30,7 +30,7 @@ export default function Fog({ _points, _isVisible, removeCallback, visibilityCal
         visibilityCallback(id, !isVisible);
         break;
       default:
-        console.log("NO TOOL CALL NEEDED");
+        break;
     }
   };
 

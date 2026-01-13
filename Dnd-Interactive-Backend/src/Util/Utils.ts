@@ -54,7 +54,7 @@ export function ValidateAllInputs(
   reqInputs: Record<string, any>,
   validInputs: ValidationInputType[],
 ): Object {
-  console.log(reqInputs);
+  // console.log(reqInputs);
   const validatedRecord: Record<string, any> = {};
   for (const field of validInputs) {
     const reqValue = reqInputs[field.name];
@@ -90,16 +90,13 @@ function ValidateTypes(val: any, expected: ExpectedTypes): boolean {
   // All the other primitive types will be handled by the default case.
   switch (expected) {
     case "array":
-      //console.log("array Validation");
       return Array.isArray(val);
       break;
     case "NOVERIFY":
       // For this we do not care to validate the types. This should be treated as dangerous.
-      //console.log("not verifying type");
       return true;
       break;
     default:
-      //console.log("default validation");
       return typeof val === expected;
   }
 }
