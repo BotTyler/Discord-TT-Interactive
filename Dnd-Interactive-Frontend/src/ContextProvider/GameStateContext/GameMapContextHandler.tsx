@@ -100,7 +100,7 @@ export const GameMapContextHandler = React.forwardRef(function GameMapContextHan
   }, [enemies]);
   React.useEffect(() => {
     emitFieldChangeEvent(`FogsChanged`, fogs);
-  }, [enemies]);
+  }, [fogs]);
   React.useEffect(() => {
     emitFieldChangeEvent(`IconHeightChanged`, iconHeight);
   }, [iconHeight]);
