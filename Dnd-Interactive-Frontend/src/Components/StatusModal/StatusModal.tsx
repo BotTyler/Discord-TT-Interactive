@@ -95,9 +95,7 @@ function GridDisplayStatus({ init, onChange }: { init: ConditionCheckboxInterfac
                   if (ele.condition !== val.condition) return ele;
                   return { condition: ele.condition, isSelected: !ele.isSelected };
                 })
-
-                onChange(changedValueArray);
-
+                
                 return changedValueArray;
               })
             }}
