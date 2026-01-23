@@ -83,7 +83,7 @@ services:
     environment:
         POSTGRES_PASSWORD: <PASSWORD>
     volumes:
-        - postgres-db:/var/lib/postgressql/data
+        - postgres-db:/var/lib/postgresql
     ports:
         - "5432:5432"
   pgadmin-dev:
