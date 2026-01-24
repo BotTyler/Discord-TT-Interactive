@@ -598,9 +598,8 @@ export class StateHandlerRoom extends Room<State> {
                   name: validateParams.name,
                   position: validateParams.position,
                   size: validateParams.size,
-                  initiative: 0,
-                  totalHealth: validateParams.totalHealth,
                   health: validateParams.totalHealth,
+                  totalHealth: validateParams.totalHealth,
                 };
                 this.state.addEnemy(client.sessionId, mData);
               })

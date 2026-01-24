@@ -497,8 +497,6 @@ export class State extends Schema {
       size: number;
       health: number;
       totalHealth: number;
-      deathSaves: number;
-      lifeSaves: number;
     },
   ): boolean {
     if (this.map === undefined) return false;
@@ -512,8 +510,8 @@ export class State extends Schema {
     newEnemy.position = new mLatLng(data.position.lat, data.position.lng);
     newEnemy.health = data.health;
     newEnemy.totalHealth = data.totalHealth;
-    newEnemy.deathSaves = data.deathSaves;
-    newEnemy.lifeSaves = data.lifeSaves;
+    newEnemy.deathSaves = 0;
+    newEnemy.lifeSaves = 0;
     newEnemy.isVisible = true;
     newEnemy.initiative = 0;
 
