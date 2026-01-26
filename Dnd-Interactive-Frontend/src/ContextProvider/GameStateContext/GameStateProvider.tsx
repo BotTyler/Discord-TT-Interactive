@@ -10,31 +10,28 @@ import { useAuthenticatedContext } from "../useAuthenticatedContext";
 import { GameMapContextHandler } from "./GameMapContextHandler";
 
 export interface GameStateInterface {
-  // map: MapData | undefined;
-  // curHostId: string | undefined;
-  // enemies: Record<string, Enemy>;
-  getMap: () => MapData | undefined;
+  getMap: () => MapData | null;
   getMapMovement: () => MapMovementType;
-  getCurrentHostId(): string | undefined;
+  getCurrentHostId(): string | null;
   getCurrentGameState: () => GameStateEnum;
   getEnemies: () => { [key: string]: Enemy };
-  getEnemy: (id: string) => Enemy | undefined;
+  getEnemy: (id: string) => Enemy | null;
   getFogs: () => { [key: string]: MapFogPolygon };
-  getFog: (id: string) => MapFogPolygon | undefined;
+  getFog: (id: string) => MapFogPolygon | null;
   getIconHeight: () => number;
   getInitiativeIndex: () => number;
   getGridColor: () => string;
   getGridShowing: () => boolean;
 }
 const GameStateContext = React.createContext<GameStateInterface>({
-  getMap: (): MapData | undefined => {
-    return undefined;
+  getMap: (): MapData | null => {
+    return null;
   },
   getMapMovement: (): MapMovementType => {
     return "free";
   },
-  getCurrentHostId: (): string | undefined => {
-    return undefined;
+  getCurrentHostId: (): string | null => {
+    return null;
   },
   getCurrentGameState: (): GameStateEnum => {
     return GameStateEnum.MAINMENU;
@@ -42,14 +39,14 @@ const GameStateContext = React.createContext<GameStateInterface>({
   getEnemies: (): { [key: string]: Enemy } => {
     return {};
   },
-  getEnemy: (id: string): Enemy | undefined => {
-    return undefined;
+  getEnemy: (id: string): Enemy | null => {
+    return null;
   },
   getFogs: () => {
     return {};
   },
   getFog: (id: string) => {
-    return undefined;
+    return null;
   },
   getIconHeight: () => {
     return 0;
@@ -110,16 +107,16 @@ export function GameStateContextProvider() {
     }
   }
 
-  const getMap = (): MapData | undefined => {
-    if (gameStateContextRef.current == null) return undefined;
+  const getMap = (): MapData | null => {
+    if (gameStateContextRef.current == null) return null;
     return gameStateContextRef.current.getMap();
   };
   const getMapMovement = (): MapMovementType => {
     if (gameStateContextRef.current == null) return "free";
     return gameStateContextRef.current.getMapMovement();
   };
-  const getCurrentHostId = (): string | undefined => {
-    if (gameStateContextRef.current == null) return undefined;
+  const getCurrentHostId = (): string | null => {
+    if (gameStateContextRef.current == null) return null;
     return gameStateContextRef.current.getCurrentHostId();
   };
   const getGameState = (): GameStateEnum => {
@@ -130,16 +127,16 @@ export function GameStateContextProvider() {
     if (gameStateContextRef.current == null) return {};
     return gameStateContextRef.current.getEnemies();
   };
-  const getEnemy = (id: string): Enemy | undefined => {
-    if (gameStateContextRef.current == null) return undefined;
+  const getEnemy = (id: string): Enemy | null => {
+    if (gameStateContextRef.current == null) return null;
     return gameStateContextRef.current.getEnemy(id);
   };
   const getFogs = (): { [key: string]: MapFogPolygon } => {
     if (gameStateContextRef.current == null) return {};
     return gameStateContextRef.current.getFogs();
   };
-  const getFog = (id: string): MapFogPolygon | undefined => {
-    if (gameStateContextRef.current == null) return undefined;
+  const getFog = (id: string): MapFogPolygon | null => {
+    if (gameStateContextRef.current == null) return null;
     return gameStateContextRef.current.getFog(id);
   };
   const getIconHeight = () => {
@@ -151,11 +148,11 @@ export function GameStateContextProvider() {
     return gameStateContextRef.current.getInitiativeIndex();
   };
   const getGridColor = () => {
-    if(gameStateContextRef.current == null) return "rgba(255, 255, 255, 0.7)";
+    if (gameStateContextRef.current == null) return "rgba(255, 255, 255, 0.7)";
     return gameStateContextRef.current.getGridColor();
   }
   const getGridShowing = () => {
-    if(gameStateContextRef.current == null) return true;
+    if (gameStateContextRef.current == null) return true;
     return gameStateContextRef.current.getGridShowing();
   }
   const providerValue: GameStateInterface = {

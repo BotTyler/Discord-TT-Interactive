@@ -99,17 +99,37 @@ export class EnemyMovementHistoryDB extends DatabaseBase<EnemyMovementHistoryDAO
     super("Enemy_Movement_History");
   }
 
-  async getEnemyMovementAtHistoryId(history_id: number) {
+  async getEnemyMovementAtHistoryId(history_id: number): Promise<EmhJoinInterface[]> {
     const query = `SELECT * FROM public."Enemy_Movement_History" as EMH join public."Enemy" as E on EMH.enemy_id = E.enemy_id join public."Image_Catalog" as IC on E.image_id = IC.img_catalog_id where EMH.history_id = $1;`;
     console.log(query);
 
-    const result: QueryResult<EmhJoinInterface> | undefined = await Database.getInstance()
+    const result: QueryResult<EmhJoinInterface> | null = await Database.getInstance()
       .query(query, [history_id])
-      .catch((e) => {
+      .catch((e: any): null => {
         console.error(`Could not ***select*** player movement history (${this.tableName})\n\t${e}`);
-        return undefined;
+        return null;
       });
-    return result?.rows;
+
+    const rowResults: EmhJoinInterface[] = result === null ? [] : result.rows;
+    return rowResults.map((val: EmhJoinInterface): EmhJoinInterface => {
+      return {
+        id: +val.id,
+        enemy_id: +val.enemy_id,
+        history_id: +val.history_id,
+        name: val.name,
+        image_name: val.image_name,
+        size: +val.size,
+        is_visible: val.is_visible,
+        position_lat: +val.position_lat,
+        position_lng: +val.position_lng,
+        health: +val.health,
+        total_health: +val.total_health,
+        death_saves: +val.death_saves,
+        life_saves: +val.death_saves,
+        initiative: +val.initiative,
+        statuses: val.statuses,
+      };
+    });
   }
 }
 

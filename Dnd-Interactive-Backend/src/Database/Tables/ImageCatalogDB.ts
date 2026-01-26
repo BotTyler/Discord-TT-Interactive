@@ -47,45 +47,66 @@ export class ImageCatalogDB extends DatabaseBase<ImageCatalogDAO> {
     return ImageCatalogDB.instance;
   }
 
-  async selectAllImagesByPlayerId(player_id: string) {
+  async selectAllImagesByPlayerId(player_id: string): Promise<ImageCatalogDAO[]> {
     const query = `SELECT * FROM public."Image_Catalog" where player_id = $1;`;
 
-    const result: QueryResult<ImageCatalogDAO> | undefined = await Database.getInstance()
+    const result: QueryResult<ImageCatalogDAO> | null = await Database.getInstance()
       .query(query, [player_id])
       .catch((e) => {
         console.error(`Could not ***select*** (${this.tableName})\n\t${e}`);
-        return undefined;
+        return null;
       });
-    return result?.rows;
+    const rows: ImageCatalogDAO[] = result === null ? [] : result.rows;
+    return rows.map((val: ImageCatalogDAO): ImageCatalogDAO => {
+      return new ImageCatalogDAO(
+        val.player_id,
+        val.image_name,
+        +val.width,
+        +val.height,
+        +val.img_catalog_id!,
+      );
+    });
   }
 
-  async selectByImageName(image_name: string) {
+  async selectByImageName(image_name: string): Promise<ImageCatalogDAO | null> {
     const query = `SELECT * FROM public."Image_Catalog" where image_name = $1;`;
 
-    const result: QueryResult<ImageCatalogDAO> | undefined = await Database.getInstance()
+    const result: QueryResult<ImageCatalogDAO> | null = await Database.getInstance()
       .query(query, [image_name])
       .catch((e) => {
         console.error(`Could not ***select*** (${this.tableName})\n\t${e}`);
-        return undefined;
+        return null;
       });
-    return result?.rows[0];
+    const rows: ImageCatalogDAO[] = result === null ? [] : result.rows;
+    if (rows.length > 0) {
+      const firstRow: ImageCatalogDAO = rows[0];
+      return new ImageCatalogDAO(
+        firstRow.player_id,
+        firstRow.image_name,
+        +firstRow.width,
+        +firstRow.height,
+        +firstRow.img_catalog_id!,
+      );
+    }
+    return null;
   }
 
-  async create(data: ImageCatalogDAO): Promise<number | undefined> {
-    return await super.create(data).then(async (id: number | undefined) => {
-      if (id !== undefined) return id;
+  async create(data: ImageCatalogDAO): Promise<number | null> {
+    return await super.create(data).then(async (id: number | null): Promise<number | null> => {
+      if (id !== null) return id;
 
       // if the id is null I need to query the database to get the original ID
       const query = `SELECT img_catalog_id as id from public."Image_Catalog" where image_name = $1;`;
 
-      const result: QueryResult<{ id: number }> | undefined = await Database.getInstance()
+      const result: QueryResult<{ id: number }> | null = await Database.getInstance()
         .query(query, [data.image_name])
         .catch((e) => {
           console.error(`Could not ***select*** (${this.tableName})\n\t${e}`);
-          return undefined;
+          return null;
         });
 
-      return result?.rows[0].id;
+      const createdResultId: number | null = result === null ? null : +result.rows[0].id;
+      return createdResultId;
     });
   }
   constructor() {

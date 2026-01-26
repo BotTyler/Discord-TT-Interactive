@@ -65,7 +65,6 @@ export interface LoadSummonsInterface {
   history_id: number;
   player_id: string;
   size: number;
-  enemy_id: number;
   position_lat: number;
   position_lng: number;
   name: string;

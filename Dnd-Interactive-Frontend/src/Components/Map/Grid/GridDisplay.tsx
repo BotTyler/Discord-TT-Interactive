@@ -13,8 +13,8 @@ export default function GridDisplay() {
     const [gridColor, setGridColor] = useState<string>(gameStateContext.getGridColor());
 
     useEffect(() => {
-        const mapData: MapData | undefined = gameStateContext.getMap();
-        if (mapData == null) return;
+        const mapData: MapData | null = gameStateContext.getMap();
+        if (mapData === null) return;
         setMapWidth(mapData.width);
         setMapHeight(mapData.height);
     }, [])
@@ -24,8 +24,8 @@ export default function GridDisplay() {
             setIconSize(val.detail.val);
         }
         const handleMapUpdate = (value: any) => {
-            const mapData: MapData | undefined = value.detail.val as MapData;
-            if (mapData == null) return;
+            const mapData: MapData | null = value.detail.val as MapData;
+            if (mapData === null) return;
             setMapWidth(mapData.width);
             setMapHeight(mapData.height);
         }

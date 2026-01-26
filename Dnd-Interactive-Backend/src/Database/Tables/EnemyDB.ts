@@ -49,7 +49,11 @@ export class EnemyDB extends DatabaseBase<EnemyDAO> {
     const rowResult: EnemyDAO | null = result?.rows[0] ?? null;
     if (rowResult === null) return null;
 
-    return new EnemyDAO(rowResult.image_id, rowResult.name, rowResult.enemy_id);
+    const enemy_id: number = +rowResult.enemy_id!;
+    const enemy_name: string = rowResult.name;
+    const image_id: number = +rowResult.image_id;
+
+    return new EnemyDAO(image_id, enemy_name, enemy_id);
   }
 
   constructor() {

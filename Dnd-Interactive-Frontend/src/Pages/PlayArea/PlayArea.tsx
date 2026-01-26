@@ -23,7 +23,7 @@ export default function PlayArea() {
   const gamestateContext = useGameState();
   const diceRollerRef: any = React.useRef(null);
 
-  const [mapData, setMapData] = React.useState<MapData | undefined>(gamestateContext.getMap());
+  const [mapData, setMapData] = React.useState<MapData | null>(gamestateContext.getMap());
   function displaySidePanel() {
     const currentUserid = authContext.user.id;
     if (players.getPlayer(currentUserid) === undefined || gamestateContext.getMap() === undefined) return <Loading />;
@@ -104,7 +104,7 @@ export default function PlayArea() {
                   <DrawingToolbar />
                 </div>
                 <div className="position-absolute" style={{ top: 0, right: 0, left: 0, bottom: 0 }}>
-                  {mapData == undefined ? <div className="w-100 h-100" style={{ background: "grey", zIndex: 100 }}></div> : <InteractiveMap map={mapData} key={`interactiveMap`} />}
+                  {mapData === null ? <div className="w-100 h-100" style={{ background: "grey", zIndex: 100 }}></div> : <InteractiveMap map={mapData} key={`interactiveMap`} />}
                 </div>
               </div>
             </Panel>

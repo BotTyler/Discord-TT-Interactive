@@ -43,29 +43,49 @@ export class MapDB extends DatabaseBase<MapDAO> {
     super("Map");
   }
 
-  async selectMapById(id: number) {
+  async selectMapById(id: number): Promise<MapJoinInterface[]> {
     const query = `SELECT * FROM public."Map" as mm JOIN public."Image_Catalog" as IC on IC.img_catalog_id = mm.image_id where id = $1 ORDER BY id DESC;`;
     console.log(query);
 
-    const result: QueryResult<MapJoinInterface> | undefined = await Database.getInstance()
+    const result: QueryResult<MapJoinInterface> | null = await Database.getInstance()
       .query(query, [id])
       .catch((e) => {
         console.error(`Could not ***select*** Fog State history (${this.tableName})\n\t${e}`);
-        return undefined;
+        return null;
       });
-    return result?.rows;
+    const rows: MapJoinInterface[] = result === null ? [] : result.rows;
+    return rows.map((ele: MapJoinInterface): MapJoinInterface => {
+      return {
+        id: +ele.id,
+        player_id: ele.player_id,
+        name: ele.name,
+        image_name: ele.image_name,
+        height: +ele.height,
+        width: +ele.width,
+        icon_height: +ele.icon_height,
+      };
+    });
   }
 
-  async selectMapByUserId(userId: string) {
+  async selectMapByUserId(userId: string): Promise<LoadCampaign[]> {
     const query = `SELECT MP.id, IC.image_name, IC.height, IC.width, MP."name" FROM Public."Map" AS MP JOIN Public."Image_Catalog" AS IC on IC.img_catalog_id = MP.image_id where MP.player_id = $1;`;
-    const result: QueryResult<LoadCampaign> | undefined = await Database.getInstance()
+    const result: QueryResult<LoadCampaign> | null = await Database.getInstance()
       .query(query, [userId])
       .catch((e) => {
         console.error(`Could not gather map data from the user`);
-        return undefined;
+        return null;
       });
 
-    return result?.rows;
+    const rows: LoadCampaign[] = result === null ? [] : result.rows;
+    return rows.map((val: LoadCampaign): LoadCampaign => {
+      return {
+        id: +val.id,
+        name: val.name,
+        image_name: val.image_name,
+        width: +val.width,
+        height: +val.height,
+      };
+    });
   }
 }
 

@@ -41,7 +41,7 @@ export default function HostMM({ otherPlayers }: { otherPlayers: Player[] }) {
               {campaignList.map((val: LoadCampaign) => {
                 return (
                   <li
-                    className={`list-group-item h-100 ${val.name === curCampaign?.name ? "active" : ""}`}
+                    className={`list-group-item h-100 ${val.id === curCampaign?.id ? "active" : ""}`}
                     style={{ minWidth: "fit-content" }}
                     onClick={() => {
                       setCurCampaign(val);
@@ -205,7 +205,7 @@ export function VersionHistory({ campaign }: { campaign: LoadCampaign | undefine
 export function MapPreviewComponent() {
   const gamestateContext = useGameState();
   const authContext = useAuthenticatedContext();
-  const [mapData, setMapData] = useState<MapData | undefined>(gamestateContext.getMap());
+  const [mapData, setMapData] = useState<MapData | null>(gamestateContext.getMap());
 
   useEffect(() => {
     const handleMapChange = (value: any) => {
@@ -229,7 +229,7 @@ export function MapPreviewComponent() {
               gameState: GameStateEnum.HOSTPLAY,
             });
           }}
-          disabled={mapData == null}
+          disabled={mapData === null}
         >
           Preview
         </button>
@@ -241,7 +241,7 @@ export function MapPreviewComponent() {
               gameState: GameStateEnum.ALLPLAY,
             });
           }}
-          disabled={mapData == null}
+          disabled={mapData === null}
         >
           Start
         </button>
@@ -251,7 +251,7 @@ export function MapPreviewComponent() {
           <div className="h-100 w-100" style={{ userSelect: "none" }}>
             {/* Interactive Map */}
 
-            {mapData == undefined ? <div className="w-100 h-100" style={{ background: "grey", zIndex: 100 }}></div> : <InteractiveMap map={mapData} key={`interactiveMap-preview-hostmm`} />}
+            {mapData === null ? <div className="w-100 h-100" style={{ background: "grey", zIndex: 100 }}></div> : <InteractiveMap map={mapData} key={`interactiveMap-preview-hostmm`} />}
           </div>
         </div>
         <div style={{ top: 0, bottom: 0, left: 0, right: 0, zIndex: 101 }} className="position-absolute"></div>

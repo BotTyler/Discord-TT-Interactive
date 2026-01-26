@@ -105,13 +105,32 @@ export class SummonsHistoryDB extends DatabaseBase<SummonsHistoryDao> {
         where SH.history_id = $1;`;
     console.log(query);
 
-    const result: QueryResult<ShJoinInterface> | undefined = await Database.getInstance()
+    const result: QueryResult<ShJoinInterface> | null = await Database.getInstance()
       .query(query, [history_id])
       .catch((e) => {
         console.error(`Could not ***select*** player movement history (${this.tableName})\n\t${e}`);
-        return undefined;
+        return null;
       });
-    return result?.rows;
+    const rows: ShJoinInterface[] = result === null ? [] : result.rows;
+    return rows.map((val: ShJoinInterface): ShJoinInterface => {
+      return {
+        id: +val.id,
+        summons_id: +val.summons_id,
+        player_id: val.player_id,
+        history_id: +val.history_id,
+        name: val.name,
+        image_name: val.image_name,
+        position_lat: +val.position_lat,
+        position_lng: +val.position_lng,
+        health: +val.health,
+        total_health: +val.total_health,
+        life_saves: +val.life_saves,
+        death_saves: +val.death_saves,
+        size: +val.size,
+        is_visible: val.is_visible,
+        statuses: val.statuses,
+      };
+    });
   }
 }
 
@@ -121,7 +140,6 @@ export interface ShJoinInterface {
   history_id: number;
   player_id: string;
   size: number;
-  enemy_id: number;
   position_lat: number;
   position_lng: number;
   name: string;

@@ -29,11 +29,16 @@ export enum GameStateEnum {
 export type MapMovementType = "free" | "grid";
 
 export class State extends Schema {
+  // This value will hold the data based on a save.
+  // In the case where a player joins AFTER a load is in progress, this is to make sure their data is not removed.
+  private lastSavedPlayerContext: LoadPlayerInterface[] = [];
+  private lastSavedSummonsContext: LoadSummonsInterface[] = [];
+
   @type({ map: Player })
   players = new MapSchema<Player>();
 
   @type(MapData)
-  map: MapData | undefined = undefined;
+  map: MapData | null = null;
 
   @type("number")
   gameState: GameStateEnum = GameStateEnum.MAINMENU;
@@ -81,8 +86,27 @@ export class State extends Schema {
     this.gameState = GameStateEnum.MAINMENU;
     this.currentHostUserId = undefined;
 
-    // I could reset the map here but that should be handled when the room is disposed.
-    //this.map = undefined;
+    return true;
+  }
+
+  // Compeltely reset all values related to a "playable" state.
+  RESET_GAME(): boolean {
+    this.players.forEach((player: Player): void => {
+      player.position = new mLatLng(0, 0);
+      player.statuses = [];
+      player.summons = [];
+      player.drawings = [];
+      player.arcDrawing = null;
+      player.beamDrawing = null;
+      player.circleDrawing = null;
+      player.cubeDrawing = null;
+      player.deathSaves = 0;
+      player.lifeSaves = 0;
+      player.health = player.totalHealth;
+    });
+    this.lastSavedPlayerContext = [];
+    this.lastSavedSummonsContext = [];
+    this.map = null;
     return true;
   }
   //#endregion
@@ -111,7 +135,59 @@ export class State extends Schema {
       player.sessionId = sessionId;
       return;
     }
-    this.players.set(playerOptions.userId, new Player({ ...playerOptions, sessionId }));
+
+    // A whole new player is being introduced.
+    // See if the current save has some information we can utilize.
+    const playerSaveData: LoadPlayerInterface | null =
+      this.lastSavedPlayerContext.find(
+        (element: LoadPlayerInterface): boolean => element.player_id === playerOptions.userId,
+      ) ?? null;
+
+    const summonsSavedData: LoadSummonsInterface[] = this.lastSavedSummonsContext.filter(
+      (ele: LoadSummonsInterface): boolean => ele.player_id === playerOptions.userId,
+    );
+
+    const createdPlayer: Player = new Player({ ...playerOptions, sessionId });
+    if (playerSaveData !== null) {
+      // console.log(playerSaveData);
+      createdPlayer.position = new mLatLng(
+        +playerSaveData.position_lat,
+        +playerSaveData.position_lng,
+      );
+      createdPlayer.initiative = +playerSaveData.initiative;
+      createdPlayer.health = +playerSaveData.health;
+      createdPlayer.totalHealth = +playerSaveData.totalHealth;
+      createdPlayer.deathSaves = +playerSaveData.deathSaves;
+      createdPlayer.lifeSaves = +playerSaveData.lifeSaves;
+      createdPlayer.statuses = playerSaveData.statuses.map(
+        (stat: string): CharacterStatus => new CharacterStatus(stat),
+      );
+    }
+
+    summonsSavedData.forEach((ele: LoadSummonsInterface): void => {
+      const savedSummon: Summons = new Summons({
+        id: ele.summons_id,
+        player_id: createdPlayer.userId,
+        avatarUri: ele.image_name,
+        color: createdPlayer.color,
+        name: ele.name,
+        size: ele.size,
+      });
+
+      savedSummon.position = new mLatLng(+ele.position_lat, +ele.position_lng);
+      savedSummon.health = +ele.health;
+      savedSummon.totalHealth = +ele.total_health;
+      savedSummon.deathSaves = +ele.death_saves;
+      savedSummon.lifeSaves = +ele.life_saves;
+      savedSummon.isVisible = ele.is_visible;
+      savedSummon.statuses = ele.statuses.map(
+        (stat: string): CharacterStatus => new CharacterStatus(stat),
+      );
+
+      createdPlayer.summons = [...createdPlayer.summons, savedSummon];
+    });
+
+    this.players.set(playerOptions.userId, createdPlayer);
   }
 
   setPlayerConnected(sessionId: string, data: { connection: boolean }): boolean {
@@ -229,21 +305,24 @@ export class State extends Schema {
   //#endregion
 
   //#region Movement
-  updatePosition(sessionId: string, position: { pos: mLatLng; clientToChange: string }): boolean {
+  updatePosition(
+    sessionId: string,
+    position: { lat: number; lng: number; clientToChange: string },
+  ): boolean {
     // I need to make some checks that the person moving this object is the right person or the host.
     const player = this._getPlayerBySessionId(sessionId);
     const playerToMove = this._getPlayerByUserId(position.clientToChange);
     if (player === undefined || playerToMove === undefined) return false; // Player does not exist
 
     // good to go move the position
-    playerToMove.position = new mLatLng(position.pos.lat, position.pos.lng);
-    playerToMove.toPosition = [new mLatLng(position.pos.lat, position.pos.lng)]; // Player is replacing the ghost character.
+    playerToMove.position = new mLatLng(position.lat, position.lng);
+    playerToMove.toPosition = [new mLatLng(position.lat, position.lng)]; // Player is replacing the ghost character.
     return true;
   }
 
   setPlayerGhostPosition(
     sessionId: string,
-    position: { pos: mLatLng[]; clientToChange: string },
+    position: { pos: { lat: number; lng: number }[]; clientToChange: string },
   ): boolean {
     // I need to make some checks that the person moving this object is the right person or the host.
     const player = this._getPlayerBySessionId(sessionId);
@@ -251,7 +330,7 @@ export class State extends Schema {
     if (player === undefined || playerToMove === undefined) return false; // Player does not exist
 
     // good to go! move ghost to the position.
-    playerToMove.toPosition = position.pos.map((val: mLatLng) => {
+    playerToMove.toPosition = position.pos.map((val: { lat: number; lng: number }): mLatLng => {
       return new mLatLng(val.lat, val.lng);
     });
     return true;
@@ -259,31 +338,31 @@ export class State extends Schema {
 
   updateEnemyPosition(
     sessionId: string,
-    position: { pos: mLatLng; clientToChange: string },
+    position: { lat: number; lng: number; clientToChange: string },
   ): boolean {
     // I need to make some checks that the person moving this object is the right person or the host.
-    if (this.map === undefined) return false;
+    if (this.map === null) return false;
     const player = this._getPlayerBySessionId(sessionId);
     const enemyToMove = this.map.enemy.get(position.clientToChange);
 
     if (player === undefined || enemyToMove === undefined) return false; // Player does not exist
 
-    enemyToMove.position = new mLatLng(position.pos.lat, position.pos.lng);
-    enemyToMove.toPosition = [new mLatLng(position.pos.lat, position.pos.lng)];
+    enemyToMove.position = new mLatLng(position.lat, position.lng);
+    enemyToMove.toPosition = [new mLatLng(position.lat, position.lng)];
     return true;
   }
   setEnemyGhostPosition(
     sessionId: string,
-    position: { pos: mLatLng[]; clientToChange: string },
+    position: { pos: { lat: number; lng: number }[]; clientToChange: string },
   ): boolean {
     // I need to make some checks that the person moving this object is the right person or the host.
-    if (this.map === undefined) return false;
+    if (this.map === null) return false;
     const player = this._getPlayerBySessionId(sessionId);
     const enemyToMove = this.map.enemy.get(position.clientToChange);
 
     if (player === undefined || enemyToMove === undefined) return false; // Player does not exist
 
-    enemyToMove.toPosition = position.pos.map((val: mLatLng) => {
+    enemyToMove.toPosition = position.pos.map((val: { lat: number; lng: number }): mLatLng => {
       return new mLatLng(val.lat, val.lng);
     });
     return true;
@@ -292,10 +371,10 @@ export class State extends Schema {
   //#endregion
 
   //#region Drawings
-  addDrawing(sessionId: string, data: mLatLng[]): boolean {
+  addDrawing(sessionId: string, data: { lat: number; lng: number }[]): boolean {
     const player = this._getPlayerBySessionId(sessionId);
     if (player === undefined) return false;
-    player.drawings = data.map((val) => {
+    player.drawings = data.map((val: { lat: number; lng: number }): mLatLng => {
       return new mLatLng(val.lat, val.lng);
     });
 
@@ -320,7 +399,10 @@ export class State extends Schema {
   }
 
   //#region Cubes
-  addCube(sessionId: string, data: { center: mLatLng; radius: number }): boolean {
+  addCube(
+    sessionId: string,
+    data: { center: { lat: number; lng: number }; radius: number },
+  ): boolean {
     const player = this._getPlayerBySessionId(sessionId);
     if (player === undefined) return false;
     player.cubeDrawing = new CubeDrawing(
@@ -338,7 +420,10 @@ export class State extends Schema {
   }
   //#endregion
   //#region Circle
-  addCircle(sessionId: string, data: { center: mLatLng; radius: number }): boolean {
+  addCircle(
+    sessionId: string,
+    data: { center: { lat: number; lng: number }; radius: number },
+  ): boolean {
     const player = this._getPlayerBySessionId(sessionId);
     if (player === undefined) return false;
     player.circleDrawing = new CircleDrawing(
@@ -358,7 +443,11 @@ export class State extends Schema {
   //#region Arc
   addArc(
     sessionId: string,
-    data: { center: mLatLng; toLocation: mLatLng; angle: number },
+    data: {
+      center: { lat: number; lng: number };
+      toLocation: { lat: number; lng: number };
+      angle: number;
+    },
   ): boolean {
     const player = this._getPlayerBySessionId(sessionId);
     if (player === undefined) return false;
@@ -378,7 +467,10 @@ export class State extends Schema {
   }
   //#endregion
   //#region Beam
-  addBeam(sessionId: string, data: { start: mLatLng; end: mLatLng; width: number }): boolean {
+  addBeam(
+    sessionId: string,
+    data: { start: { lat: number; lng: number }; end: { lat: number; lng: number }; width: number },
+  ): boolean {
     const player = this._getPlayerBySessionId(sessionId);
     if (player === undefined) return false;
 
@@ -410,6 +502,8 @@ export class State extends Schema {
     player.isHost = true;
     this.currentHostUserId = player.userId;
 
+    this.RESET_GAME();
+
     return true;
   }
 
@@ -433,30 +527,30 @@ export class State extends Schema {
   //#endregion
 
   //#region MapData
-  setMap(sessionId: string, data: MapData): boolean {
+  setMap(
+    sessionId: string,
+    data: {
+      id: number;
+      image_name: string;
+      width: number;
+      height: number;
+      iconHeight: number;
+    },
+  ): boolean {
+    this.RESET_GAME();
     this.map = new MapData(
       {
-        mapBase64: data.mapBase64,
-        width: +data.width,
-        height: +data.height,
-        iconHeight: +data.iconHeight,
+        mapBase64: data.image_name,
+        width: data.width,
+        height: data.height,
+        iconHeight: data.iconHeight,
         fogs: new MapSchema<MapFogPolygon>({}),
         enemy: new MapSchema<Enemy>({}),
-        initiativeIndex: +(data.initiativeIndex ?? 0),
+        initiativeIndex: 0,
       },
       data.id,
     );
-
-    this.players.forEach((player: Player): void => {
-      player.summons = [];
-      player.statuses = [];
-    });
     return false;
-  }
-
-  clearMap(sessionId: string): boolean {
-    this.map = undefined;
-    return true;
   }
 
   setMapMovement(mapMovement: MapMovementType): boolean {
@@ -465,13 +559,13 @@ export class State extends Schema {
   }
 
   setPlayerSize(sessionId: string, data: { size: number }): boolean {
-    if (this.map === undefined) return false;
+    if (this.map === null) return false;
     this.map.iconHeight = data.size;
     return true;
   }
 
   nextInitiative(): boolean {
-    if (this.map === undefined) return false;
+    if (this.map === null) return false;
 
     const nInit = this.map.initiativeIndex + 1;
     const initSize = this.players.size + this.map.enemy.size;
@@ -481,7 +575,7 @@ export class State extends Schema {
   }
 
   resetInitiativeIndex(): boolean {
-    if (this.map === undefined) return false;
+    if (this.map === null) return false;
     this.map.initiativeIndex = 0;
     return true;
   }
@@ -493,13 +587,13 @@ export class State extends Schema {
       id: number;
       avatarUri: string;
       name: string;
-      position: mLatLng;
+      position: { lat: number; lng: number };
       size: number;
       health: number;
       totalHealth: number;
     },
   ): boolean {
-    if (this.map === undefined) return false;
+    if (this.map === null) return false;
 
     const newEnemy: Enemy = new Enemy({
       id: data.id,
@@ -519,7 +613,7 @@ export class State extends Schema {
     return true;
   }
   removeEnemy(sessionId: string, data: { id: string }): boolean {
-    if (this.map === undefined) return false;
+    if (this.map === null) return false;
     this.map.enemy.delete(data.id);
     return true;
   }
@@ -534,7 +628,7 @@ export class State extends Schema {
       totalHealth: number;
     },
   ): boolean {
-    if (this.map === undefined) return false;
+    if (this.map === null) return false;
     const enemy = this.map.enemy.get(data.id);
     if (enemy === undefined) return false;
     enemy.name = data.name;
@@ -546,7 +640,7 @@ export class State extends Schema {
   }
 
   updateEnemyInitiative(session_id: string, data: { id: string; initiative: number }): boolean {
-    if (this.map === undefined) return false;
+    if (this.map === null) return false;
     const enemy = this.map.enemy.get(data.id);
     if (enemy === undefined) return false;
 
@@ -555,7 +649,7 @@ export class State extends Schema {
   }
 
   healEnemy(sessionId: string, data: { clientToChange: string; heal: number }): boolean {
-    if (this.map === undefined) return false;
+    if (this.map === null) return false;
     const player = this.map.enemy.get(`${data.clientToChange}`);
     if (player === undefined) return false;
     player.health += Math.abs(data.heal);
@@ -563,7 +657,7 @@ export class State extends Schema {
     return true;
   }
   damageEnemy(sessionId: string, data: { clientToChange: string; damage: number }): boolean {
-    if (this.map === undefined) return false;
+    if (this.map === null) return false;
     const player = this.map.enemy.get(`${data.clientToChange}`);
     if (player === undefined) return false;
     player.health -= Math.abs(data.damage);
@@ -574,7 +668,7 @@ export class State extends Schema {
     return true;
   }
   addEnemyDeath(sessionId: string, data: { clientToChange: string }): boolean {
-    if (this.map === undefined) return false;
+    if (this.map === null) return false;
     const player = this.map.enemy.get(`${data.clientToChange}`);
     if (player === undefined) return false;
     player.deathSaves += 1;
@@ -582,7 +676,7 @@ export class State extends Schema {
     return true;
   }
   removeEnemyDeath(sessionId: string, data: { clientToChange: string }): boolean {
-    if (this.map === undefined) return false;
+    if (this.map === null) return false;
     const player = this.map.enemy.get(`${data.clientToChange}`);
     if (player === undefined) return false;
     player.deathSaves -= 1;
@@ -591,7 +685,7 @@ export class State extends Schema {
     return true;
   }
   addEnemySave(sessionId: string, data: { clientToChange: string }): boolean {
-    if (this.map === undefined) return false;
+    if (this.map === null) return false;
     const player = this.map.enemy.get(`${data.clientToChange}`);
     if (player === undefined) return false;
     player.lifeSaves += 1;
@@ -604,7 +698,7 @@ export class State extends Schema {
     return true;
   }
   removeEnemySave(sessionId: string, data: { clientToChange: string }): boolean {
-    if (this.map === undefined) return false;
+    if (this.map === null) return false;
     const player = this.map.enemy.get(`${data.clientToChange}`);
     if (player === undefined) return false;
     player.lifeSaves -= 1;
@@ -613,7 +707,7 @@ export class State extends Schema {
     return true;
   }
   toggleEnemyVisibility(sessionId: string, data: { clientToChange: string }): boolean {
-    if (this.map === undefined) return false;
+    if (this.map === null) return false;
 
     const player = this.map.enemy.get(`${data.clientToChange}`);
     if (player === undefined) return false;
@@ -624,7 +718,7 @@ export class State extends Schema {
     sessionid: string,
     data: { statuses: string[]; clientToChange: string },
   ): boolean {
-    if (this.map === undefined) return false;
+    if (this.map === null) return false;
 
     const player = this.map.enemy.get(`${data.clientToChange}`);
     if (player === undefined) return false;
@@ -639,7 +733,7 @@ export class State extends Schema {
   //#region Summons
   updateSummonPosition(
     sessionId: string,
-    data: { pos: mLatLng; id: number; player_id: string },
+    data: { pos: { lat: number; lng: number }; id: number; player_id: string },
   ): boolean {
     // I need to make some checks that the person moving this object is the right person or the host.
     const player: Player | null = this._getPlayerByUserId(data.player_id) ?? null;
@@ -656,7 +750,7 @@ export class State extends Schema {
 
   setSummonGhostPosition(
     sessionId: string,
-    data: { pos: mLatLng[]; id: number; player_id: string },
+    data: { pos: { lat: number; lng: number }[]; id: number; player_id: string },
   ): boolean {
     // I need to make some checks that the person moving this object is the right person or the host.
     const player: Player | null = this._getPlayerByUserId(data.player_id) ?? null;
@@ -666,7 +760,7 @@ export class State extends Schema {
       player.summons.find((val: Summons) => val.id === data.id) ?? null;
     if (summon === null) return false;
 
-    summon.toPosition = data.pos.map((val: mLatLng) => {
+    summon.toPosition = data.pos.map((val: { lat: number; lng: number }): mLatLng => {
       return new mLatLng(val.lat, val.lng);
     });
 
@@ -680,7 +774,7 @@ export class State extends Schema {
       player_id: string;
       avatarUri: string;
       name: string;
-      position: mLatLng;
+      position: { lat: number; lng: number };
       size: number;
       health: number;
       totalHealth: number;
@@ -688,7 +782,7 @@ export class State extends Schema {
       lifeSaves: number;
     },
   ): boolean {
-    if (this.map === undefined) return false;
+    if (this.map === null) return false;
 
     const player: Player | undefined = this._getPlayerBySessionId(sessionId);
     if (player === undefined) return false;
@@ -714,7 +808,7 @@ export class State extends Schema {
   }
 
   removeSummon(sessionId: string, data: { id: number }): boolean {
-    if (this.map === undefined) return false;
+    if (this.map === null) return false;
 
     const player: Player | undefined = this._getPlayerBySessionId(sessionId);
     if (player === undefined) return false;
@@ -735,7 +829,7 @@ export class State extends Schema {
       size: number;
     },
   ): boolean {
-    if (this.map === undefined) return false;
+    if (this.map === null) return false;
 
     const player: Player | undefined = this._getPlayerBySessionId(sessionId);
     if (player === undefined) return false;
@@ -754,7 +848,7 @@ export class State extends Schema {
   }
 
   healSummons(sessionId: string, data: { id: number; heal: number }): boolean {
-    if (this.map === undefined) return false;
+    if (this.map === null) return false;
 
     const player: Player | undefined = this._getPlayerBySessionId(sessionId);
     if (player === undefined) return false;
@@ -769,7 +863,7 @@ export class State extends Schema {
   }
 
   damageSummons(sessionId: string, data: { id: number; damage: number }): boolean {
-    if (this.map === undefined) return false;
+    if (this.map === null) return false;
 
     const player: Player | undefined = this._getPlayerBySessionId(sessionId);
     if (player === undefined) return false;
@@ -785,7 +879,7 @@ export class State extends Schema {
   }
 
   addSummonsDeath(sessionId: string, data: { id: number }): boolean {
-    if (this.map === undefined) return false;
+    if (this.map === null) return false;
 
     const player: Player | undefined = this._getPlayerBySessionId(sessionId);
     if (player === undefined) return false;
@@ -800,7 +894,7 @@ export class State extends Schema {
     return true;
   }
   removeSummonsDeath(sessionId: string, data: { id: number }): boolean {
-    if (this.map === undefined) return false;
+    if (this.map === null) return false;
 
     const player: Player | undefined = this._getPlayerBySessionId(sessionId);
     if (player === undefined) return false;
@@ -816,7 +910,7 @@ export class State extends Schema {
   }
 
   addSummonsSave(sessionId: string, data: { id: number }): boolean {
-    if (this.map === undefined) return false;
+    if (this.map === null) return false;
 
     const player: Player | undefined = this._getPlayerBySessionId(sessionId);
     if (player === undefined) return false;
@@ -835,7 +929,7 @@ export class State extends Schema {
   }
 
   removeSummonsSave(sessionId: string, data: { id: number }): boolean {
-    if (this.map === undefined) return false;
+    if (this.map === null) return false;
 
     const player: Player | undefined = this._getPlayerBySessionId(sessionId);
     if (player === undefined) return false;
@@ -850,7 +944,7 @@ export class State extends Schema {
   }
 
   toggleSummonsVisibility(sessionId: string, data: { id: number }): boolean {
-    if (this.map === undefined) return false;
+    if (this.map === null) return false;
 
     const player: Player | undefined = this._getPlayerBySessionId(sessionId);
     if (player === undefined) return false;
@@ -865,7 +959,7 @@ export class State extends Schema {
   }
 
   setSummonsStatuses(sessionId: string, data: { statuses: string[]; id: number }): boolean {
-    if (this.map === undefined) return false;
+    if (this.map === null) return false;
 
     const player: Player | undefined = this._getPlayerBySessionId(sessionId);
     if (player === undefined) return false;
@@ -881,18 +975,19 @@ export class State extends Schema {
 
   //#region Fog
 
-  //     this.players.set(playerOptions.userId, new Player({ ...playerOptions, sessionId }));
-
-  addFog(sessionId: string, data: { polygon: mLatLng[]; isVisible: boolean; id: string }): boolean {
+  addFog(
+    sessionId: string,
+    data: { polygon: { lat: number; lng: number }[]; isVisible: boolean; id: string },
+  ): boolean {
     const player = this._getPlayerBySessionId(sessionId);
     if (player === undefined) return false;
-    if (this.map === undefined) return false;
+    if (this.map === null) return false;
 
     // may need to tarnsform object
     this.map.fogs.set(
       data.id,
       new MapFogPolygon(
-        data.polygon.map((points) => {
+        data.polygon.map((points: { lat: number; lng: number }): mLatLng => {
           return new mLatLng(points.lat, points.lng);
         }),
         data.isVisible,
@@ -905,8 +1000,7 @@ export class State extends Schema {
   removeFog(sessionId: string, data: { id: string }): boolean {
     const player = this._getPlayerBySessionId(sessionId);
     if (player === undefined) return false;
-    // if (!this.authenticateAction(player)) return;
-    if (this.map === undefined) return false;
+    if (this.map === null) return false;
     this.map.fogs.delete(data.id);
     return true;
   }
@@ -915,7 +1009,7 @@ export class State extends Schema {
     const player = this._getPlayerBySessionId(sessionId);
     if (player === undefined) return false;
     // if (!this.authenticateAction(player)) return;
-    if (this.map === undefined) return false;
+    if (this.map === null) return false;
 
     const obj = this.map.fogs.get(data.id);
     if (obj === undefined) return false;
@@ -927,8 +1021,8 @@ export class State extends Schema {
   //#endregion
 
   //#region IMPORT AND EXPORT
-  exportCurrentMapData(): ExportDataInterface | undefined {
-    if (this.map === undefined) return undefined;
+  exportCurrentMapData(): ExportDataInterface | null {
+    if (this.map === null) return null;
     const data: ExportDataInterface = {
       map: this.map,
       players: this.players,
@@ -939,60 +1033,91 @@ export class State extends Schema {
 
   // the below load functions should only be called with the data from the database
   loadMapData(map: LoadMapInterface[], initiativeIndex: number, player_size: number) {
+    this.RESET_GAME(); // start with a clean slate.
     const data = map[0]; // using the first since there should only be one element
     this.map = new MapData(
       {
         mapBase64: data.image_name,
-        width: +data.width,
-        height: +data.height,
+        width: data.width,
+        height: data.height,
         iconHeight: player_size,
         fogs: new MapSchema<MapFogPolygon>({}),
         enemy: new MapSchema<Enemy>({}),
         initiativeIndex: initiativeIndex,
       },
-      +data.id!,
+      data.id!,
     );
 
-    // Reset map specific fields
+    // Offset players positions in the beginning to make sure they are not overlapping.
+    // if there player is part of the save, they will be set on a follow up method.
+    let index: number = 0;
     this.players.forEach((player: Player): void => {
-      player.summons = [];
-      player.statuses = [];
-      player.initiative = 1;
+      player.position = new mLatLng(0, player_size * index);
+      index++;
     });
   }
 
   loadPlayerData(players: LoadPlayerInterface[]) {
-    players.forEach((val) => {
+    this.lastSavedPlayerContext = players;
+    players.forEach((val: LoadPlayerInterface) => {
       if (!this.players.has(val.player_id)) {
-        // TODO: Set this, no reason to not estimate the player if they were here before.
+        // It may be the case where a player joins late
         return;
       }
       const player: Player = this.players.get(val.player_id)!;
 
       player.position = new mLatLng(val.position_lat, val.position_lng);
-      player.initiative = +val.initiative;
+      player.initiative = val.initiative;
       player.statuses = val.statuses.map((status: string): CharacterStatus => {
         return new CharacterStatus(status as Conditions);
       });
     });
   }
 
+  loadSummonsData(summons: LoadSummonsInterface[]): void {
+    this.lastSavedSummonsContext = summons;
+    summons.forEach((val: LoadSummonsInterface): void => {
+      if (!this.players.has(val.player_id)) {
+        return;
+      }
+      const currentPlayer: Player = this.players.get(val.player_id)!;
+      const summon: Summons = new Summons({
+        id: val.summons_id,
+        player_id: currentPlayer.userId,
+        avatarUri: val.image_name,
+        name: val.name,
+        size: val.size,
+        color: currentPlayer.color,
+      });
+      summon.position = new mLatLng(val.position_lat, val.position_lng);
+      summon.health = val.health;
+      summon.totalHealth = val.total_health;
+      summon.lifeSaves = val.life_saves;
+      summon.deathSaves = val.death_saves;
+      summon.isVisible = val.is_visible;
+      currentPlayer.summons = [...currentPlayer.summons, summon];
+      summon.statuses = val.statuses.map((status: string): CharacterStatus => {
+        return new CharacterStatus(status as Conditions);
+      });
+    });
+  }
+
   loadEnemyData(enemies: LoadEnemyInterface[]) {
-    if (this.map === undefined) return; // this should not be null just checking to satisfy ts
+    if (this.map === null) return; // this should not be null just checking to satisfy ts
     enemies.forEach((enemy) => {
       const insertEnemy: Enemy = new Enemy({
         avatarUri: enemy.image_name,
-        id: +enemy.enemy_id,
+        id: enemy.enemy_id,
         name: enemy.name,
-        size: +enemy.size,
+        size: enemy.size,
       });
 
       insertEnemy.position = new mLatLng(enemy.position_lat, enemy.position_lng);
-      insertEnemy.initiative = +enemy.initiative;
-      insertEnemy.health = +enemy.health;
-      insertEnemy.totalHealth = +enemy.total_health;
-      insertEnemy.deathSaves = +enemy.death_saves;
-      insertEnemy.lifeSaves = +enemy.life_saves;
+      insertEnemy.initiative = enemy.initiative;
+      insertEnemy.health = enemy.health;
+      insertEnemy.totalHealth = enemy.total_health;
+      insertEnemy.deathSaves = enemy.death_saves;
+      insertEnemy.lifeSaves = enemy.life_saves;
       insertEnemy.isVisible = enemy.is_visible;
       insertEnemy.statuses = enemy.statuses.map((status: string): CharacterStatus => {
         return new CharacterStatus(status as Conditions);
@@ -1013,37 +1138,10 @@ export class State extends Schema {
         const point = new mLatLng(+val[1], +val[2]);
         poly.push(point);
       });
-      this.map!.fogs.set(fog.fog_id + "", new MapFogPolygon(poly, fog.visible, +fog.fog_id));
+      this.map!.fogs.set(fog.fog_id + "", new MapFogPolygon(poly, fog.visible, fog.fog_id));
     });
   }
 
-  loadSummonsData(summons: LoadSummonsInterface[]): void {
-    summons.forEach((val: LoadSummonsInterface): void => {
-      if (!this.players.has(val.player_id)) {
-        console.log("Not the right player");
-        return;
-      }
-      const currentPlayer: Player = this.players.get(val.player_id)!;
-      const summon: Summons = new Summons({
-        id: +val.summons_id,
-        player_id: currentPlayer.userId,
-        avatarUri: val.image_name,
-        name: val.name,
-        size: +val.size,
-        color: currentPlayer.color,
-      });
-      summon.position = new mLatLng(val.position_lat, val.position_lng);
-      summon.health = +val.health;
-      summon.totalHealth = +val.total_health;
-      summon.lifeSaves = +val.life_saves;
-      summon.deathSaves = +val.death_saves;
-      summon.isVisible = val.is_visible;
-      currentPlayer.summons = [...currentPlayer.summons, summon];
-      summon.statuses = val.statuses.map((status: string): CharacterStatus => {
-        return new CharacterStatus(status as Conditions);
-      });
-    });
-  }
   //#endregion
 
   //#endregion
