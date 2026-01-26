@@ -110,7 +110,7 @@ export class MapDB extends DatabaseBase<MapDAO> {
         console.error(`Could not delete map`, e);
         return null;
       });
-    console.log(result);
+
     return result !== null;
   }
 }

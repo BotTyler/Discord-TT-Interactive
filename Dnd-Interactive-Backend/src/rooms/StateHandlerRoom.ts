@@ -1612,7 +1612,6 @@ delete from Public."Map" where player_id = 'temp';
             return val.toString();
           });
 
-          console.log(`(${position.lat}, ${position.lng})`);
           PlayerMovementHistoryDB.getInstance().create(
             new PlayerMovementHistoryDAO(
               history_id,
