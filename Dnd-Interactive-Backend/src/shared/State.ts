@@ -550,6 +550,12 @@ export class State extends Schema {
       },
       data.id,
     );
+
+    let index: number = 0;
+    this.players.forEach((player: Player): void => {
+      player.position = new mLatLng(0, data.iconHeight * index);
+      index++;
+    });
     return false;
   }
 

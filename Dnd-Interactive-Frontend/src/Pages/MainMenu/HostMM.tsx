@@ -55,7 +55,6 @@ export default function HostMM({ otherPlayers }: { otherPlayers: Player[] }) {
                   >
                     <div className="w-100 h-100 position-relative MapComponent">
                       <button className="btn btn-danger p-0 px-1 m-0 w-fit h-fit position-absolute top-0 end-0" onClick={() => {
-                        console.log("on delete called for: ", val)
                         setPendingDeleteMap(val);
                       }}>
                         <i className="bi bi-x-lg"></i>
