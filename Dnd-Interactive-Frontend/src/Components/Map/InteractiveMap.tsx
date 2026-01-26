@@ -15,6 +15,7 @@ import ShowFog from "./Fog/ShowFog";
 import PlayerMarkerList from "./PlayableMarkers/Player/PlayerMarkerList";
 import GridDisplay from "./Grid/GridDisplay";
 import DrawBeam from "./DrawingTools/Beam/DrawBeam";
+import DrawRuler from "./DrawingTools/Ruler/DrawRuler";
 
 /**
  * Component responsible for rendering an interactive map. This will contain everything necessary for an interactive map.
@@ -85,6 +86,7 @@ export default function InteractiveMap({ map }: { map: MapData }) {
           <DrawCircle />
           <DrawArc />
           <DrawBeam />
+          <DrawRuler />
           <Pane name="fog" style={{ zIndex: 600 }}>
             <ShowFog />
           </Pane>

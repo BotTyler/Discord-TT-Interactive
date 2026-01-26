@@ -6,6 +6,7 @@ export enum DrawingTools {
   ARC,
   CUBE,
   BEAM,
+  RULER,
 }
 
 export function GameDrawingProvider({ children }: { children: React.ReactNode }) {
