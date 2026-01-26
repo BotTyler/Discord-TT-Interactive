@@ -50,6 +50,15 @@ export default function DrawingToolbar() {
         >
           L
         </button>
+        <button
+          type="button"
+          className={`btn btn-secondary ${toolContext.curTool === DrawingTools.RULER ? "active" : ""}`}
+          onClick={() => {
+            toolContext.setTool(DrawingTools.RULER);
+          }}
+        >
+          <i className="bi bi-rulers"></i>
+        </button>
       </div>
     </div >
   );
