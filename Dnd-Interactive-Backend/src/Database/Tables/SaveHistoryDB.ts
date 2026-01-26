@@ -42,36 +42,42 @@ export class SaveHistoryDB extends DatabaseBase<SaveHistoryDAO> {
     super("Save_History");
   }
 
-  async selectByPlayerId(player_id: string): Promise<SaveHistoryDAO[] | undefined> {
+  async selectByPlayerId(player_id: string): Promise<SaveHistoryDAO[]> {
     const query = `SELECT * FROM public."Save_History" 
       where player_id = $1;`;
     console.log(query);
 
-    const result: QueryResult<SaveHistoryDAO> | undefined = await Database.getInstance()
+    const result: QueryResult<SaveHistoryDAO> | null = await Database.getInstance()
       .query(query, [player_id])
       .catch((e) => {
         console.error(`Could not ***select*** (${this.tableName})\n\t${e}`);
-        return undefined;
+        return null;
       });
-    return result?.rows;
+    const rows: SaveHistoryDAO[] = result === null ? [] : result.rows;
+    return rows.map((val: SaveHistoryDAO): SaveHistoryDAO => {
+      return new SaveHistoryDAO(val.date, +val.map, val.player_id, +val.player_size, +val.id!);
+    });
   }
 
-  async selectByCampaignId(campaign_id: string): Promise<SaveHistoryDAO[] | undefined> {
+  async selectByCampaignId(campaign_id: string): Promise<SaveHistoryDAO[]> {
     const query = `SELECT * FROM Public."Save_History" 
         where map = $1 
         ORDER BY date DESC
         LIMIT 20;`;
-    console.log(query, campaign_id);
+    console.log(query);
 
-    const result: QueryResult<SaveHistoryDAO> | undefined = await Database.getInstance()
+    const result: QueryResult<SaveHistoryDAO> | null = await Database.getInstance()
       .query(query, [campaign_id])
       .catch((e) => {
         console.error(
           `Could not ***select**** Campaign Id: ${campaign_id} from (${this.tableName})`,
         );
-        return undefined;
+        return null;
       });
 
-    return result?.rows;
+    const rows: SaveHistoryDAO[] = result === null ? [] : result.rows;
+    return rows.map((val: SaveHistoryDAO): SaveHistoryDAO => {
+      return new SaveHistoryDAO(val.date, +val.map, val.player_id, +val.player_size, +val.id!);
+    });
   }
 }

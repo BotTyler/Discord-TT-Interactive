@@ -19,8 +19,7 @@ export default function MainMenu() {
   const mapContext = useGameState();
   const [currentPlayer, setCurrentPlayer] = React.useState<Player | undefined>(undefined);
   const [otherPlayers, setOtherPlayers] = React.useState<Player[]>([]);
-  const [currentHostId, setHostId] = React.useState<string | undefined>(mapContext.getCurrentHostId());
-  const [mapLoaded, setMapLoaded] = React.useState<boolean>(mapContext.getMap() != null);
+  const [currentHostId, setHostId] = React.useState<string | null>(mapContext.getCurrentHostId());
 
   React.useEffect(() => {
     const updateList = (value: any) => {
@@ -29,10 +28,6 @@ export default function MainMenu() {
 
     const handleHostId = (value: any) => {
       setHostId(value.detail.val);
-    };
-
-    const handleMapChange = (value: any) => {
-      setMapLoaded(value.detail.val != null);
     };
 
     function splitPlayers(data: { [key: string]: Player }) {
@@ -49,17 +44,15 @@ export default function MainMenu() {
 
     window.addEventListener(`PlayersChanged`, updateList);
     window.addEventListener(`HostIdChange`, handleHostId);
-    window.addEventListener(`MapUpdate`, handleMapChange);
 
     return () => {
       window.removeEventListener(`PlayersChanged`, updateList);
       window.removeEventListener(`HostIdChange`, handleHostId);
-      window.removeEventListener(`MapUpdate`, handleMapChange);
     };
   }, []);
 
   const isHostTaken = () => {
-    return currentHostId !== undefined;
+    return currentHostId !== null;
   };
   const amIHost = (): boolean => {
     return isHostTaken() && currentHostId === authContext.user.id;

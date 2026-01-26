@@ -25,6 +25,7 @@ import { SummonsHistoryDao, SummonsHistoryDB } from "../Database/Tables/SummonsH
 import { Summons } from "../shared/Summons";
 import { mLatLng } from "../shared/PositionInterface";
 import { CharacterStatus } from "../shared/StatusTypes";
+import { Enemy } from "../shared/Enemy";
 
 export class StateHandlerRoom extends Room<State> {
   maxClients = 1000;
@@ -154,7 +155,11 @@ export class StateHandlerRoom extends Room<State> {
           return;
         }
 
-        const status = this.state.updatePosition(client.sessionId, validateParams);
+        const status = this.state.updatePosition(client.sessionId, {
+          clientToChange: validateParams.clientToChange,
+          lat: +validateParams.pos.lat,
+          lng: +validateParams.pos.lng,
+        });
       } catch (error) {
         console.error(error);
       }
@@ -172,7 +177,14 @@ export class StateHandlerRoom extends Room<State> {
           return;
         }
 
-        const status = this.state.setPlayerGhostPosition(client.sessionId, validateParams);
+        const status = this.state.setPlayerGhostPosition(client.sessionId, {
+          clientToChange: validateParams.clientToChange,
+          pos: validateParams.pos.map(
+            (val: { lat: number; lng: number }): { lat: number; lng: number } => {
+              return { lat: +val.lat, lng: +val.lng };
+            },
+          ),
+        });
       } catch (error) {
         console.error(error);
       }
@@ -190,7 +202,11 @@ export class StateHandlerRoom extends Room<State> {
           return;
         }
 
-        const status = this.state.updateEnemyPosition(client.sessionId, validateParams);
+        const status = this.state.updateEnemyPosition(client.sessionId, {
+          clientToChange: validateParams.clientToChange,
+          lat: +validateParams.pos.lat,
+          lng: +validateParams.pos.lng,
+        });
       } catch (error) {
         console.error(error);
       }
@@ -209,7 +225,14 @@ export class StateHandlerRoom extends Room<State> {
           return;
         }
 
-        const status = this.state.setEnemyGhostPosition(client.sessionId, validateParams);
+        const status = this.state.setEnemyGhostPosition(client.sessionId, {
+          clientToChange: validateParams.clientToChange,
+          pos: validateParams.pos.map(
+            (val: { lat: number; lng: number }): { lat: number; lng: number } => {
+              return { lat: +val.lat, lng: +val.lng };
+            },
+          ),
+        });
         // client.send(`EnemyGhostMovementConfirmation${validateParams.clientToChange}`, status);
       } catch (error) {
         console.error(error);
@@ -223,7 +246,9 @@ export class StateHandlerRoom extends Room<State> {
         ];
 
         const validateParams: any = ValidateAllInputs(data, inputList);
-        this.state.changePlayerColor(client.sessionId, validateParams);
+        this.state.changePlayerColor(client.sessionId, {
+          color: validateParams.color,
+        });
       } catch (error) {
         console.error(error);
       }
@@ -238,7 +263,10 @@ export class StateHandlerRoom extends Room<State> {
         ];
 
         const validateParams: any = ValidateAllInputs(data, inputList);
-        this.state.changePlayerInitiative(client.sessionId, validateParams);
+        this.state.changePlayerInitiative(client.sessionId, {
+          clientToChange: validateParams.clientToChange,
+          initiative: +validateParams.initiative,
+        });
       } catch (error) {
         console.error(error);
       }
@@ -252,7 +280,9 @@ export class StateHandlerRoom extends Room<State> {
 
         const validateParams: any = ValidateAllInputs(data, inputList);
 
-        this.state.setPlayerStatuses(client.sessionId, validateParams);
+        this.state.setPlayerStatuses(client.sessionId, {
+          statuses: validateParams.statuses,
+        });
       } catch (error) {
         console.error(error);
       }
@@ -386,7 +416,9 @@ export class StateHandlerRoom extends Room<State> {
 
         const validateParams: any = ValidateAllInputs(data, inputList);
 
-        this.state.setGameState(client.sessionId, validateParams);
+        this.state.setGameState(client.sessionId, {
+          gameState: +validateParams.gameState,
+        });
       } catch (error) {
         console.error(error);
       }
@@ -401,7 +433,9 @@ export class StateHandlerRoom extends Room<State> {
 
         const validateParams: any = ValidateAllInputs(data, inputList);
 
-        this.state.setPlayerSize(client.sessionId, validateParams);
+        this.state.setPlayerSize(client.sessionId, {
+          size: +validateParams.size,
+        });
       } catch (error) {
         console.error(error);
       }
@@ -415,7 +449,17 @@ export class StateHandlerRoom extends Room<State> {
         ];
 
         const validateParams: any = ValidateAllInputs(data, inputList);
-        this.state.addDrawing(client.sessionId, validateParams.points);
+        this.state.addDrawing(
+          client.sessionId,
+          validateParams.points.map(
+            (val: { lat: number; lng: number }): { lat: number; lng: number } => {
+              return {
+                lat: +val.lat,
+                lng: +val.lng,
+              };
+            },
+          ),
+        );
       } catch (error) {
         console.error(error);
       }
@@ -427,7 +471,9 @@ export class StateHandlerRoom extends Room<State> {
         ];
 
         const validateParams: any = ValidateAllInputs(data, inputList);
-        this.state.removeDrawing(client.sessionId, validateParams);
+        this.state.removeDrawing(client.sessionId, {
+          playerId: validateParams.playerId,
+        });
       } catch (error) {
         console.error(error);
       }
@@ -446,7 +492,13 @@ export class StateHandlerRoom extends Room<State> {
         ];
 
         const validateParams: any = ValidateAllInputs(data, inputList);
-        this.state.addCube(client.sessionId, validateParams);
+        this.state.addCube(client.sessionId, {
+          radius: +validateParams.radius,
+          center: {
+            lat: +validateParams.center.lat,
+            lng: +validateParams.center.lng,
+          },
+        });
       } catch (error) {
         console.error(error);
       }
@@ -465,7 +517,13 @@ export class StateHandlerRoom extends Room<State> {
         ];
 
         const validateParams: any = ValidateAllInputs(data, inputList);
-        this.state.addCircle(client.sessionId, validateParams);
+        this.state.addCircle(client.sessionId, {
+          radius: +validateParams.radius,
+          center: {
+            lat: +validateParams.center.lat,
+            lng: +validateParams.center.lng,
+          },
+        });
       } catch (error) {
         console.error(error);
       }
@@ -485,7 +543,17 @@ export class StateHandlerRoom extends Room<State> {
         ];
 
         const validateParams: any = ValidateAllInputs(data, inputList);
-        this.state.addArc(client.sessionId, validateParams);
+        this.state.addArc(client.sessionId, {
+          angle: +validateParams.angle,
+          toLocation: {
+            lat: +validateParams.toLocation.lat,
+            lng: +validateParams.toLocation.lng,
+          },
+          center: {
+            lat: +validateParams.center.lat,
+            lng: +validateParams.center.lng,
+          },
+        });
       } catch (error) {
         console.error(error);
       }
@@ -505,7 +573,17 @@ export class StateHandlerRoom extends Room<State> {
         ];
 
         const validateParams: any = ValidateAllInputs(data, inputList);
-        this.state.addBeam(client.sessionId, validateParams);
+        this.state.addBeam(client.sessionId, {
+          width: +validateParams.width,
+          start: {
+            lat: +validateParams.start.lat,
+            lng: +validateParams.start.lng,
+          },
+          end: {
+            lat: +validateParams.start.lat,
+            lng: +validateParams.start.lng,
+          },
+        });
       } catch (error) {
         console.error(error);
       }
@@ -528,9 +606,20 @@ export class StateHandlerRoom extends Room<State> {
 
         FogDB.getInstance()
           .create(new FogDAO(validateParams.polygon))
-          .then((index) => {
-            validateParams.id = index;
-            this.state.addFog(client.sessionId, validateParams);
+          .then((index: number | null) => {
+            if (index === null) return;
+            this.state.addFog(client.sessionId, {
+              id: `${index}`,
+              isVisible: validateParams.isVisible,
+              polygon: validateParams.polygon.map(
+                (val: { lat: number; lng: number }): { lat: number; lng: number } => {
+                  return {
+                    lat: +val.lat,
+                    lng: +val.lng,
+                  };
+                },
+              ),
+            });
           });
       } catch (error) {
         console.error(error);
@@ -545,7 +634,9 @@ export class StateHandlerRoom extends Room<State> {
 
         const validateParams: any = ValidateAllInputs(data, inputList);
 
-        this.state.removeFog(client.sessionId, validateParams);
+        this.state.removeFog(client.sessionId, {
+          id: validateParams.id,
+        });
       } catch (error) {
         console.error(error);
       }
@@ -560,7 +651,10 @@ export class StateHandlerRoom extends Room<State> {
 
         const validateParams: any = ValidateAllInputs(data, inputList);
 
-        this.state.setFogVisible(client.sessionId, validateParams);
+        this.state.setFogVisible(client.sessionId, {
+          id: validateParams.id,
+          isVisible: validateParams.isVisible,
+        });
       } catch (error) {
         console.error(error);
       }
@@ -585,23 +679,25 @@ export class StateHandlerRoom extends Room<State> {
         ImageCatalogDB.getInstance()
           // .create(new ImageCatalogDAO(player.userId, data.avatarUri, data.imgWidth, data.imgHeight))
           .selectByImageName(validateParams.avatarUri)
-          .then((value) => {
-            if (value === undefined) return;
+          .then((value: ImageCatalogDAO | null): void => {
+            if (value === null) return;
             EnemyDB.getInstance()
               .create(new EnemyDAO(value.img_catalog_id!, validateParams.name))
-              .then((id) => {
-                if (id === undefined) return;
+              .then((id: number | null) => {
+                if (id === null) return;
                 validateParams.id = +id;
-                const mData: any = {
+                this.state.addEnemy(client.sessionId, {
                   id: +id,
                   avatarUri: value.image_name,
                   name: validateParams.name,
-                  position: validateParams.position,
-                  size: validateParams.size,
-                  health: validateParams.totalHealth,
-                  totalHealth: validateParams.totalHealth,
-                };
-                this.state.addEnemy(client.sessionId, mData);
+                  position: {
+                    lat: +validateParams.position.lat,
+                    lng: +validateParams.position.lng,
+                  },
+                  size: +validateParams.size,
+                  health: +validateParams.totalHealth,
+                  totalHealth: +validateParams.totalHealth,
+                });
               })
               .catch((e) => {});
           });
@@ -618,7 +714,9 @@ export class StateHandlerRoom extends Room<State> {
 
         const validateParams: any = ValidateAllInputs(data, inputList);
 
-        this.state.removeEnemy(client.sessionId, validateParams);
+        this.state.removeEnemy(client.sessionId, {
+          id: validateParams.id,
+        });
       } catch (error) {
         console.error(error);
       }
@@ -641,21 +739,30 @@ export class StateHandlerRoom extends Room<State> {
         ImageCatalogDB.getInstance()
           // .create(new ImageCatalogDAO(player.userId, data.avatarUri, data.imgWidth, data.imgHeight))
           .selectByImageName(validateParams.avatarUri)
-          .then((value) => {
-            if (value === undefined) return;
+          .then((imageCatalog: ImageCatalogDAO | null) => {
+            if (imageCatalog === null) return;
             EnemyDB.getInstance()
               .selectById(+validateParams.id)
               .then((enemy: EnemyDAO | null) => {
                 if (enemy === null) return;
-                enemy.image_id = value.img_catalog_id!;
+                enemy.image_id = imageCatalog.img_catalog_id!;
                 enemy.name = validateParams.name;
 
                 // NGL this many encased db calls is bad.
                 EnemyDB.getInstance().update(enemy);
 
-                this.state.updateEnemyInformation(client.sessionId, validateParams);
+                this.state.updateEnemyInformation(client.sessionId, {
+                  id: validateParams.id,
+                  name: validateParams.name,
+                  size: +validateParams.size,
+                  avatarUri: imageCatalog.image_name,
+                  health: +validateParams.health,
+                  totalHealth: +validateParams.totalHealth,
+                });
               })
-              .catch((e) => {});
+              .catch((e) => {
+                console.error(e);
+              });
           });
       } catch (error) {
         console.error(error);
@@ -671,7 +778,10 @@ export class StateHandlerRoom extends Room<State> {
         ];
 
         const validateParams: any = ValidateAllInputs(data, inputList);
-        this.state.updateEnemyInitiative(client.sessionId, validateParams);
+        this.state.updateEnemyInitiative(client.sessionId, {
+          id: validateParams.id,
+          initiative: +validateParams.initiative,
+        });
       } catch (error) {
         console.error(error);
       }
@@ -686,7 +796,10 @@ export class StateHandlerRoom extends Room<State> {
         ];
 
         const validateParams: any = ValidateAllInputs(data, inputList);
-        this.state.healEnemy(client.sessionId, validateParams);
+        this.state.healEnemy(client.sessionId, {
+          clientToChange: validateParams.clientToChange,
+          heal: +validateParams.heal,
+        });
       } catch (error) {
         console.error(error);
       }
@@ -700,7 +813,10 @@ export class StateHandlerRoom extends Room<State> {
         ];
 
         const validateParams: any = ValidateAllInputs(data, inputList);
-        this.state.damageEnemy(client.sessionId, validateParams);
+        this.state.damageEnemy(client.sessionId, {
+          clientToChange: validateParams.clientToChange,
+          damage: +validateParams.damage,
+        });
       } catch (error) {
         console.error(error);
       }
@@ -713,7 +829,9 @@ export class StateHandlerRoom extends Room<State> {
         ];
 
         const validateParams: any = ValidateAllInputs(data, inputList);
-        this.state.addEnemyDeath(client.sessionId, validateParams);
+        this.state.addEnemyDeath(client.sessionId, {
+          clientToChange: validateParams.clientToChange,
+        });
       } catch (error) {
         console.error(error);
       }
@@ -726,7 +844,9 @@ export class StateHandlerRoom extends Room<State> {
         ];
 
         const validateParams: any = ValidateAllInputs(data, inputList);
-        this.state.removeEnemyDeath(client.sessionId, validateParams);
+        this.state.removeEnemyDeath(client.sessionId, {
+          clientToChange: validateParams.clientToChange,
+        });
       } catch (error) {
         console.error(error);
       }
@@ -739,7 +859,9 @@ export class StateHandlerRoom extends Room<State> {
         ];
 
         const validateParams: any = ValidateAllInputs(data, inputList);
-        this.state.addEnemySave(client.sessionId, validateParams);
+        this.state.addEnemySave(client.sessionId, {
+          clientToChange: validateParams.clientToChange,
+        });
       } catch (error) {
         console.error(error);
       }
@@ -752,7 +874,9 @@ export class StateHandlerRoom extends Room<State> {
         ];
 
         const validateParams: any = ValidateAllInputs(data, inputList);
-        this.state.removeEnemySave(client.sessionId, validateParams);
+        this.state.removeEnemySave(client.sessionId, {
+          clientToChange: validateParams.clientToChange,
+        });
       } catch (error) {
         console.error(error);
       }
@@ -766,7 +890,9 @@ export class StateHandlerRoom extends Room<State> {
 
         const validateParams: any = ValidateAllInputs(data, inputList);
 
-        this.state.toggleEnemyVisibility(client.sessionId, validateParams);
+        this.state.toggleEnemyVisibility(client.sessionId, {
+          clientToChange: validateParams.clientToChange,
+        });
       } catch (error) {
         console.error(error);
       }
@@ -782,7 +908,10 @@ export class StateHandlerRoom extends Room<State> {
 
         const validateParams: any = ValidateAllInputs(data, inputList);
 
-        this.state.setEnemyStatuses(client.sessionId, validateParams);
+        this.state.setEnemyStatuses(client.sessionId, {
+          clientToChange: validateParams.clientToChange,
+          statuses: validateParams.statuses,
+        });
       } catch (error) {
         console.error(error);
       }
@@ -802,7 +931,14 @@ export class StateHandlerRoom extends Room<State> {
           return;
         }
 
-        const status = this.state.updateSummonPosition(client.sessionId, validateParams);
+        const status = this.state.updateSummonPosition(client.sessionId, {
+          id: validateParams.id,
+          player_id: validateParams.player_id,
+          pos: {
+            lat: validateParams.pos.lat,
+            lng: validateParams.pos.lng,
+          },
+        });
       } catch (error) {
         console.error(error);
       }
@@ -811,7 +947,7 @@ export class StateHandlerRoom extends Room<State> {
     this.onMessage("updateSummonsGhostPosition", (client, data) => {
       try {
         const inputList: ValidationInputType[] = [
-          { name: "pos", type: "object", PostProcess: undefined },
+          { name: "pos", type: "array", PostProcess: undefined },
           { name: "id", type: "number", PostProcess: undefined },
           { name: "player_id", type: "string", PostProcess: undefined },
         ];
@@ -822,7 +958,18 @@ export class StateHandlerRoom extends Room<State> {
           return;
         }
 
-        const status = this.state.setSummonGhostPosition(client.sessionId, validateParams);
+        const status = this.state.setSummonGhostPosition(client.sessionId, {
+          id: validateParams.id,
+          player_id: validateParams.player_id,
+          pos: validateParams.pos.map(
+            (val: { lat: number; lng: number }): { lat: number; lng: number } => {
+              return {
+                lat: +val.lat,
+                lng: +val.lng,
+              };
+            },
+          ),
+        });
         // client.send(`EnemyGhostMovementConfirmation${validateParams.clientToChange}`, status);
       } catch (error) {
         console.error(error);
@@ -848,28 +995,34 @@ export class StateHandlerRoom extends Room<State> {
         ImageCatalogDB.getInstance()
           // .create(new ImageCatalogDAO(player.userId, data.avatarUri, data.imgWidth, data.imgHeight))
           .selectByImageName(validateParams.avatarUri)
-          .then((value) => {
-            if (value === undefined) return;
+          .then((imageCatalog: ImageCatalogDAO | null): void => {
+            if (imageCatalog === null) return;
             SummonsDB.getInstance()
-              .create(new SummonsDao(value.img_catalog_id!, validateParams.name, player.userId))
-              .then((id) => {
-                if (id === undefined) return;
+              .create(
+                new SummonsDao(imageCatalog.img_catalog_id!, validateParams.name, player.userId),
+              )
+              .then((id: number | null): void => {
+                if (id === null) return;
 
-                const mData: any = {
+                this.state.addSummon(client.sessionId, {
                   id: +id,
                   player_id: player.userId,
-                  avatarUri: value.image_name,
+                  avatarUri: imageCatalog.image_name,
                   name: validateParams.name,
-                  position: validateParams.position,
+                  position: {
+                    lat: +validateParams.position.lat,
+                    lng: +validateParams.position.lng,
+                  },
                   size: validateParams.size,
                   health: validateParams.totalHealth,
                   totalHealth: validateParams.totalHealth,
                   deathSaves: 0,
                   lifeSaves: 0,
-                };
-                this.state.addSummon(client.sessionId, mData);
+                });
               })
-              .catch((e) => {});
+              .catch((e) => {
+                console.error(e);
+              });
           });
       } catch (error) {
         console.error(error);
@@ -880,15 +1033,15 @@ export class StateHandlerRoom extends Room<State> {
         // Player_id as this action can be called on by different people. (host vs player)
         const inputList: ValidationInputType[] = [
           { name: "id", type: "number", PostProcess: undefined },
-          { name: "player_id", type: "string", PostProcess: undefined },
         ];
 
         const validateParams: any = ValidateAllInputs(data, inputList);
-        if (!this.softAuthenticate(client.sessionId, validateParams.player_id)) {
-          // client.send(`EnemyGhostMovementConfirmation${validateParams.clientToChange}`, false);
-          return;
-        }
-        this.state.removeSummon(client.sessionId, validateParams);
+
+        // NOTE: No authentication is required as the sessionId is being used.
+
+        this.state.removeSummon(client.sessionId, {
+          id: +validateParams.id,
+        });
       } catch (error) {
         console.error(error);
       }
@@ -915,28 +1068,29 @@ export class StateHandlerRoom extends Room<State> {
         ImageCatalogDB.getInstance()
           // .create(new ImageCatalogDAO(player.userId, data.avatarUri, data.imgWidth, data.imgHeight))
           .selectByImageName(validateParams.avatarUri)
-          .then((value) => {
-            if (value === undefined) return;
+          .then((imageCatalog: ImageCatalogDAO | null): void => {
+            if (imageCatalog === null) return;
             SummonsDB.getInstance()
               .selectById(validateParams.id)
-              .then((summon: SummonsDao | null) => {
+              .then((summon: SummonsDao | null): void => {
                 if (summon === null) return;
-                summon.image_id = value.img_catalog_id!;
+                summon.image_id = imageCatalog.img_catalog_id!;
                 summon.name = validateParams.name;
 
                 SummonsDB.getInstance().update(summon);
 
-                const mData: any = {
+                this.state.updateSummonsInformation(client.sessionId, {
                   id: +summon.getIdValue()!,
-                  avatarUri: value.image_name,
+                  avatarUri: imageCatalog.image_name,
                   name: validateParams.name,
-                  size: validateParams.size,
-                  health: validateParams.health,
-                  totalHealth: validateParams.totalHealth,
-                };
-                this.state.updateSummonsInformation(client.sessionId, mData);
+                  size: +validateParams.size,
+                  health: +validateParams.health,
+                  totalHealth: +validateParams.totalHealth,
+                });
               })
-              .catch((e) => {});
+              .catch((e) => {
+                console.error(e);
+              });
           });
       } catch (error) {
         console.error(error);
@@ -954,7 +1108,10 @@ export class StateHandlerRoom extends Room<State> {
 
         // NOTE: No Authentication is required as the sessionId is being used.
 
-        this.state.healSummons(client.sessionId, validateParams);
+        this.state.healSummons(client.sessionId, {
+          id: +validateParams.id,
+          heal: +validateParams.heal,
+        });
       } catch (error) {
         console.error(error);
       }
@@ -971,7 +1128,10 @@ export class StateHandlerRoom extends Room<State> {
 
         // NOTE: No Authentication is required as the sessionId is being used.
 
-        this.state.damageSummons(client.sessionId, validateParams);
+        this.state.damageSummons(client.sessionId, {
+          id: +validateParams.id,
+          damage: +validateParams.damage,
+        });
       } catch (error) {
         console.error(error);
       }
@@ -986,7 +1146,9 @@ export class StateHandlerRoom extends Room<State> {
 
         // NOTE: No Authentication is required as the sessionId is being used.
 
-        this.state.addSummonsDeath(client.sessionId, validateParams);
+        this.state.addSummonsDeath(client.sessionId, {
+          id: +validateParams.id,
+        });
       } catch (error) {
         console.error(error);
       }
@@ -1001,7 +1163,9 @@ export class StateHandlerRoom extends Room<State> {
 
         // NOTE: No Authentication is required as the sessionId is being used.
 
-        this.state.removeSummonsDeath(client.sessionId, validateParams);
+        this.state.removeSummonsDeath(client.sessionId, {
+          id: +validateParams.id,
+        });
       } catch (error) {
         console.error(error);
       }
@@ -1016,7 +1180,9 @@ export class StateHandlerRoom extends Room<State> {
 
         // NOTE: No Authentication is required as the sessionId is being used.
 
-        this.state.addSummonsSave(client.sessionId, validateParams);
+        this.state.addSummonsSave(client.sessionId, {
+          id: +validateParams.id,
+        });
       } catch (error) {
         console.error(error);
       }
@@ -1031,7 +1197,9 @@ export class StateHandlerRoom extends Room<State> {
 
         // NOTE: No Authentication is required as the sessionId is being used.
 
-        this.state.removeSummonsSave(client.sessionId, validateParams);
+        this.state.removeSummonsSave(client.sessionId, {
+          id: +validateParams.id,
+        });
       } catch (error) {
         console.error(error);
       }
@@ -1047,7 +1215,9 @@ export class StateHandlerRoom extends Room<State> {
 
         // NOTE: No Authentication is required as the sessionId is being used.
 
-        this.state.toggleSummonsVisibility(client.sessionId, validateParams);
+        this.state.toggleSummonsVisibility(client.sessionId, {
+          id: +validateParams.id,
+        });
       } catch (error) {
         console.error(error);
       }
@@ -1063,7 +1233,10 @@ export class StateHandlerRoom extends Room<State> {
 
         // NOTE: No Authentication is required as the sessionId is being used.
 
-        this.state.setSummonsStatuses(client.sessionId, validateParams);
+        this.state.setSummonsStatuses(client.sessionId, {
+          id: +validateParams.id,
+          statuses: validateParams.statuses,
+        });
       } catch (error) {
         console.error(error);
       }
@@ -1087,25 +1260,49 @@ export class StateHandlerRoom extends Room<State> {
 
         ImageCatalogDB.getInstance()
           .selectByImageName(validateParams.mapBase64)
-          .then((value) => {
-            if (value === undefined) return;
+          .then((imageCatalog: ImageCatalogDAO | null): void => {
+            if (imageCatalog === null) return;
             MapDB.getInstance()
-              .create(new MapDAO(value.img_catalog_id!, validateParams.name, player.userId))
-              .then((index) => {
-                const mData: any = {
-                  id: index,
-                  mapBase64: value.image_name,
-                  width: value.width,
-                  height: value.height,
-                  iconHeight: validateParams.iconHeight,
-                  initiativeIndex: 0,
-                };
-                // create atleast one save for the future
-                SaveHistoryDB.getInstance().create(
-                  new SaveHistoryDAO(new Date(), mData.id, player.userId, mData.iconHeight),
-                );
-                this.state.setMap(client.sessionId, mData);
+              .create(new MapDAO(imageCatalog.img_catalog_id!, validateParams.name, player.userId))
+              .then((index: number | null): void => {
+                if (index === null) return;
+                this.state.setMap(client.sessionId, {
+                  id: +index,
+                  image_name: imageCatalog.image_name,
+                  width: +imageCatalog.width,
+                  height: +imageCatalog.height,
+                  iconHeight: +validateParams.iconHeight,
+                });
                 this.state.gameState = GameStateEnum.HOSTPLAY;
+
+                // Make sure at least one save is made.
+                this.saveState();
+              });
+          });
+      } catch (error) {
+        console.error(error);
+      }
+    });
+
+    this.onMessage("deleteMap", (client, data) => {
+      if (!this.authenticateHostAction(client.sessionId)) return;
+      try {
+        const inputList: ValidationInputType[] = [
+          { name: "campaign_id", type: "number", PostProcess: undefined },
+        ];
+
+        const validateParams: any = ValidateAllInputs(data, inputList);
+        const player = this.state._getPlayerBySessionId(client.sessionId);
+        if (player === undefined) return;
+
+        // MapDB.getInstance().delete;
+        MapDB.getInstance()
+          .deleteMap(validateParams.campaign_id)
+          .then((value: boolean): void => {
+            MapDB.getInstance()
+              .selectMapByUserId(player.userId)
+              .then((value: LoadCampaign[]): void => {
+                client.send("CampaignResult", value);
               });
           });
       } catch (error) {
@@ -1121,8 +1318,8 @@ export class StateHandlerRoom extends Room<State> {
 
     this.onMessage("clearMap", (client, _data) => {
       if (!this.authenticateHostAction(client.sessionId)) return;
-
-      this.state.clearMap(client.sessionId);
+      this.saveState();
+      this.state.RESET_GAME();
     });
 
     this.onMessage("SetMapMovementType", (client, data) => {
@@ -1132,6 +1329,7 @@ export class StateHandlerRoom extends Room<State> {
         const inputList: ValidationInputType[] = [
           {
             name: "mapMovement",
+            type: "string",
             PostProcess: (val: string): MapMovementType => {
               switch (val) {
                 case "free":
@@ -1142,7 +1340,6 @@ export class StateHandlerRoom extends Room<State> {
                   return "free";
               }
             },
-            type: "string",
           },
         ];
         const validateParams: any = ValidateAllInputs(data, inputList);
@@ -1167,11 +1364,11 @@ export class StateHandlerRoom extends Room<State> {
     this.onMessage("getSaves", (client, _data) => {
       SaveHistoryDB.getInstance()
         .selectByPlayerId(_data.user_id)
-        .then((value: SaveHistoryDAO[] | undefined) => {
-          const sendData: LoadSaveHistory[] | undefined = value?.map((val) => {
-            return { id: val.id ?? -1, date: val.date, map: val.map, player_size: val.player_size };
+        .then((value: SaveHistoryDAO[]): void => {
+          const sendData: LoadSaveHistory[] = value.map((val: SaveHistoryDAO): LoadSaveHistory => {
+            return { id: val.id!, date: val.date, map: val.map, player_size: val.player_size };
           });
-          client.send("getSavesResult", sendData ?? []);
+          client.send("getSavesResult", sendData);
         });
     });
 
@@ -1189,40 +1386,41 @@ delete from Public."Map" where player_id = 'temp';
       if (!player) return client.error(666, "You are not Connected");
       MapDB.getInstance()
         .selectMapByUserId(player?.userId)
-        .then((value: LoadCampaign[] | undefined) => {
-          const sendData: LoadCampaign[] | undefined = value?.map((val) => {
-            return {
-              id: val.id,
-              image_name: val.image_name,
-              name: val.name,
-              height: val.height,
-              width: val.width,
-            };
-          });
+        .then((value: LoadCampaign[]): void => {
+          // const sendData: LoadCampaign[] = value.map((val: LoadCampaign): LoadCampaign => {
+          //   return {
+          //     id: val.id,
+          //     image_name: val.image_name,
+          //     name: val.name,
+          //     height: val.height,
+          //     width: val.width,
+          //   };
+          // });
 
-          client.send("CampaignResult", sendData ?? []);
+          client.send("CampaignResult", value);
         });
     });
 
     this.onMessage("getVersionsByCampaign", (client, data) => {
       try {
         const inputList: ValidationInputType[] = [
-          { name: "campaign_id", type: "string", PostProcess: undefined },
+          { name: "campaign_id", type: "number", PostProcess: undefined },
         ];
 
         const validateParams: any = ValidateAllInputs(data, inputList);
         SaveHistoryDB.getInstance()
-          .selectByCampaignId(validateParams.campaign_id)
-          .then((value: SaveHistoryDAO[] | undefined) => {
-            const sendData: LoadSaveHistory[] =
-              value?.map((val) => {
+          .selectByCampaignId(`${validateParams.campaign_id}`)
+          .then((value: SaveHistoryDAO[]): void => {
+            const sendData: LoadSaveHistory[] = value.map(
+              (val: SaveHistoryDAO): LoadSaveHistory => {
                 return {
                   id: val.id ?? -1,
                   date: val.date,
                   map: val.map,
                   player_size: val.player_size,
                 };
-              }) ?? [];
+              },
+            );
 
             client.send("CampaignVersionHistoryResult", sendData);
           });
@@ -1239,11 +1437,11 @@ delete from Public."Map" where player_id = 'temp';
 
       ImageCatalogDB.getInstance()
         .selectAllImagesByPlayerId(player.userId)
-        .then((value: ImageCatalogDAO[] | undefined) => {
-          const sendData: LoadImage[] | undefined = value?.map((val) => {
+        .then((value: ImageCatalogDAO[]): void => {
+          const sendData: LoadImage[] = value.map((val: ImageCatalogDAO): LoadImage => {
             return { image_name: val.image_name };
           });
-          client.send("getImageListResult", sendData ?? []);
+          client.send("getImageListResult", sendData);
         });
     });
 
@@ -1319,8 +1517,6 @@ delete from Public."Map" where player_id = 'temp';
     // input validation
     try {
       const inputList: ValidationInputType[] = [
-        { name: "channelId", PostProcess: undefined, type: "string" },
-        { name: "roomName", PostProcess: undefined, type: "string" },
         { name: "userId", PostProcess: undefined, type: "string" },
         { name: "name", PostProcess: undefined, type: "string" },
         { name: "avatarUri", PostProcess: undefined, type: "string" },
@@ -1330,7 +1526,12 @@ delete from Public."Map" where player_id = 'temp';
 
       // Validation Complete Lets insert into the database and create the player
       PlayerDB.getInstance().create(new PlayerDAO(validateParams.userId, validateParams.name));
-      this.state.createPlayer(client.sessionId, options);
+      this.state.createPlayer(client.sessionId, {
+        avatarUri: validateParams.avatarUri,
+        name: validateParams.name,
+        sessionId: client.sessionId,
+        userId: validateParams.userId,
+      });
     } catch (error) {
       console.error(error);
       client.error(404, `${error}`);
@@ -1367,16 +1568,17 @@ delete from Public."Map" where player_id = 'temp';
 
   onDispose() {
     console.log("Dispose StateHandlerRoom");
-    this.saveState();
-    this.state.removeAllPlayers();
+    // this.saveState();
+    // this.state.RESET_GAME();
+    // this.state.removeAllPlayers();
   }
 
   // exportMap
   saveState(): void {
-    const data: ExportDataInterface | undefined = this.state.exportCurrentMapData();
+    const data: ExportDataInterface | null = this.state.exportCurrentMapData() ?? null;
     // save this data to the database
 
-    if (data === undefined) {
+    if (data === null) {
       console.log("data not saved!!");
       // client.send("exportData", new Error("Data was not saved!!"));
       return;
@@ -1393,8 +1595,8 @@ delete from Public."Map" where player_id = 'temp';
     // TODO: This should be transformed into a transaction on the database side for now this is ok for test purposes.
     SaveHistoryDB.getInstance()
       .create(new SaveHistoryDAO(new Date(), data.map.id!, host_id, data.map.iconHeight))
-      .then((history_id) => {
-        if (history_id === undefined) return; // required data is not inserted in the database we need to leave.
+      .then((history_id: number | null) => {
+        if (history_id === null) return; // required data is not inserted in the database we need to leave.
         //we have the save history index we now need to insert into all other databases
 
         // Create a checkpoint for all players in the player_movement_history DB
@@ -1409,6 +1611,7 @@ delete from Public."Map" where player_id = 'temp';
           const statuses: string[] = p.statuses.map((val: CharacterStatus): string => {
             return val.toString();
           });
+
           PlayerMovementHistoryDB.getInstance().create(
             new PlayerMovementHistoryDAO(
               history_id,
@@ -1455,16 +1658,18 @@ delete from Public."Map" where player_id = 'temp';
         });
 
         // Create a checkpoint for all enemies
-        [...data.map.enemy.keys()].forEach((key) => {
-          const e = data.map.enemy.get(key)!;
-          const position = e.position;
-          const size = e.size;
-          const initiaitive = e.initiative;
-          const health = e.health;
-          const totalHealth = e.totalHealth;
-          const deathSaves = e.deathSaves;
-          const lifeSaves = e.lifeSaves;
-          const isVisible = e.isVisible;
+        [...data.map.enemy.keys()].forEach((key: string): void => {
+          const e: Enemy = data.map.enemy.get(key)!;
+
+          const enemy_id: number = e.id;
+          const position: mLatLng = e.position;
+          const size: number = e.size;
+          const initiaitive: number = e.initiative;
+          const health: number = e.health;
+          const totalHealth: number = e.totalHealth;
+          const deathSaves: number = e.deathSaves;
+          const lifeSaves: number = e.lifeSaves;
+          const isVisible: boolean = e.isVisible;
           const statuses: string[] = e.statuses.map((val: CharacterStatus): string => {
             return val.toString();
           });
@@ -1472,7 +1677,7 @@ delete from Public."Map" where player_id = 'temp';
           EnemyMovementHistoryDB.getInstance().create(
             new EnemyMovementHistoryDAO(
               history_id,
-              +key,
+              enemy_id,
               size,
               position,
               initiaitive,

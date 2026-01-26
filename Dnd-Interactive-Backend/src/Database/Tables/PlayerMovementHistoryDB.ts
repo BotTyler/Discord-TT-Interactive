@@ -2,6 +2,7 @@ import { mLatLng } from "../../shared/PositionInterface";
 import { QueryResult } from "pg";
 import Database from "../Database";
 import { DAO, DatabaseBase } from "../Interface/DatabaseObjectInterface";
+import { LoadPlayerInterface } from "../../shared/LoadDataInterfaces";
 
 export class PlayerMovementHistoryDAO extends DAO {
   public readonly pmh_id?: number;
@@ -89,16 +90,44 @@ export class PlayerMovementHistoryDB extends DatabaseBase<PlayerMovementHistoryD
     super("Player_Movement_History");
   }
 
-  async getPlayerMovementAtHistoryId(history_id: number) {
+  async getPlayerMovementAtHistoryId(history_id: number): Promise<LoadPlayerInterface[]> {
     const query = `SELECT * FROM public."Player_Movement_History" where history_id = $1;`;
     console.log(query);
 
-    const result: QueryResult<PlayerMovementHistoryDAO> | undefined = await Database.getInstance()
+    const result: QueryResult<PlayerSaveState> | null = await Database.getInstance()
       .query(query, [history_id])
       .catch((e) => {
         console.error(`Could not ***select*** player movement history (${this.tableName})\n\t${e}`);
-        return undefined;
+        return null;
       });
-    return result?.rows;
+
+    const rows: PlayerSaveState[] = result === null ? [] : result.rows;
+    return rows.map((val: PlayerSaveState): LoadPlayerInterface => {
+      return {
+        player_id: val.player_id,
+        position_lat: +val.position_lat,
+        position_lng: +val.position_lng,
+        health: +val.health,
+        totalHealth: +val.total_health,
+        lifeSaves: +val.life_saves,
+        deathSaves: +val.death_saves,
+        initiative: +val.initiative,
+        statuses: val.statuses,
+      };
+    });
   }
+}
+
+interface PlayerSaveState {
+  pmh_id: number;
+  history_id: number;
+  player_id: string;
+  position_lat: number;
+  position_lng: number;
+  initiative: number;
+  health: number;
+  total_health: number;
+  death_saves: number;
+  life_saves: number;
+  statuses: string[];
 }

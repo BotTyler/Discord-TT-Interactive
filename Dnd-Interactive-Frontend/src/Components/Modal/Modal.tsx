@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 /**
  * Component that utilizes bootstrap modal to display information to the user.
  */
@@ -8,6 +8,8 @@ export default function Modal({ Title, children, closeCallback, submitCallback }
     const maxHeight = windowHeight * 0.50;
     return maxHeight;
   };
+
+  const [isSubmitting, setSubmitting] = useState<boolean>(false);
 
   return (
     <>
@@ -24,6 +26,7 @@ export default function Modal({ Title, children, closeCallback, submitCallback }
                 onClick={() => {
                   closeCallback();
                 }}
+                disabled={isSubmitting}
               ></button>
             </div>
             <div className="modal-body overflow-auto" style={{ maxHeight: calcMaxHeight() }}>
@@ -36,6 +39,7 @@ export default function Modal({ Title, children, closeCallback, submitCallback }
                 onClick={() => {
                   closeCallback();
                 }}
+                disabled={isSubmitting}
               >
                 Close
               </button>
@@ -43,10 +47,12 @@ export default function Modal({ Title, children, closeCallback, submitCallback }
                 type="button"
                 className="btn btn-primary"
                 onClick={() => {
+                  setSubmitting(true);
                   submitCallback();
                 }}
+                disabled={isSubmitting}
               >
-                Save changes
+                {isSubmitting ? <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> : "Submit"}
               </button>
             </div>
           </div>

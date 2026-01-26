@@ -39,16 +39,19 @@ export class InitiativeHistoryDB extends DatabaseBase<InitiativeHistoryDAO> {
     super("Initiative_History");
   }
 
-  async selectByHistoryId(history_id: number): Promise<InitiativeHistoryDAO[] | undefined> {
+  async selectByHistoryId(history_id: number): Promise<InitiativeHistoryDAO[]> {
     const query = `SELECT * FROM public."Initiative_History" where history_id = $1;`;
     console.log(query);
 
-    const result: QueryResult<InitiativeHistoryDAO> | undefined = await Database.getInstance()
+    const result: QueryResult<InitiativeHistoryDAO> | null = await Database.getInstance()
       .query(query, [history_id])
       .catch((e) => {
         console.error(`Could not ***select*** (${this.tableName})\n\t${e}`);
-        return undefined;
+        return null;
       });
-    return result?.rows;
+    const rows: InitiativeHistoryDAO[] = result === null ? [] : result.rows;
+    return rows.map((val: InitiativeHistoryDAO): InitiativeHistoryDAO => {
+      return new InitiativeHistoryDAO(+val.history_id, +val.initiative_index, +val.id!);
+    });
   }
 }

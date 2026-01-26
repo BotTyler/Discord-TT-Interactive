@@ -18,7 +18,7 @@ export default function PlayerBanner({ player, isMain, hostOnClick }: { player: 
   const [currentHp, setCurrentHp] = useState<number>(player.health);
   const [totHp, setTotHp] = useState<number>(player.totalHealth);
   const [color, setColor] = useState<string>(player.color);
-  const [curHostId, setCurHostId] = useState<string | undefined>(gameStateContext.getCurrentHostId());
+  const [curHostId, setCurHostId] = useState<string | null>(gameStateContext.getCurrentHostId());
   const [currentlyConnected, setConnected] = useState<boolean>(player.isConnected);
 
   useEffect(() => {

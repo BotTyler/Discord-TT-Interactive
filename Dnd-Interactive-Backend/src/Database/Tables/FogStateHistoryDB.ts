@@ -41,17 +41,27 @@ export class FogStateHistoryDB extends DatabaseBase<FogStateHistoryDAO> {
     super("Fog_State_History");
   }
 
-  async getFogStateAtHistoryId(history_id: number) {
+  async getFogStateAtHistoryId(history_id: number): Promise<FshJoinInterface[]> {
     const query = `SELECT * FROM public."Fog_State_History" as FSH join public."Fog" as F on FSH.fog_id = F.id where FSH.history_id = $1;`;
     console.log(query);
 
-    const result: QueryResult<FshJoinInterface> | undefined = await Database.getInstance()
+    const result: QueryResult<FshJoinInterface> | null = await Database.getInstance()
       .query(query, [history_id])
       .catch((e) => {
         console.error(`Could not ***select*** Fog State history (${this.tableName})\n\t${e}`);
-        return undefined;
+        return null;
       });
-    return result?.rows;
+
+    const rowResult: FshJoinInterface[] = result === null ? [] : result.rows;
+    return rowResult.map((val: FshJoinInterface): FshJoinInterface => {
+      return {
+        id: +val.id,
+        history_id: +val.history_id,
+        fog_id: +val.fog_id,
+        visible: val.visible,
+        polygon: val.polygon,
+      };
+    });
   }
 }
 

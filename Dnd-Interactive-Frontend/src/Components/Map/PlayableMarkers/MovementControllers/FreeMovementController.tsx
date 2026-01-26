@@ -302,7 +302,7 @@ export default function FreeMovementController({ controllableUser, userType, onP
           authContext.room.send("deleteEnemy", { id: `${id}` });
           break;
         case "summon":
-          authContext.room.send("deleteSummons", { id: +id, player_id: markerUser.player_id });
+          authContext.room.send("deleteSummons", { id: +id });
           break;
       }
     }

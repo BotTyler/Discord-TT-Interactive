@@ -24,7 +24,7 @@ export abstract class DatabaseBase<T extends DAO> {
     this.tableName = tableName;
   }
 
-  async create(data: T): Promise<number | undefined> {
+  async create(data: T): Promise<number | null> {
     const keys = data.getKeys();
     const values = data.getValues();
     const placeholders = data.getPlaceHolders();
@@ -32,14 +32,15 @@ export abstract class DatabaseBase<T extends DAO> {
     const query = `INSERT INTO public."${this.tableName}" (${keys.join(", ")}) VALUES (${placeholders.join(", ")}) RETURNING ${data.getIdName()} as id`;
     console.log(query);
 
-    const result: QueryResult<{ id: number }> | undefined = await Database.getInstance()
+    const result: QueryResult<{ id: number }> | null = await Database.getInstance()
       .query(query, values)
       .catch((e) => {
         console.error(`Could not ***insert*** (${this.tableName})\n\t${e}`);
-        return undefined;
+        return null;
       });
 
-    return result?.rows[0].id;
+    const createdResultId: number | null = result === null ? null : +result.rows[0].id;
+    return createdResultId;
   }
 
   async delete(id: number): Promise<void> {
@@ -54,34 +55,23 @@ export abstract class DatabaseBase<T extends DAO> {
       });
   }
 
-  async update(data: T): Promise<number | undefined> {
+  async update(data: T): Promise<number | null> {
     const keys = data.getKeys();
     const values = data.getValues();
     const setString = keys.map((key, i) => `${key} = $${i + 1}`).join(", ");
 
     const query = `UPDATE public."${this.tableName}" SET ${setString} WHERE ${data.getIdName()} = $${keys.length + 1} RETURNING ${data.getIdName()} as id`;
     console.log(query);
-    const result: QueryResult<{ id: number }> | undefined = await Database.getInstance()
+
+    const result: QueryResult<{ id: number }> | null = await Database.getInstance()
       .query(query, [...values, data.getIdValue()])
       .catch((e) => {
         console.error(`Could not ***update*** (${this.tableName})\n\t${e}`);
-        return undefined;
+        return null;
       });
 
-    return result?.rows[0].id;
-  }
-
-  async selectAll(): Promise<T[] | undefined> {
-    const query = `SELECT * FROM public."${this.tableName}";`;
-    console.log(query);
-
-    const result: QueryResult<T> | undefined = await Database.getInstance()
-      .query(query)
-      .catch((e) => {
-        console.error(`Could not ***select*** (${this.tableName})\n\t${e}`);
-        return undefined;
-      });
-    return result?.rows;
+    const createdResultId: number | null = result === null ? null : +result.rows[0].id;
+    return createdResultId;
   }
 }
 

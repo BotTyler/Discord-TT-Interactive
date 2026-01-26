@@ -32,7 +32,7 @@ export class PlayerDB extends DatabaseBase<PlayerDAO> {
     if (PlayerDB.instance === undefined) PlayerDB.instance = new PlayerDB();
     return PlayerDB.instance;
   }
-  async create(data: PlayerDAO): Promise<number | undefined> {
+  async create(data: PlayerDAO): Promise<number | null> {
     const keys = data.getKeys();
     const values = data.getValues();
     const placeholders = data.getPlaceHolders();
@@ -40,14 +40,18 @@ export class PlayerDB extends DatabaseBase<PlayerDAO> {
     const query = `INSERT INTO public."Player" (${keys.join(", ")}) VALUES (${placeholders.join(", ")}) ON CONFLICT (user_id) DO UPDATE SET name = EXCLUDED.name RETURNING ${data.getIdName()} as id;`;
     console.log(query);
 
-    const result: QueryResult<{ id: number }> | undefined = await Database.getInstance()
+    const result: QueryResult<{ id: number }> | null = await Database.getInstance()
       .query(query, values)
       .catch((e) => {
         console.error(`Could not ***insert*** (${this.tableName})\n\t${e}`);
-        return undefined;
+        return null;
       });
 
-    return result?.rows[0].id;
+    if (result === null || result.rows.length === 0) {
+      return null;
+    }
+
+    return +result.rows[0].id;
   }
   constructor() {
     super("Player");

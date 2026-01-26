@@ -9,7 +9,8 @@ import FogContextElement from "./FogContextElement";
 export const GameMapContextHandler = React.forwardRef(function GameMapContextHandler({ }: {}, ref: any) {
   const authenticatedContext = useAuthenticatedContext();
   const [currentGameState, setGameState] = React.useState<GameStateEnum>(GameStateEnum.MAINMENU);
-  const [map, setMap] = React.useState<MapData | undefined>(getBaseMapFromAuthContext());
+  // const [map, setMap] = React.useState<MapData | null>(getBaseMapFromAuthContext());
+  const [map, setMap] = React.useState<MapData | null>(getBaseMapFromAuthContext());
   const [mapMovement, setMapMovement] = React.useState<MapMovementType>("free");
   const [curHostId, setCurHostId] = React.useState<string | undefined>(authenticatedContext.room.state.currentHostUserId);
 
@@ -30,16 +31,16 @@ export const GameMapContextHandler = React.forwardRef(function GameMapContextHan
   const [gridColor, setGridColor] = React.useState<string>("");
   const [gridShowing, setGridShowing] = React.useState<boolean>(true);
 
-  function getBaseMapFromAuthContext(): MapData | undefined {
+  function getBaseMapFromAuthContext(): MapData | null {
     const mMap = authenticatedContext.room.state.map;
 
-    return mMap == null || mMap.mapBase64 == null ? undefined : mMap;
+    return mMap === null || mMap.mapBase64 == null ? null : mMap;
   }
 
   useImperativeHandle(
     ref,
     () => ({
-      getMap(): MapData | undefined {
+      getMap(): MapData | null {
         return map;
       },
       getMapMovement(): MapMovementType {
@@ -127,11 +128,11 @@ export const GameMapContextHandler = React.forwardRef(function GameMapContextHan
     });
 
     const mapCallback = authenticatedContext.room.state.listen("map", (value: any) => {
-      if (value == undefined || value.mapBase64 === undefined) {
-        setMap(undefined);
-        return;
+      if(value === null || value.mapBase64 == null) {
+        setMap(null);
+      }else{
+        setMap(value);
       }
-      setMap(value);
     });
 
     const hostIdListener = authenticatedContext.room.state.listen("currentHostUserId", (value: any) => {
@@ -164,7 +165,7 @@ export const GameMapContextHandler = React.forwardRef(function GameMapContextHan
 
   // all listeners for the enemies list only (No Enemy Properties)
   React.useEffect(() => {
-    if (map == null) return;
+    if (map === null) return;
 
     // set the listeners for enemy
     const enemyAdd = map.enemy.onAdd((item: Enemy, key: string) => {
@@ -216,7 +217,7 @@ export const GameMapContextHandler = React.forwardRef(function GameMapContextHan
 
   // all listeners for the Fogs list only (No Fogg Properties)
   React.useEffect(() => {
-    if (map == undefined) return;
+    if (map === null) return;
 
     // set the listeners for enemy
     const fogAdd = map.fogs.onAdd((item: MapFogPolygon, key: string) => {
@@ -267,7 +268,7 @@ export const GameMapContextHandler = React.forwardRef(function GameMapContextHan
   }, [authenticatedContext.room, map]);
 
   React.useEffect(() => {
-    if (map == undefined) return;
+    if (map === null) return;
     const iconHeightListener = map.listen("iconHeight", (val) => {
       setIconHeight(val);
     });
