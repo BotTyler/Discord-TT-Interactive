@@ -64,7 +64,7 @@ export class SaveHistoryDB extends DatabaseBase<SaveHistoryDAO> {
         where map = $1 
         ORDER BY date DESC
         LIMIT 20;`;
-    console.log(query, campaign_id);
+    console.log(query);
 
     const result: QueryResult<SaveHistoryDAO> | null = await Database.getInstance()
       .query(query, [campaign_id])

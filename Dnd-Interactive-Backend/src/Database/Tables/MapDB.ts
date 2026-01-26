@@ -8,21 +8,23 @@ export class MapDAO extends DAO {
   public readonly image_id: number; // reference to image catalog
   public readonly name: string;
   public readonly player_id: string;
+  public readonly isDeleted: boolean;
 
-  constructor(image_id: number, name: string, player_id: string, id?: number) {
+  constructor(image_id: number, name: string, player_id: string, isDeleted?: boolean, id?: number) {
     super();
     this.id = id;
     this.image_id = image_id;
     this.name = name;
     this.player_id = player_id;
+    this.isDeleted = isDeleted ?? false;
   }
 
   getKeys(): string[] {
-    return ["image_id", "name", "player_id"];
+    return ["image_id", "name", "player_id", "is_deleted"];
     // return ["id", "map_image", "width", "height", "icon_height"];
   }
   getValues(): any[] {
-    return [this.image_id, this.name, this.player_id];
+    return [this.image_id, this.name, this.player_id, this.isDeleted];
     // return [this.id, this.map_image, this.width, this.height, this.icon_height];
   }
   getIdName(): string {
@@ -68,11 +70,18 @@ export class MapDB extends DatabaseBase<MapDAO> {
   }
 
   async selectMapByUserId(userId: string): Promise<LoadCampaign[]> {
-    const query = `SELECT MP.id, IC.image_name, IC.height, IC.width, MP."name" FROM Public."Map" AS MP JOIN Public."Image_Catalog" AS IC on IC.img_catalog_id = MP.image_id where MP.player_id = $1;`;
+    const query = `
+    SELECT MP.id, IC.image_name, IC.height, IC.width, MP."name" 
+    FROM Public."Map" AS MP 
+    JOIN Public."Image_Catalog" AS IC on IC.img_catalog_id = MP.image_id 
+    WHERE MP.player_id = $1
+      AND MP.is_deleted = false;`;
+    console.log(query);
+
     const result: QueryResult<LoadCampaign> | null = await Database.getInstance()
       .query(query, [userId])
       .catch((e) => {
-        console.error(`Could not gather map data from the user`);
+        console.error(`Could not gather map data from the user`, e);
         return null;
       });
 
@@ -86,6 +95,23 @@ export class MapDB extends DatabaseBase<MapDAO> {
         height: +val.height,
       };
     });
+  }
+
+  async deleteMap(id: number): Promise<boolean> {
+    const query = `
+      UPDATE public."Map"
+      SET is_deleted = true
+      WHERE id = $1
+    `;
+    console.log(query);
+    const result: QueryResult<any> | null = await Database.getInstance()
+      .query(query, [id])
+      .catch((e) => {
+        console.error(`Could not delete map`, e);
+        return null;
+      });
+    console.log(result);
+    return result !== null;
   }
 }
 

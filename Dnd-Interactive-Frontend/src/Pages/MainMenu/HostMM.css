@@ -1,0 +1,7 @@
+.MapComponent:hover > button {
+  opacity: 100%;
+}
+
+.MapComponent > button {
+  opacity: 0%;
+}

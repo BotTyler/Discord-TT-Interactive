@@ -1284,6 +1284,32 @@ export class StateHandlerRoom extends Room<State> {
       }
     });
 
+    this.onMessage("deleteMap", (client, data) => {
+      if (!this.authenticateHostAction(client.sessionId)) return;
+      try {
+        const inputList: ValidationInputType[] = [
+          { name: "campaign_id", type: "number", PostProcess: undefined },
+        ];
+
+        const validateParams: any = ValidateAllInputs(data, inputList);
+        const player = this.state._getPlayerBySessionId(client.sessionId);
+        if (player === undefined) return;
+
+        // MapDB.getInstance().delete;
+        MapDB.getInstance()
+          .deleteMap(validateParams.campaign_id)
+          .then((value: boolean): void => {
+            MapDB.getInstance()
+              .selectMapByUserId(player.userId)
+              .then((value: LoadCampaign[]): void => {
+                client.send("CampaignResult", value);
+              });
+          });
+      } catch (error) {
+        console.error(error);
+      }
+    });
+
     // saves the map to the database
     this.onMessage("exportMap", (client, _data) => {
       if (!this.authenticateHostAction(client.sessionId)) return;

@@ -8,6 +8,9 @@ import MapUpload, { ClientMapDataInterface } from "../../Components/Map/MapUploa
 import PlayerBanner from "../../Components/PlayerBanner/PlayerBanner";
 import { useGameState } from "../../ContextProvider/GameStateContext/GameStateProvider";
 import { useAuthenticatedContext } from "../../ContextProvider/useAuthenticatedContext";
+import "./HostMM.css";
+import { Button, Modal } from "react-bootstrap";
+
 export default function HostMM({ otherPlayers }: { otherPlayers: Player[] }) {
   const authContext = useAuthenticatedContext();
   function removeHost() {
@@ -16,6 +19,8 @@ export default function HostMM({ otherPlayers }: { otherPlayers: Player[] }) {
   const [campaignList, setCampaignList] = useState<LoadCampaign[]>([]);
   const [curCampaign, setCurCampaign] = useState<LoadCampaign | undefined>(undefined);
   const [isMapUpload, setMapUpload] = useState<boolean>(false);
+
+  const [pendingDeleteMap, setPendingDeleteMap] = useState<LoadCampaign | null>(null);
 
   useEffect(() => {
     const handleResultCallback = authContext.room.onMessage("CampaignResult", (val: LoadCampaign[]) => {
@@ -48,7 +53,15 @@ export default function HostMM({ otherPlayers }: { otherPlayers: Player[] }) {
                     }}
                     key={`Campaign-List-Element-${val.id}`}
                   >
-                    <CampaignComponent imageUrl={val.image_name} name={val.name} />
+                    <div className="w-100 h-100 position-relative MapComponent">
+                      <button className="btn btn-danger p-0 px-1 m-0 w-fit h-fit position-absolute top-0 end-0" onClick={() => {
+                        console.log("on delete called for: ", val)
+                        setPendingDeleteMap(val);
+                      }}>
+                        <i className="bi bi-x-lg"></i>
+                      </button>
+                      <CampaignComponent imageUrl={val.image_name} name={val.name} />
+                    </div>
                   </li>
                 );
               })}
@@ -100,6 +113,26 @@ export default function HostMM({ otherPlayers }: { otherPlayers: Player[] }) {
           </div>
         </div>
       </div>
+      <Modal show={pendingDeleteMap !== null}>
+        <Modal.Header closeButton>
+          <Modal.Title>Delete?</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>Are you sure you want to delete '{pendingDeleteMap !== null ? pendingDeleteMap!.name : "None"}'?</Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => {
+            setPendingDeleteMap(null);
+          }}>
+            No
+          </Button>
+          <Button variant="primary" onClick={() => {
+            if (pendingDeleteMap === null) return;
+            authContext.room.send("deleteMap", { campaign_id: pendingDeleteMap.id });
+            setPendingDeleteMap(null);
+          }}>
+            Yes
+          </Button>
+        </Modal.Footer>
+      </Modal>
       {isMapUpload ? (
         <MapUpload
           callback={(data: ClientMapDataInterface | undefined) => {
