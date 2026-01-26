@@ -356,7 +356,7 @@ export default function GridMovementController({ controllableUser, userType, onP
           authContext.room.send("deleteEnemy", { id: `${id}` });
           break;
         case "summon":
-          authContext.room.send("deleteSummons", { id: +id, player_id: (markerUser as Summons).player_id });
+          authContext.room.send("deleteSummons", { id: +id });
           break;
       }
     }

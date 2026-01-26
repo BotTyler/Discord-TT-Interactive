@@ -932,7 +932,7 @@ export class StateHandlerRoom extends Room<State> {
         }
 
         const status = this.state.updateSummonPosition(client.sessionId, {
-          id: +validateParams.id,
+          id: validateParams.id,
           player_id: validateParams.player_id,
           pos: {
             lat: validateParams.pos.lat,
@@ -959,7 +959,7 @@ export class StateHandlerRoom extends Room<State> {
         }
 
         const status = this.state.setSummonGhostPosition(client.sessionId, {
-          id: +validateParams.id,
+          id: validateParams.id,
           player_id: validateParams.player_id,
           pos: validateParams.pos.map(
             (val: { lat: number; lng: number }): { lat: number; lng: number } => {
@@ -1036,10 +1036,9 @@ export class StateHandlerRoom extends Room<State> {
         ];
 
         const validateParams: any = ValidateAllInputs(data, inputList);
-        if (!this.softAuthenticate(client.sessionId, validateParams.player_id)) {
-          // client.send(`EnemyGhostMovementConfirmation${validateParams.clientToChange}`, false);
-          return;
-        }
+
+        // NOTE: No authentication is required as the sessionId is being used.
+
         this.state.removeSummon(client.sessionId, {
           id: +validateParams.id,
         });

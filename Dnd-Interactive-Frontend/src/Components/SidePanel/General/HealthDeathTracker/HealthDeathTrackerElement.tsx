@@ -295,7 +295,7 @@ export default function HealthDeathTrackerElement({ item, itemType }:
         authContext.room.send("deleteEnemy", { id: `${id}` });
         break;
       case "summons":
-        authContext.room.send("deleteSummons", { id: +id, player_id: `${(item as Summons).player_id}` });
+        authContext.room.send("deleteSummons", { id: +id });
         break;
     }
   };
