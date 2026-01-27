@@ -13,6 +13,6 @@ export default function Ruler({ start, end, playerSize, color }: { start: LatLng
     end={end}
     size={playerSize}
     color={mColor}
-    key={`CurrentCubeCreationDistanceLine`}
+    key={`CurrentRulerDistanceLine`}
   />
 }
