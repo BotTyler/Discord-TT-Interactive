@@ -9,8 +9,14 @@ import FogContextElement from "./FogContextElement";
 export const GameMapContextHandler = React.forwardRef(function GameMapContextHandler({ }: {}, ref: any) {
   const authenticatedContext = useAuthenticatedContext();
   const [currentGameState, setGameState] = React.useState<GameStateEnum>(GameStateEnum.MAINMENU);
-  // const [map, setMap] = React.useState<MapData | null>(getBaseMapFromAuthContext());
-  const [map, setMap] = React.useState<MapData | null>(getBaseMapFromAuthContext());
+
+  // Even if the state is null the below map might return undefined for some unknown reason.
+  const [map, setMap] = React.useState<MapData | null>(
+    ((authenticatedContext.room.state.map ?? null) === null || (authenticatedContext.room.state.map?.mapBase64 == null))
+      ? null
+      : authenticatedContext.room.state.map
+
+  );
   const [mapMovement, setMapMovement] = React.useState<MapMovementType>("free");
   const [curHostId, setCurHostId] = React.useState<string | undefined>(authenticatedContext.room.state.currentHostUserId);
 
@@ -30,12 +36,6 @@ export const GameMapContextHandler = React.forwardRef(function GameMapContextHan
   // Grid values
   const [gridColor, setGridColor] = React.useState<string>("");
   const [gridShowing, setGridShowing] = React.useState<boolean>(true);
-
-  function getBaseMapFromAuthContext(): MapData | null {
-    const mMap = authenticatedContext.room.state.map;
-
-    return mMap === null || mMap.mapBase64 == null ? null : mMap;
-  }
 
   useImperativeHandle(
     ref,
@@ -128,9 +128,9 @@ export const GameMapContextHandler = React.forwardRef(function GameMapContextHan
     });
 
     const mapCallback = authenticatedContext.room.state.listen("map", (value: any) => {
-      if(value === null || value.mapBase64 == null) {
+      if (value === null || value.mapBase64 == null) {
         setMap(null);
-      }else{
+      } else {
         setMap(value);
       }
     });
