@@ -1,12 +1,15 @@
 import { GameStateEnum } from "../../../../src/shared/State";
 import React, { useEffect } from "react";
 import { useAuthenticatedContext } from "../../../ContextProvider/useAuthenticatedContext";
+import { useMessageContext } from "../../../ContextProvider/Messages/MessageContextProvider";
+import { TOAST_LEVEL } from "../../../ContextProvider/Messages/Toast";
 
 /**
  * Component that will handle the import and export of a map
  */
 export default function ImportExport() {
   const authContext = useAuthenticatedContext();
+  const toastContext = useMessageContext();
 
   // const handleImport = React.useCallback((e: React.MouseEvent) => {
   //   authContext.room.send("getSaves");
@@ -24,8 +27,33 @@ export default function ImportExport() {
     };
   }, []);
 
+  useEffect(() => {
+    /**
+      0 - Success
+      1 - Warning - Partial save
+      2 - ERROR - Complete Failure
+    */
+    authContext.room.onMessage("SaveStatus", (status: { level: number }): void => {
+      switch (status.level) {
+        case 0:
+          toastContext.addToast("[Success]", "Saved!", TOAST_LEVEL.SUCCES);
+          break;
+        case 1:
+          toastContext.addToast("[WARNING]", "Partial Data Saved!", TOAST_LEVEL.WARNING);
+          break;
+        case 2:
+          toastContext.addToast("[ERROR]", "No Data Saved!", TOAST_LEVEL.ERROR);
+          break;
+        default:
+          toastContext.addToast("[UNKNOWN]", "Unexpected Save Status.", TOAST_LEVEL.NONE);
+          break
+      }
+    })
+  }, [authContext.room])
+
   const handleExport = React.useCallback((e: React.MouseEvent) => {
     authContext.room.send("exportMap");
+    toastContext.addToast("[PENDING]", "SAVING....", TOAST_LEVEL.NONE);
   }, []);
 
   return (

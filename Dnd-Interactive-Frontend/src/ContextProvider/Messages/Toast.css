@@ -1,0 +1,33 @@
+.custom-toast {
+  opacity: 75%;
+}
+.custom-toast:hover {
+  opacity: 100%;
+}
+
+.toast-level-success {
+  background: lime;
+  color: black;
+}
+.toast-level-success-header {
+  background: limegreen;
+  color: white;
+}
+
+.toast-level-warning {
+  background: yellow;
+  color: black;
+}
+.toast-level-warning-header {
+  background: #bfac00;
+  color: white;
+}
+
+.toast-level-error {
+  background: red;
+  color: black;
+}
+.toast-level-error-header {
+  background: darkred;
+  color: white;
+}

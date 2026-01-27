@@ -127,7 +127,6 @@ export default config({
         res.destroy(e);
       }
     });
-    // app.post("/uploadImage/:bucket", upload.single("image"), async (req, res) => {
     app.post("/uploadImage/:userId", upload.single("image"), async (req, res) => {
       // TODO: Add some authentication and limits to prevent image spam.
 

@@ -64,7 +64,7 @@ export class State extends Schema {
   // serverAttribute = "this attribute wont be sent to the client-side";
 
   @type("string")
-  currentHostUserId: string | undefined;
+  currentHostUserId: string | undefined = undefined;
 
   // Init
   constructor(attributes: IState) {
