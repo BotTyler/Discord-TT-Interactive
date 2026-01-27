@@ -42,32 +42,16 @@ export class SaveHistoryDB extends DatabaseBase<SaveHistoryDAO> {
     super("Save_History");
   }
 
-  async selectByPlayerId(player_id: string): Promise<SaveHistoryDAO[]> {
-    const query = `SELECT * FROM public."Save_History" 
-      where player_id = $1;`;
-    console.log(query);
-
-    const result: QueryResult<SaveHistoryDAO> | null = await Database.getInstance()
-      .query(query, [player_id])
-      .catch((e) => {
-        console.error(`Could not ***select*** (${this.tableName})\n\t${e}`);
-        return null;
-      });
-    const rows: SaveHistoryDAO[] = result === null ? [] : result.rows;
-    return rows.map((val: SaveHistoryDAO): SaveHistoryDAO => {
-      return new SaveHistoryDAO(val.date, +val.map, val.player_id, +val.player_size, +val.id!);
-    });
-  }
-
-  async selectByCampaignId(campaign_id: string): Promise<SaveHistoryDAO[]> {
+  async selectByCampaignId(campaign_id: string, player_id: string): Promise<SaveHistoryDAO[]> {
     const query = `SELECT * FROM Public."Save_History" 
         where map = $1 
+          AND player_id = $2
         ORDER BY date DESC
         LIMIT 20;`;
     console.log(query);
 
     const result: QueryResult<SaveHistoryDAO> | null = await Database.getInstance()
-      .query(query, [campaign_id])
+      .query(query, [campaign_id, player_id])
       .catch((e) => {
         console.error(
           `Could not ***select**** Campaign Id: ${campaign_id} from (${this.tableName})`,

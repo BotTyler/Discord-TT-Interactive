@@ -1360,24 +1360,6 @@ export class StateHandlerRoom extends Room<State> {
       this.state.resetInitiativeIndex();
     });
 
-    // this will get all saves from a specific user and return those to the client that called
-    this.onMessage("getSaves", (client, _data) => {
-      SaveHistoryDB.getInstance()
-        .selectByPlayerId(_data.user_id)
-        .then((value: SaveHistoryDAO[]): void => {
-          const sendData: LoadSaveHistory[] = value.map((val: SaveHistoryDAO): LoadSaveHistory => {
-            return { id: val.id!, date: val.date, map: val.map, player_size: val.player_size };
-          });
-          client.send("getSavesResult", sendData);
-        });
-    });
-
-    /**
-UPDATE Public."Map" AS mp
-SET player_id = sh.player_id
-FROM Public."Save_History" AS sh
-WHERE sh.map = mp.id;
-     */
     /*
 delete from Public."Map" where player_id = 'temp';
     */
@@ -1387,29 +1369,21 @@ delete from Public."Map" where player_id = 'temp';
       MapDB.getInstance()
         .selectMapByUserId(player?.userId)
         .then((value: LoadCampaign[]): void => {
-          // const sendData: LoadCampaign[] = value.map((val: LoadCampaign): LoadCampaign => {
-          //   return {
-          //     id: val.id,
-          //     image_name: val.image_name,
-          //     name: val.name,
-          //     height: val.height,
-          //     width: val.width,
-          //   };
-          // });
-
           client.send("CampaignResult", value);
         });
     });
 
     this.onMessage("getVersionsByCampaign", (client, data) => {
       try {
+        const player = this.state._getPlayerBySessionId(client.sessionId);
+        if (!player) return client.error(666, "You are not Connected");
         const inputList: ValidationInputType[] = [
           { name: "campaign_id", type: "number", PostProcess: undefined },
         ];
 
         const validateParams: any = ValidateAllInputs(data, inputList);
         SaveHistoryDB.getInstance()
-          .selectByCampaignId(`${validateParams.campaign_id}`)
+          .selectByCampaignId(`${validateParams.campaign_id}`, player.userId)
           .then((value: SaveHistoryDAO[]): void => {
             const sendData: LoadSaveHistory[] = value.map(
               (val: SaveHistoryDAO): LoadSaveHistory => {
