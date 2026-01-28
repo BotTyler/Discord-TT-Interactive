@@ -14,14 +14,15 @@ export const ToastListHandler = forwardRef(function ToastListHandler({ }: {}, re
 
   return (
     <div className="toast-container bottom-0 end-0">
-      {toast.map((val, index) => {
+      {toast.map((val) => {
         return (
           <Toast
-            key={`ToastIndex-${index}`}
+            key={`ToastIndex-${val.id}`}
             message={val.message}
             title={val.title}
             level={val.level}
             callback={() => {
+              console.log("Close Callback called for", val);
               setToast((prev) => {
                 return prev.filter((item) => val.id !== item.id);
               });
