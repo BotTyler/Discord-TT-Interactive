@@ -1,12 +1,13 @@
 import React, { forwardRef, useImperativeHandle } from "react";
-import Toast from "./Toast";
+import Toast, { TOAST_LEVEL } from "./Toast";
 
 export const ToastListHandler = forwardRef(function ToastListHandler({ }: {}, ref: any) {
-  const [toast, setToast] = React.useState<{ title: string; message: string }[]>([]);
+  const [toast, setToast] = React.useState<{ title: string; message: string, level: TOAST_LEVEL, id: string }[]>([]);
   useImperativeHandle(ref, () => ({
-    addToast(title: string, message: string) {
+    addToast(title: string, message: string, level: TOAST_LEVEL) {
       setToast((prev) => {
-        return [...prev, { title, message }];
+        const id: string = crypto.randomUUID();
+        return [...prev, { title, message, level, id }];
       });
     },
   }));
@@ -19,9 +20,10 @@ export const ToastListHandler = forwardRef(function ToastListHandler({ }: {}, re
             key={`ToastIndex-${index}`}
             message={val.message}
             title={val.title}
+            level={val.level}
             callback={() => {
               setToast((prev) => {
-                return prev.filter((item, _Index) => _Index !== index);
+                return prev.filter((item) => val.id !== item.id);
               });
             }}
           />

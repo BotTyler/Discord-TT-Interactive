@@ -1313,7 +1313,7 @@ export class StateHandlerRoom extends Room<State> {
     // saves the map to the database
     this.onMessage("exportMap", (client, _data) => {
       if (!this.authenticateHostAction(client.sessionId)) return;
-      this.saveState();
+      this.saveState(client);
     });
 
     this.onMessage("clearMap", (client, _data) => {
@@ -1360,24 +1360,6 @@ export class StateHandlerRoom extends Room<State> {
       this.state.resetInitiativeIndex();
     });
 
-    // this will get all saves from a specific user and return those to the client that called
-    this.onMessage("getSaves", (client, _data) => {
-      SaveHistoryDB.getInstance()
-        .selectByPlayerId(_data.user_id)
-        .then((value: SaveHistoryDAO[]): void => {
-          const sendData: LoadSaveHistory[] = value.map((val: SaveHistoryDAO): LoadSaveHistory => {
-            return { id: val.id!, date: val.date, map: val.map, player_size: val.player_size };
-          });
-          client.send("getSavesResult", sendData);
-        });
-    });
-
-    /**
-UPDATE Public."Map" AS mp
-SET player_id = sh.player_id
-FROM Public."Save_History" AS sh
-WHERE sh.map = mp.id;
-     */
     /*
 delete from Public."Map" where player_id = 'temp';
     */
@@ -1387,29 +1369,21 @@ delete from Public."Map" where player_id = 'temp';
       MapDB.getInstance()
         .selectMapByUserId(player?.userId)
         .then((value: LoadCampaign[]): void => {
-          // const sendData: LoadCampaign[] = value.map((val: LoadCampaign): LoadCampaign => {
-          //   return {
-          //     id: val.id,
-          //     image_name: val.image_name,
-          //     name: val.name,
-          //     height: val.height,
-          //     width: val.width,
-          //   };
-          // });
-
           client.send("CampaignResult", value);
         });
     });
 
     this.onMessage("getVersionsByCampaign", (client, data) => {
       try {
+        const player = this.state._getPlayerBySessionId(client.sessionId);
+        if (!player) return client.error(666, "You are not Connected");
         const inputList: ValidationInputType[] = [
           { name: "campaign_id", type: "number", PostProcess: undefined },
         ];
 
         const validateParams: any = ValidateAllInputs(data, inputList);
         SaveHistoryDB.getInstance()
-          .selectByCampaignId(`${validateParams.campaign_id}`)
+          .selectByCampaignId(`${validateParams.campaign_id}`, player.userId)
           .then((value: SaveHistoryDAO[]): void => {
             const sendData: LoadSaveHistory[] = value.map(
               (val: SaveHistoryDAO): LoadSaveHistory => {
@@ -1573,10 +1547,9 @@ delete from Public."Map" where player_id = 'temp';
     // this.state.removeAllPlayers();
   }
 
-  // exportMap
-  saveState(): void {
+  // Save the current state
+  saveState(client?: Client) {
     const data: ExportDataInterface | null = this.state.exportCurrentMapData() ?? null;
-    // save this data to the database
 
     if (data === null) {
       console.log("data not saved!!");
@@ -1596,7 +1569,9 @@ delete from Public."Map" where player_id = 'temp';
     SaveHistoryDB.getInstance()
       .create(new SaveHistoryDAO(new Date(), data.map.id!, host_id, data.map.iconHeight))
       .then((history_id: number | null) => {
-        if (history_id === null) return; // required data is not inserted in the database we need to leave.
+        if (history_id === null) return;
+
+        const savePromises: Promise<any>[] = [];
         //we have the save history index we now need to insert into all other databases
 
         // Create a checkpoint for all players in the player_movement_history DB
@@ -1612,7 +1587,7 @@ delete from Public."Map" where player_id = 'temp';
             return val.toString();
           });
 
-          PlayerMovementHistoryDB.getInstance().create(
+          const playerSavePromise: Promise<any> = PlayerMovementHistoryDB.getInstance().create(
             new PlayerMovementHistoryDAO(
               history_id,
               key,
@@ -1625,6 +1600,7 @@ delete from Public."Map" where player_id = 'temp';
               statuses,
             ),
           );
+          savePromises.push(playerSavePromise);
 
           p.summons.forEach((curSummon: Summons): void => {
             const summons_id: number = curSummon.id;
@@ -1639,7 +1615,7 @@ delete from Public."Map" where player_id = 'temp';
               return val.toString();
             });
 
-            SummonsHistoryDB.getInstance().create(
+            const summonSavePromise: Promise<any> = SummonsHistoryDB.getInstance().create(
               new SummonsHistoryDao(
                 history_id,
                 summons_id,
@@ -1654,6 +1630,8 @@ delete from Public."Map" where player_id = 'temp';
                 statuses,
               ),
             );
+
+            savePromises.push(summonSavePromise);
           });
         });
 
@@ -1674,7 +1652,7 @@ delete from Public."Map" where player_id = 'temp';
             return val.toString();
           });
 
-          EnemyMovementHistoryDB.getInstance().create(
+          const enemySavePromise: Promise<any> = EnemyMovementHistoryDB.getInstance().create(
             new EnemyMovementHistoryDAO(
               history_id,
               enemy_id,
@@ -1689,17 +1667,60 @@ delete from Public."Map" where player_id = 'temp';
               statuses,
             ),
           );
+
+          savePromises.push(enemySavePromise);
         });
 
         // Time for fogs
         [...data.map.fogs.keys()].forEach((key) => {
           const visible = data.map.fogs.get(key)!.isVisible;
-          FogStateHistoryDB.getInstance().create(new FogStateHistoryDAO(history_id, +key, visible));
+          const fogSavePromise: Promise<any> = FogStateHistoryDB.getInstance().create(
+            new FogStateHistoryDAO(history_id, +key, visible),
+          );
+          savePromises.push(fogSavePromise);
         });
 
-        InitiativeHistoryDB.getInstance().create(
+        const initiativeSavePromise: Promise<any> = InitiativeHistoryDB.getInstance().create(
           new InitiativeHistoryDAO(history_id, data.map.initiativeIndex),
         );
+        savePromises.push(initiativeSavePromise);
+
+        if (client !== undefined) {
+          Promise.allSettled(savePromises)
+            .then((value: PromiseSettledResult<any>[]): void => {
+              let errorAmount: number = 0;
+              value.forEach((promiseReturn: PromiseSettledResult<any>): void => {
+                if (promiseReturn.status === "rejected") {
+                  errorAmount++;
+                }
+              });
+              /**
+              0 = SUCCESS
+              1 = WARNING - Partial Save
+              2 = ERROR - NO SAVE
+              */
+              const sendRes: { level: number } = { level: 0 };
+              if (errorAmount === 0) {
+                sendRes.level = 0;
+              } else if (errorAmount < value.length) {
+                sendRes.level = 1;
+              } else {
+                sendRes.level = 2;
+              }
+
+              client.send("SaveStatus", sendRes);
+            })
+            .catch((_e: any): void => {
+              // This should never happen.
+              console.error("Error in promise.settled of save function");
+            });
+        }
+      })
+      .catch((_e: any): void => {
+        if (client !== undefined) {
+          // Send back a compelte failure
+          client.send("SaveStatus", { level: 2 });
+        }
       });
   }
 

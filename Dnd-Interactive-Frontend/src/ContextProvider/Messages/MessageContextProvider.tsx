@@ -3,6 +3,7 @@ import { useAuthenticatedContext } from "../useAuthenticatedContext";
 import HandoutHandler from "./HandoutHandler";
 import { MessageHandler, MessageInterface } from "./MessageHandler";
 import { ToastListHandler } from "./ToastListHandler";
+import { TOAST_LEVEL } from "./Toast";
 
 /**
  * Context component that will allow other component to call methods and add a toast to the screen.
@@ -15,13 +16,13 @@ export function MessageContextProvider({ children }: { children: React.ReactNode
   const [messageRefReady, setMessageRefReady] = React.useState<boolean>(false);
 
   const addToast = React.useCallback(
-    (title: string, message: any) => {
+    (title: string, message: any, level: TOAST_LEVEL) => {
       if (toastListRef == undefined) {
         console.log("Toast Ref is not def");
         return;
       }
 
-      toastListRef.current.addToast(title, message);
+      toastListRef.current.addToast(title, message, level);
     },
     [toastListRef]
   ); // Use useCallback to avoid unnecessary re-renders
@@ -62,7 +63,7 @@ export function MessageContextProvider({ children }: { children: React.ReactNode
   );
 }
 interface ToastContextInterface {
-  addToast: (title: string, message: any) => void;
+  addToast: (title: string, message: any, level: TOAST_LEVEL) => void;
   getAllMessage: () => MessageInterface[];
   sendPlayerMessage: (message: string) => void;
   sendHostMessage: (message: string) => void;

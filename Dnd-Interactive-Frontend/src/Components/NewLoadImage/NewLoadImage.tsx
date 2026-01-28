@@ -2,11 +2,14 @@ import { LoadImage } from "../../../src/shared/LoadDataInterfaces";
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useState } from "react";
 import { useAuthenticatedContext } from "../../ContextProvider/useAuthenticatedContext";
 import { getFileNameFromMinioString } from "../../Util/Util";
+import { useMessageContext } from "../../ContextProvider/Messages/MessageContextProvider";
+import { TOAST_LEVEL } from "../../ContextProvider/Messages/Toast";
 
 // Although the onChange method can be used to get the image url. This will not be linked with pg or minio. When the image should be used, we should use the forward ref method (getMinioFileUrl) to ensure the file is properly placed.
 // onChange will provide the full url to get the image within a src tag. But this should not be used for creating or updating players **************************************
 export const NewLoadImage = forwardRef(function NewLoadImage({ startingImageSrc, imgSrcPrefix, showPreview = true, onChange }: { startingImageSrc: string; imgSrcPrefix: string; showPreview?: boolean; onChange?: (imageUrl: string) => void }, ref: any) {
   const authContext = useAuthenticatedContext();
+  const toastContext = useMessageContext();
 
   const [imgSrc, setImgSrc] = useState<string>(`${imgSrcPrefix}${startingImageSrc}`);
   const [imageFile, setImageFile] = useState<{ file: File | undefined; imgsrc: string } | undefined>(undefined);
@@ -52,8 +55,10 @@ export const NewLoadImage = forwardRef(function NewLoadImage({ startingImageSrc,
               body: formData,
             })
             .catch((e) => {
+              toastContext.addToast("[ERROR]", "Failed to upload image", TOAST_LEVEL.ERROR);
               throw new Error(e);
             });
+          toastContext.addToast("[SUCCESS]", "Image Uploaded!!", TOAST_LEVEL.SUCCES);
           const data = response.data;
           return data.fileName;
         },

@@ -1,5 +1,6 @@
 import React from "react";
 import { useMessageContext } from "./ContextProvider/Messages/MessageContextProvider";
+import { TOAST_LEVEL } from "./ContextProvider/Messages/Toast";
 
 export function ErrorHandlerProvider({ children }: { children: React.ReactNode }) {
   const toastContext = useMessageContext();
@@ -16,7 +17,7 @@ export function ErrorHandlerProvider({ children }: { children: React.ReactNode }
         return false;
       }
       event.error.hasBeenCaught = true;
-      toastContext.addToast("ERROR", event.message.toString());
+      toastContext.addToast("ERROR", event.message.toString(), TOAST_LEVEL.ERROR);
       event.preventDefault();
       return true;
     };
