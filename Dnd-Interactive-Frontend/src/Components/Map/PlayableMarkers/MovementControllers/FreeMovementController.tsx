@@ -355,10 +355,10 @@ export default function FreeMovementController({ controllableUser, userType, onP
           name={name}
           avatarURI={userType === "player" ? avatarUri : `/colyseus/getImage/${avatarUri}`}
           color={color}
-          position={toPosition[toPosition.length - 1] ?? position}
+          position={toPosition[toPosition.length - 1]}
           size={calcSizeCategoryMultiplier()}
           isDraggable={true}
-          className={"opacity-50"}
+          className={`${isMoving ? "opacity-50" : "opacity-0"}`}
           displayName={false}
           health={health}
           totalHealth={totalHealth}
