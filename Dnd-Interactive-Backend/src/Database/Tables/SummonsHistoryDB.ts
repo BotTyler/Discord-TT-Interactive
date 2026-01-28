@@ -2,13 +2,14 @@ import { mLatLng } from "../../shared/PositionInterface";
 import { QueryResult } from "pg";
 import Database from "../Database";
 import { DAO, DatabaseBase } from "../Interface/DatabaseObjectInterface";
+import { MARKER_SIZE_CATEGORIES } from "../../shared/MarkerOptions";
 
 export class SummonsHistoryDao extends DAO {
   private id?: number;
   private history_id: number;
   private summons_id: number;
   private player_id: string;
-  private size: number;
+  private size_category: MARKER_SIZE_CATEGORIES;
   private position_lat: number;
   private position_lng: number;
   private health: number;
@@ -22,7 +23,7 @@ export class SummonsHistoryDao extends DAO {
     history_id: number,
     summons_id: number,
     player_id: string,
-    size: number,
+    size_category: MARKER_SIZE_CATEGORIES,
     position: mLatLng,
     health: number,
     totalHealth: number,
@@ -37,7 +38,7 @@ export class SummonsHistoryDao extends DAO {
     this.history_id = history_id;
     this.summons_id = summons_id;
     this.player_id = player_id;
-    this.size = size;
+    this.size_category = size_category;
     this.position_lat = position.lat;
     this.position_lng = position.lng;
     this.health = health;
@@ -53,7 +54,7 @@ export class SummonsHistoryDao extends DAO {
       "history_id",
       "summons_id",
       "player_id",
-      "size",
+      "size_category",
       "position_lat",
       "position_lng",
       "health",
@@ -69,7 +70,7 @@ export class SummonsHistoryDao extends DAO {
       this.history_id,
       this.summons_id,
       this.player_id,
-      this.size,
+      this.size_category,
       this.position_lat,
       this.position_lng,
       this.health,
@@ -126,7 +127,7 @@ export class SummonsHistoryDB extends DatabaseBase<SummonsHistoryDao> {
         total_health: +val.total_health,
         life_saves: +val.life_saves,
         death_saves: +val.death_saves,
-        size: +val.size,
+        size_category: val.size_category,
         is_visible: val.is_visible,
         statuses: val.statuses,
       };
@@ -139,7 +140,7 @@ export interface ShJoinInterface {
   summons_id: number;
   history_id: number;
   player_id: string;
-  size: number;
+  size_category: MARKER_SIZE_CATEGORIES;
   position_lat: number;
   position_lng: number;
   name: string;

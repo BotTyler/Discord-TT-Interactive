@@ -1,0 +1,1 @@
+export type MARKER_SIZE_CATEGORIES = "TINY" | "SMALL" | "MEDIUM" | "LARGE" | "HUGE" | "GARGANTUAN";

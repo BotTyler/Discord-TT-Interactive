@@ -14,6 +14,7 @@ import { Player, TPlayerOptions } from "./Player";
 import { mLatLng } from "./PositionInterface";
 import { Summons } from "./Summons";
 import { CharacterStatus, Conditions } from "./StatusTypes";
+import { MARKER_SIZE_CATEGORIES } from "./MarkerOptions";
 
 export interface IState {
   roomName: string;
@@ -171,7 +172,7 @@ export class State extends Schema {
         avatarUri: ele.image_name,
         color: createdPlayer.color,
         name: ele.name,
-        size: ele.size,
+        size_category: ele.size_category,
       });
 
       savedSummon.position = new mLatLng(+ele.position_lat, +ele.position_lng);
@@ -594,7 +595,7 @@ export class State extends Schema {
       avatarUri: string;
       name: string;
       position: { lat: number; lng: number };
-      size: number;
+      size_category: MARKER_SIZE_CATEGORIES;
       health: number;
       totalHealth: number;
     },
@@ -605,7 +606,7 @@ export class State extends Schema {
       id: data.id,
       avatarUri: data.avatarUri,
       name: data.name,
-      size: data.size,
+      size_category: data.size_category,
     });
     newEnemy.position = new mLatLng(data.position.lat, data.position.lng);
     newEnemy.health = data.health;
@@ -628,20 +629,32 @@ export class State extends Schema {
     data: {
       id: string;
       name: string;
-      size: number;
+      size_category: MARKER_SIZE_CATEGORIES;
       avatarUri: string;
-      health: number;
-      totalHealth: number;
     },
   ): boolean {
     if (this.map === null) return false;
     const enemy = this.map.enemy.get(data.id);
     if (enemy === undefined) return false;
     enemy.name = data.name;
-    enemy.size = data.size;
+    enemy.size_category = data.size_category;
     enemy.avatarUri = data.avatarUri;
+    return true;
+  }
+
+  setEnemyHealth(
+    sessionId: string,
+    data: {
+      id: string;
+      health: number;
+      total_health: number;
+    },
+  ): boolean {
+    if (this.map === null) return false;
+    const enemy = this.map.enemy.get(data.id);
+    if (enemy === undefined) return false;
     enemy.health = data.health;
-    enemy.totalHealth = data.totalHealth;
+    enemy.totalHealth = data.total_health;
     return true;
   }
 
@@ -781,7 +794,7 @@ export class State extends Schema {
       avatarUri: string;
       name: string;
       position: { lat: number; lng: number };
-      size: number;
+      size_category: MARKER_SIZE_CATEGORIES;
       health: number;
       totalHealth: number;
       deathSaves: number;
@@ -798,7 +811,7 @@ export class State extends Schema {
       id: data.id,
       avatarUri: data.avatarUri,
       name: data.name,
-      size: data.size,
+      size_category: data.size_category,
       color: player.color,
     });
 
@@ -830,9 +843,7 @@ export class State extends Schema {
       id: number;
       avatarUri: string;
       name: string;
-      health: number;
-      totalHealth: number;
-      size: number;
+      size_category: MARKER_SIZE_CATEGORIES;
     },
   ): boolean {
     if (this.map === null) return false;
@@ -840,16 +851,34 @@ export class State extends Schema {
     const player: Player | undefined = this._getPlayerBySessionId(sessionId);
     if (player === undefined) return false;
 
-    // Force unwrap is fine as the previous 'if' ensures it is available.
     const summon: Summons | null =
       player.summons.find((item: Summons) => item.id == data.id) ?? null;
     if (summon === null) return false;
     summon.avatarUri = data.avatarUri;
     summon.name = data.name;
-    summon.health = data.health;
-    summon.totalHealth = data.totalHealth;
-    summon.size = data.size;
+    summon.size_category = data.size_category;
 
+    return true;
+  }
+
+  setSummonHealth(
+    sessionId: string,
+    data: {
+      id: number;
+      health: number;
+      total_health: number;
+    },
+  ): boolean {
+    if (this.map === null) return false;
+
+    const player: Player | undefined = this._getPlayerBySessionId(sessionId);
+    if (player === undefined) return false;
+
+    const summon: Summons | null =
+      player.summons.find((item: Summons) => item.id == data.id) ?? null;
+    if (summon === null) return false;
+    summon.health = data.health;
+    summon.totalHealth = data.total_health;
     return true;
   }
 
@@ -1092,7 +1121,7 @@ export class State extends Schema {
         player_id: currentPlayer.userId,
         avatarUri: val.image_name,
         name: val.name,
-        size: val.size,
+        size_category: val.size_category,
         color: currentPlayer.color,
       });
       summon.position = new mLatLng(val.position_lat, val.position_lng);
@@ -1115,7 +1144,7 @@ export class State extends Schema {
         avatarUri: enemy.image_name,
         id: enemy.enemy_id,
         name: enemy.name,
-        size: enemy.size,
+        size_category: enemy.size_category,
       });
 
       insertEnemy.position = new mLatLng(enemy.position_lat, enemy.position_lng);

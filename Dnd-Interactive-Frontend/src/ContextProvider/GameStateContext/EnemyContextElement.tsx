@@ -3,12 +3,13 @@ import { mLatLng } from "../../../src/shared/PositionInterface"
 import React from "react";
 import { useAuthenticatedContext } from "../useAuthenticatedContext";
 import { CharacterStatus } from "../../shared/StatusTypes";
+import { MARKER_SIZE_CATEGORIES } from "../../shared/MarkerOptions";
 
 export default function EnemyContextElement({ enemy, onValueChanged }: { enemy: Enemy; onValueChanged: (field: string, value: unknown) => void }) {
   const [id, setId] = React.useState<number>(enemy.id);
   const [avatarUri, setAvatarUri] = React.useState<string>(enemy.avatarUri);
   const [name, setName] = React.useState<string>(enemy.name);
-  const [size, setSize] = React.useState<number>(enemy.size);
+  const [sizeCategory, setSizeCategory] = React.useState<MARKER_SIZE_CATEGORIES>(enemy.size_category);
   const [position, setPosition] = React.useState<mLatLng>(enemy.position);
   const [toPosition, setToPosition] = React.useState<mLatLng[]>([]);
   const [health, setHealth] = React.useState<number>(enemy.health);
@@ -38,8 +39,8 @@ export default function EnemyContextElement({ enemy, onValueChanged }: { enemy: 
     emitFieldChangeEvent("name", name);
   }, [name]);
   React.useEffect(() => {
-    emitFieldChangeEvent("size", size);
-  }, [size]);
+    emitFieldChangeEvent("size", sizeCategory);
+  }, [sizeCategory]);
   React.useEffect(() => {
     emitFieldChangeEvent("position", position);
   }, [position]);
@@ -88,8 +89,8 @@ export default function EnemyContextElement({ enemy, onValueChanged }: { enemy: 
     const nameListener = enemy.listen("name", (value: string) => {
       setName(value);
     });
-    const sizeListener = enemy.listen("size", (value: number) => {
-      setSize(value);
+    const sizeListener = enemy.listen("size_category", (value: MARKER_SIZE_CATEGORIES) => {
+      setSizeCategory(value);
     });
     const positionListener = enemy.listen("position", (value: mLatLng) => {
       setPosition(value);

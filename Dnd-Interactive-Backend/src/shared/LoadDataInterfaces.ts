@@ -1,3 +1,5 @@
+import { MARKER_SIZE_CATEGORIES } from "./MarkerOptions";
+
 export interface LoadMapInterface {
   id: number;
   width: number;
@@ -19,7 +21,7 @@ export interface LoadPlayerInterface {
 }
 
 export interface LoadEnemyInterface {
-  size: number;
+  size_category: MARKER_SIZE_CATEGORIES;
   enemy_id: number;
   position_lat: number;
   position_lng: number;
@@ -64,7 +66,7 @@ export interface LoadSummonsInterface {
   summons_id: number;
   history_id: number;
   player_id: string;
-  size: number;
+  size_category: MARKER_SIZE_CATEGORIES;
   position_lat: number;
   position_lng: number;
   name: string;

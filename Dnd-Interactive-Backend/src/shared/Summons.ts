@@ -1,10 +1,11 @@
 import { Schema, type } from "@colyseus/schema";
 import { mLatLng } from "./PositionInterface";
 import { CharacterStatus } from "./StatusTypes";
+import { MARKER_SIZE_CATEGORIES } from "./MarkerOptions";
 
 export type TSummonsOptions = Pick<
   Summons,
-  "id" | "player_id" | "avatarUri" | "name" | "size" | "color"
+  "id" | "player_id" | "avatarUri" | "name" | "size_category" | "color"
 >;
 
 export class Summons extends Schema {
@@ -20,8 +21,8 @@ export class Summons extends Schema {
   @type("string")
   public name: string;
 
-  @type("number")
-  public size: number;
+  @type("string")
+  public size_category: MARKER_SIZE_CATEGORIES;
 
   @type("string")
   public color: string;
@@ -54,13 +55,13 @@ export class Summons extends Schema {
   public statuses: CharacterStatus[];
 
   // Init
-  constructor({ player_id, id, avatarUri, name, size, color }: TSummonsOptions) {
+  constructor({ player_id, id, avatarUri, name, size_category, color }: TSummonsOptions) {
     super();
     this.id = id;
     this.player_id = player_id;
     this.avatarUri = avatarUri;
     this.name = name;
-    this.size = size;
+    this.size_category = size_category;
     this.color = color;
 
     this.position = new mLatLng(0, 0);

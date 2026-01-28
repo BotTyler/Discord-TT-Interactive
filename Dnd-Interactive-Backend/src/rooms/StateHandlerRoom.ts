@@ -19,13 +19,19 @@ import { SaveHistoryDAO, SaveHistoryDB } from "../Database/Tables/SaveHistoryDB"
 import { ExportDataInterface } from "../shared/ExportDataInterface";
 import { LoadCampaign, LoadImage, LoadSaveHistory } from "../shared/LoadDataInterfaces";
 import { GameStateEnum, IState, MapMovementType, State } from "../shared/State";
-import { sanitize, ValidateAllInputs, ValidationInputType } from "../Util/Utils";
+import {
+  processMarkerStringSizes,
+  sanitize,
+  ValidateAllInputs,
+  ValidationInputType,
+} from "../Util/Utils";
 import { SummonsDao, SummonsDB } from "../Database/Tables/SummonsDb";
 import { SummonsHistoryDao, SummonsHistoryDB } from "../Database/Tables/SummonsHistoryDB";
 import { Summons } from "../shared/Summons";
 import { mLatLng } from "../shared/PositionInterface";
 import { CharacterStatus } from "../shared/StatusTypes";
 import { Enemy } from "../shared/Enemy";
+import { MARKER_SIZE_CATEGORIES } from "../shared/MarkerOptions";
 
 export class StateHandlerRoom extends Room<State> {
   maxClients = 1000;
@@ -668,8 +674,7 @@ export class StateHandlerRoom extends Room<State> {
           { name: "name", type: "string", PostProcess: undefined },
           { name: "avatarUri", type: "string", PostProcess: undefined },
           { name: "position", type: "object", PostProcess: undefined },
-          { name: "size", type: "number", PostProcess: undefined },
-          { name: "totalHealth", type: "number", PostProcess: undefined },
+          { name: "size", type: "string", PostProcess: processMarkerStringSizes },
         ];
 
         const validateParams: any = ValidateAllInputs(data, inputList);
@@ -694,9 +699,9 @@ export class StateHandlerRoom extends Room<State> {
                     lat: +validateParams.position.lat,
                     lng: +validateParams.position.lng,
                   },
-                  size: +validateParams.size,
-                  health: +validateParams.totalHealth,
-                  totalHealth: +validateParams.totalHealth,
+                  size_category: validateParams.size,
+                  health: 1,
+                  totalHealth: 1,
                 });
               })
               .catch((e) => {});
@@ -721,6 +726,28 @@ export class StateHandlerRoom extends Room<State> {
         console.error(error);
       }
     });
+
+    this.onMessage("EnemyHealth", (client, data) => {
+      if (!this.authenticateHostAction(client.sessionId)) return;
+      try {
+        const inputList: ValidationInputType[] = [
+          { name: "id", type: "string", PostProcess: undefined },
+          { name: "health", type: "number", PostProcess: undefined },
+          { name: "total_health", type: "number", PostProcess: undefined },
+        ];
+
+        const validateParams: any = ValidateAllInputs(data, inputList);
+
+        this.state.setEnemyHealth(client.sessionId, {
+          id: validateParams.id,
+          health: +validateParams.health,
+          total_health: +validateParams.total_health,
+        });
+      } catch (error) {
+        console.error(error);
+      }
+    });
+
     this.onMessage("updateEnemy", (client, data) => {
       if (!this.authenticateHostAction(client.sessionId)) return;
       try {
@@ -728,9 +755,7 @@ export class StateHandlerRoom extends Room<State> {
           { name: "id", type: "string", PostProcess: undefined },
           { name: "name", type: "string", PostProcess: undefined },
           { name: "avatarUri", type: "string", PostProcess: undefined },
-          { name: "size", type: "number", PostProcess: undefined },
-          { name: "health", type: "number", PostProcess: undefined },
-          { name: "totalHealth", type: "number", PostProcess: undefined },
+          { name: "size", type: "string", PostProcess: processMarkerStringSizes },
         ];
 
         const validateParams: any = ValidateAllInputs(data, inputList);
@@ -754,10 +779,8 @@ export class StateHandlerRoom extends Room<State> {
                 this.state.updateEnemyInformation(client.sessionId, {
                   id: validateParams.id,
                   name: validateParams.name,
-                  size: +validateParams.size,
+                  size_category: validateParams.size,
                   avatarUri: imageCatalog.image_name,
-                  health: +validateParams.health,
-                  totalHealth: +validateParams.totalHealth,
                 });
               })
               .catch((e) => {
@@ -982,8 +1005,7 @@ export class StateHandlerRoom extends Room<State> {
           { name: "avatarUri", type: "string", PostProcess: undefined },
           { name: "name", type: "string", PostProcess: undefined },
           { name: "position", type: "object", PostProcess: undefined },
-          { name: "size", type: "number", PostProcess: undefined },
-          { name: "totalHealth", type: "number", PostProcess: undefined },
+          { name: "size", type: "string", PostProcess: processMarkerStringSizes },
         ];
         // NOTE: This utilizes the player so no authentication is required.
 
@@ -1013,9 +1035,9 @@ export class StateHandlerRoom extends Room<State> {
                     lat: +validateParams.position.lat,
                     lng: +validateParams.position.lng,
                   },
-                  size: validateParams.size,
-                  health: validateParams.totalHealth,
-                  totalHealth: validateParams.totalHealth,
+                  size_category: validateParams.size,
+                  health: 1,
+                  totalHealth: 1,
                   deathSaves: 0,
                   lifeSaves: 0,
                 });
@@ -1052,9 +1074,7 @@ export class StateHandlerRoom extends Room<State> {
           { name: "id", type: "number", PostProcess: undefined },
           { name: "name", type: "string", PostProcess: undefined },
           { name: "avatarUri", type: "string", PostProcess: undefined },
-          { name: "size", type: "number", PostProcess: undefined },
-          { name: "health", type: "number", PostProcess: undefined },
-          { name: "totalHealth", type: "number", PostProcess: undefined },
+          { name: "size", type: "string", PostProcess: processMarkerStringSizes },
         ];
 
         const validateParams: any = ValidateAllInputs(data, inputList);
@@ -1083,15 +1103,34 @@ export class StateHandlerRoom extends Room<State> {
                   id: +summon.getIdValue()!,
                   avatarUri: imageCatalog.image_name,
                   name: validateParams.name,
-                  size: +validateParams.size,
-                  health: +validateParams.health,
-                  totalHealth: +validateParams.totalHealth,
+                  size_category: validateParams.size,
                 });
               })
               .catch((e) => {
                 console.error(e);
               });
           });
+      } catch (error) {
+        console.error(error);
+      }
+    });
+
+    this.onMessage("SummonHealth", (client, data) => {
+      if (!this.authenticateHostAction(client.sessionId)) return;
+      try {
+        const inputList: ValidationInputType[] = [
+          { name: "id", type: "number", PostProcess: undefined },
+          { name: "health", type: "number", PostProcess: undefined },
+          { name: "total_health", type: "number", PostProcess: undefined },
+        ];
+
+        const validateParams: any = ValidateAllInputs(data, inputList);
+
+        this.state.setSummonHealth(client.sessionId, {
+          id: +validateParams.id,
+          health: +validateParams.health,
+          total_health: +validateParams.total_health,
+        });
       } catch (error) {
         console.error(error);
       }
@@ -1604,7 +1643,7 @@ delete from Public."Map" where player_id = 'temp';
 
           p.summons.forEach((curSummon: Summons): void => {
             const summons_id: number = curSummon.id;
-            const size: number = curSummon.size;
+            const size_category: MARKER_SIZE_CATEGORIES = curSummon.size_category;
             const position: mLatLng = curSummon.position;
             const health: number = curSummon.health;
             const totalHealth: number = curSummon.totalHealth;
@@ -1620,7 +1659,7 @@ delete from Public."Map" where player_id = 'temp';
                 history_id,
                 summons_id,
                 p.userId,
-                size,
+                size_category,
                 position,
                 health,
                 totalHealth,
@@ -1641,7 +1680,7 @@ delete from Public."Map" where player_id = 'temp';
 
           const enemy_id: number = e.id;
           const position: mLatLng = e.position;
-          const size: number = e.size;
+          const size_category: MARKER_SIZE_CATEGORIES = e.size_category;
           const initiaitive: number = e.initiative;
           const health: number = e.health;
           const totalHealth: number = e.totalHealth;
@@ -1656,7 +1695,7 @@ delete from Public."Map" where player_id = 'temp';
             new EnemyMovementHistoryDAO(
               history_id,
               enemy_id,
-              size,
+              size_category,
               position,
               initiaitive,
               health,

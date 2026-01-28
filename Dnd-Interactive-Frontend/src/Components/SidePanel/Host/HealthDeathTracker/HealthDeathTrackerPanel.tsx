@@ -64,8 +64,7 @@ export default function HealthDeathTrackerPanel() {
                 avatarUri: data.avatarUri,
                 name: data.name,
                 position: new mLatLng(0, 0),
-                size: data.size,
-                totalHealth: data.hp,
+                size: data.size_category,
               });
             }
             setIsAddingEnemy(false);
@@ -74,7 +73,6 @@ export default function HealthDeathTrackerPanel() {
           title="Enemy Add"
           avatarUri={""}
           name=""
-          totalHp={1}
           key={`AddEnemyModal`}
         />
       ) : (

@@ -1,8 +1,8 @@
 import React from "react";
-import { useAuthenticatedContext } from "../useAuthenticatedContext";
 import { Summons } from "../../shared/Summons";
 import { mLatLng } from "../../shared/PositionInterface";
 import { CharacterStatus } from "../../shared/StatusTypes";
+import { MARKER_SIZE_CATEGORIES } from "../../shared/MarkerOptions";
 
 // this class def can be simpler
 export default function SummonsElementHandler({ summon }: { summon: Summons; }) {
@@ -12,7 +12,7 @@ export default function SummonsElementHandler({ summon }: { summon: Summons; }) 
   const [name, setName] = React.useState<string>(summon.name);
   const [position, setPosition] = React.useState<mLatLng>(summon.position);
   const [toPosition, setToPosition] = React.useState<mLatLng[]>([]);
-  const [size, setSize] = React.useState<number>(summon.size);
+  const [sizeCategory, setSizeCategory] = React.useState<MARKER_SIZE_CATEGORIES>(summon.size_category);
   const [color, setColor] = React.useState<string>(summon.color);
   const [health, setHealth] = React.useState<number>(summon.health);
   const [totalHealth, setTotalHealth] = React.useState<number>(summon.totalHealth);
@@ -21,7 +21,6 @@ export default function SummonsElementHandler({ summon }: { summon: Summons; }) 
   const [isVisible, setIsVisible] = React.useState<boolean>(summon.isVisible);
   const [statuses, setStatuses] = React.useState<CharacterStatus[]>(summon.statuses);
 
-  const authContext = useAuthenticatedContext();
 
   // below effects are used to emit events when the value is finalized
   const emitFieldChangeEvent = (field: string, value: any) => {
@@ -50,8 +49,8 @@ export default function SummonsElementHandler({ summon }: { summon: Summons; }) 
     emitFieldChangeEvent("toPosition", toPosition);
   }, [toPosition]);
   React.useEffect(() => {
-    emitFieldChangeEvent("size", size);
-  }, [size]);
+    emitFieldChangeEvent("size", sizeCategory);
+  }, [sizeCategory]);
   React.useEffect(() => {
     emitFieldChangeEvent("color", color);
   }, [color]);
@@ -94,8 +93,8 @@ export default function SummonsElementHandler({ summon }: { summon: Summons; }) 
     const toPositionListener = summon.listen("toPosition", (value: mLatLng[]) => {
       setToPosition(value);
     });
-    const sizeListener = summon.listen("size", (value: number) => {
-      setSize(value);
+    const sizeListener = summon.listen("size_category", (value: MARKER_SIZE_CATEGORIES) => {
+      setSizeCategory(value);
     });
     const colorListener = summon.listen("color", (value: string) => {
       setColor(value);

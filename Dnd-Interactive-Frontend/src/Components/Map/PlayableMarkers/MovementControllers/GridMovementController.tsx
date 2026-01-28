@@ -12,6 +12,7 @@ import { DistanceLineGrid } from "../DistanceLine";
 import MarkerDisplay from "../MarkerDisplay";
 import { Summons } from "../../../../shared/Summons";
 import { CharacterStatus } from "../../../../shared/StatusTypes";
+import { MARKER_SIZE_CATEGORIES } from "../../../../shared/MarkerOptions";
 
 export default function GridMovementController({ controllableUser, userType, onPositionChange, onGhostPositionChange }:
   {
@@ -32,7 +33,8 @@ export default function GridMovementController({ controllableUser, userType, onP
   const [id, setId] = useState<string>((markerUser as Player).userId ?? (markerUser as Enemy | Summons).id);
   const [name, setName] = useState<string>(markerUser.name);
   const [avatarUri, setAvatarUri] = useState<string>(markerUser.avatarUri);
-  const [markerSize, setMarkerSize] = useState<number>((markerUser as Enemy | Summons).size ?? mapContext.getIconHeight());
+  // const [markerSize, setMarkerSize] = useState<number>((markerUser as Enemy | Summons).size ?? mapContext.getIconHeight());
+  const [sizeCategory, setSizeCategory] = useState<MARKER_SIZE_CATEGORIES>((markerUser as Enemy | Summons).size_category ?? "MEDIUM")
   const [iconSize, setIconSize] = useState<number>(mapContext.getIconHeight());
   const [position, setPosition] = useState<LatLng>(new LatLng(markerUser.position.lat, markerUser.position.lng));
   const [toPosition, setToPosition] = useState<LatLng[]>([position]);
@@ -58,6 +60,23 @@ export default function GridMovementController({ controllableUser, userType, onP
     isMovingRef.current = isMoving;
   }, [isMoving])
 
+  const calcSizeCategoryMultiplier = useCallback((): number => {
+    switch (sizeCategory) {
+      case "TINY":
+        return iconSize * 0.5;
+      case "SMALL":
+        return iconSize * 0.85;
+      case "MEDIUM":
+        return iconSize * 1;
+      case "LARGE":
+        return iconSize * 2;
+      case "HUGE":
+        return iconSize * 3;
+      case "GARGANTUAN":
+        return iconSize * 4;
+    }
+  }, [sizeCategory, iconSize]);
+
   const calculateNearestcenter = useCallback((position: LatLng): LatLng => {
     const halfIcon = iconSize / 2;
     const centerLng: number = Math.floor(position.lng / iconSize) * iconSize + halfIcon;
@@ -71,12 +90,12 @@ export default function GridMovementController({ controllableUser, userType, onP
     const offsetXMult: 1 | -1 = xDiff >= 0 ? 1 : -1;
     const offsetYMult: 1 | -1 = yDiff >= 0 ? 1 : -1;
 
-    const offset = Math.floor(markerSize / iconSize) % 2 == 0 ? halfIcon : 0;
+    const offset = Math.floor(calcSizeCategoryMultiplier() / iconSize) % 2 == 0 ? halfIcon : 0;
     const xval: number = centerLng + (offset * offsetXMult);
     const yval: number = centerLat + (offset * offsetYMult);
     return new LatLng(yval, xval);
 
-  }, [mapWidth, mapHeight, iconSize, markerSize]);
+  }, [mapWidth, mapHeight, iconSize, sizeCategory]);
 
   useEffect(() => {
     setMarkerUser(controllableUser);
@@ -100,7 +119,6 @@ export default function GridMovementController({ controllableUser, userType, onP
     };
     const handleIconHeightChange = (value: any) => {
       setIconSize(value.detail.val);
-      setMarkerSize(value.detail.val);
     };
     const handleConnectionChange = (value: any) => {
       setConnected(value.detail.val);
@@ -163,7 +181,7 @@ export default function GridMovementController({ controllableUser, userType, onP
       onPositionChange(centeredPos);
       return centeredPos;
     })
-  }, [iconSize, markerSize]);
+  }, [iconSize, sizeCategory]);
 
 
   useEffect(() => {
@@ -179,7 +197,7 @@ export default function GridMovementController({ controllableUser, userType, onP
       setPosition(value.detail.val);
     };
     const updateSize = (value: any) => {
-      setMarkerSize(value.detail.val);
+      setSizeCategory(value.detail.val);
     };
     const handleIconHeightChange = (value: any) => {
       setIconSize(value.detail.val);
@@ -243,7 +261,7 @@ export default function GridMovementController({ controllableUser, userType, onP
       setPosition(value.detail.val);
     };
     const updateSize = (value: any) => {
-      setMarkerSize(value.detail.val);
+      setSizeCategory(value.detail.val);
     };
     const updateColor = (value: any) => {
       setColor(value.detail.val);
@@ -378,7 +396,7 @@ export default function GridMovementController({ controllableUser, userType, onP
           avatarURI={userType === "player" ? avatarUri : `/colyseus/getImage/${avatarUri}`}
           color={color}
           position={position}
-          size={markerSize}
+          size={calcSizeCategoryMultiplier()}
           health={health}
           totalHealth={totalHealth}
           className={isVisible ? "opacity-100" : "opacity-50"}
@@ -386,7 +404,7 @@ export default function GridMovementController({ controllableUser, userType, onP
           isHovering={isHovering && !isMoving}
         />
       </Pane>
-      <DistanceLineGrid positions={toPosition} color={color} playerSize={markerSize} />
+      <DistanceLineGrid positions={toPosition} color={color} playerSize={calcSizeCategoryMultiplier()} />
       <Pane name={`Grid-${userType}-Ghost-Marker-${id}`} style={{ zIndex: 501 }}>
         {/* size needs to be at least the iconSize due to issues with mouse up event */}
         <MarkerDisplay
@@ -394,7 +412,7 @@ export default function GridMovementController({ controllableUser, userType, onP
           avatarURI={userType === "player" ? avatarUri : `/colyseus/getImage/${avatarUri}`}
           color={color}
           position={toPosition[toPosition.length - 1] ?? position}
-          size={isMoving ? Math.max(markerSize, iconSize) : markerSize}
+          size={isMoving ? Math.max(calcSizeCategoryMultiplier(), iconSize) : calcSizeCategoryMultiplier()}
           isDraggable={true}
           className={`opacity-50`}
           displayName={false}
