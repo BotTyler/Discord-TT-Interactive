@@ -18,8 +18,9 @@ export default function ImportExport() {
   useEffect(() => {
     // Start interval
     const intervalId = setInterval(() => {
-      authContext.room.send("exportMap");
-    }, 5 * 60 * 1000); // 5 minute
+      console.log("AUTOSAVING")
+      authContext.room.send("exportMap", { isAutosave: true });
+    }, 20 * 60 * 1000); // 20 minute
 
     // Cleanup: stop interval when component unmounts
     return () => {
@@ -52,7 +53,7 @@ export default function ImportExport() {
   }, [authContext.room])
 
   const handleExport = React.useCallback((e: React.MouseEvent) => {
-    authContext.room.send("exportMap");
+    authContext.room.send("exportMap", { isAutosave: false });
     toastContext.addToast("[PENDING]", "SAVING....", TOAST_LEVEL.NONE);
   }, []);
 

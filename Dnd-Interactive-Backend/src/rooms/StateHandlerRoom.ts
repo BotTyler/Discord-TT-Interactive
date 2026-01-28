@@ -1350,9 +1350,24 @@ export class StateHandlerRoom extends Room<State> {
     });
 
     // saves the map to the database
-    this.onMessage("exportMap", (client, _data) => {
+    this.onMessage("exportMap", (client, data) => {
       if (!this.authenticateHostAction(client.sessionId)) return;
-      this.saveState(client);
+      try {
+        const inputList: ValidationInputType[] = [
+          { name: "isAutosave", type: "boolean", PostProcess: undefined },
+        ];
+
+        const validateParams: any = ValidateAllInputs(data, inputList);
+        if (validateParams.isAutosave) {
+          // For autosave we will not want to notify the client on a save.
+          // we only want to notify when it was intentional.
+          this.saveState();
+        } else {
+          this.saveState(client);
+        }
+      } catch (error) {
+        console.error(error);
+      }
     });
 
     this.onMessage("clearMap", (client, _data) => {
@@ -1587,6 +1602,7 @@ delete from Public."Map" where player_id = 'temp';
   }
 
   // Save the current state
+  // if a client is provided, they will be sent the status of the save.
   saveState(client?: Client) {
     const data: ExportDataInterface | null = this.state.exportCurrentMapData() ?? null;
 
