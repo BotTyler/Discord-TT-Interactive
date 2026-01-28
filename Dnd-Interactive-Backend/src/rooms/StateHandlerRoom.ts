@@ -26,7 +26,6 @@ import { Summons } from "../shared/Summons";
 import { mLatLng } from "../shared/PositionInterface";
 import { CharacterStatus } from "../shared/StatusTypes";
 import { Enemy } from "../shared/Enemy";
-import { error } from "console";
 
 export class StateHandlerRoom extends Room<State> {
   maxClients = 1000;
