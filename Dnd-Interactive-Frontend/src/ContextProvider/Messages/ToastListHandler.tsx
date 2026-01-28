@@ -22,7 +22,6 @@ export const ToastListHandler = forwardRef(function ToastListHandler({ }: {}, re
             title={val.title}
             level={val.level}
             callback={() => {
-              console.log("Close Callback called for", val);
               setToast((prev) => {
                 return prev.filter((item) => val.id !== item.id);
               });
