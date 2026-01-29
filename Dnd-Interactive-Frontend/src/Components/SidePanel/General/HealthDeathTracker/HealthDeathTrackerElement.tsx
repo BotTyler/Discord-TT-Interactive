@@ -11,6 +11,7 @@ import HealthNamePlate, { HealDamageComponent } from "./HealthComponent";
 import { mLatLng } from "../../../../shared/PositionInterface";
 import StatusDropdown from "../../../StatusModal/StatusModal";
 import { CharacterStatus } from "../../../../shared/StatusTypes";
+import { MARKER_SIZE_CATEGORIES } from "../../../../shared/MarkerOptions";
 
 export default function HealthDeathTrackerElement({ item, itemType }:
   {
@@ -22,7 +23,7 @@ export default function HealthDeathTrackerElement({ item, itemType }:
 
   const [id, setId] = useState<any>((item as Player).userId ?? (item as Enemy | Summons).id);
   const [name, setName] = useState<string>(item.name);
-  const [size, setSize] = useState<number>((item as Enemy).size ?? gamestate.getIconHeight());
+  const [size_category, setSizeCategory] = useState<MARKER_SIZE_CATEGORIES>((item as Enemy | Summons).size_category ?? "MEDIUM");
   const [avatarUri, setUri] = useState<string>(item.avatarUri);
   const [health, setHealth] = useState<number>(item.health);
   const [totalHealth, setTotalHealth] = useState<number>(item.totalHealth);
@@ -74,7 +75,7 @@ export default function HealthDeathTrackerElement({ item, itemType }:
     };
 
     const handleSizeChange = (val: any) => {
-      setSize(val.detail.val);
+      setSizeCategory(val.detail.val);
     }
 
     const handleVisibilityChange = (val: any) => {
@@ -117,23 +118,17 @@ export default function HealthDeathTrackerElement({ item, itemType }:
           case "player":
             break;
           case "enemy":
-            authContext.room.send("updateEnemy", {
+            authContext.room.send("EnemyHealth", {
               id: `${id}`,
-              name: name,
-              size: size,
-              avatarUri: avatarUri,
               health: val,
-              totalHealth: totalHealth,
+              total_health: totalHealth,
             })
             break;
           case "summons":
-            authContext.room.send("updateSummons", {
+            authContext.room.send("SummonHealth", {
               id: +id,
-              name: name,
-              size: size,
-              avatarUri: avatarUri,
               health: val,
-              totalHealth: totalHealth,
+              total_health: totalHealth,
             })
             break;
         }
@@ -143,23 +138,17 @@ export default function HealthDeathTrackerElement({ item, itemType }:
           case "player":
             break;
           case "enemy":
-            authContext.room.send("updateEnemy", {
+            authContext.room.send("EnemyHealth", {
               id: `${id}`,
-              name: name,
-              size: size,
-              avatarUri: avatarUri,
               health: health,
-              totalHealth: val,
+              total_health: val,
             })
             break;
           case "summons":
-            authContext.room.send("updateSummons", {
+            authContext.room.send("SummonHealth", {
               id: +id,
-              name: name,
-              size: size,
-              avatarUri: avatarUri,
               health: health,
-              totalHealth: val,
+              total_health: val,
             })
             break;
         }
@@ -272,8 +261,7 @@ export default function HealthDeathTrackerElement({ item, itemType }:
           avatarUri: avatarUri,
           name: name,
           position: new mLatLng(0, 0),
-          size: size,
-          totalHealth: totalHealth,
+          size: size_category,
         });
         break;
       case "summons":
@@ -281,8 +269,7 @@ export default function HealthDeathTrackerElement({ item, itemType }:
           avatarUri: avatarUri,
           name: name,
           position: new mLatLng(0, 0),
-          size: size,
-          totalHealth: totalHealth,
+          size: size_category,
         });
         break;
     }
@@ -392,20 +379,16 @@ export default function HealthDeathTrackerElement({ item, itemType }:
                   authContext.room.send(`updateEnemy`, {
                     id: id + "",
                     name: data.name,
-                    size: data.size,
+                    size: data.size_category,
                     avatarUri: data.avatarUri,
-                    health: health,
-                    totalHealth: data.hp,
                   });
                   break;
                 case "summons":
                   authContext.room.send(`updateSummons`, {
                     id: +id,
                     name: data.name,
-                    size: data.size,
+                    size: data.size_category,
                     avatarUri: data.avatarUri,
-                    health: health,
-                    totalHealth: data.hp,
                   });
                   break
                 case "player":
@@ -417,9 +400,8 @@ export default function HealthDeathTrackerElement({ item, itemType }:
             }}
             title={`${itemType} Edit`}
             name={name}
-            size={size}
+            size_category={size_category}
             avatarUri={avatarUri}
-            totalHp={totalHealth}
             key={`ChangeChacterStats-${id}`}
           /> : <></>
       }

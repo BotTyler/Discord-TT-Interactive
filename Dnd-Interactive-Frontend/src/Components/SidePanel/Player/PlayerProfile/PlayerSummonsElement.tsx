@@ -55,8 +55,7 @@ export default function PlayerSummonsListElement({ }: {}) {
                 avatarUri: data.avatarUri,
                 name: data.name,
                 position: new mLatLng(0, 0),
-                size: data.size,
-                totalHealth: data.hp,
+                size: data.size_category,
               });
             }
             setIsAddingSummon(false);
@@ -65,7 +64,6 @@ export default function PlayerSummonsListElement({ }: {}) {
           title="Summon Add"
           avatarUri={""}
           name=""
-          totalHp={1}
           key={`AddSummonModal`}
         />
       ) : (

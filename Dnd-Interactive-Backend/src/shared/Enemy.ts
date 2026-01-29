@@ -1,8 +1,9 @@
 import { Schema, type } from "@colyseus/schema";
 import { mLatLng } from "./PositionInterface";
 import { CharacterStatus } from "./StatusTypes";
+import { MARKER_SIZE_CATEGORIES } from "./MarkerOptions";
 
-export type TEnemyOptions = Pick<Enemy, "id" | "avatarUri" | "name" | "size">;
+export type TEnemyOptions = Pick<Enemy, "id" | "avatarUri" | "name" | "size_category">;
 
 export class Enemy extends Schema {
   @type("number")
@@ -14,8 +15,8 @@ export class Enemy extends Schema {
   @type("string")
   public name: string;
 
-  @type("number")
-  public size: number;
+  @type("string")
+  public size_category: MARKER_SIZE_CATEGORIES;
 
   @type(mLatLng)
   public position: mLatLng;
@@ -46,12 +47,12 @@ export class Enemy extends Schema {
   public statuses: CharacterStatus[];
 
   // Init
-  constructor({ avatarUri, id, name, size }: TEnemyOptions) {
+  constructor({ avatarUri, id, name, size_category }: TEnemyOptions) {
     super();
     this.id = id;
     this.avatarUri = avatarUri;
     this.name = name;
-    this.size = size;
+    this.size_category = size_category;
 
     this.statuses = [];
     this.initiative = 1;

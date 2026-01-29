@@ -1,25 +1,34 @@
 import { ChangeEvent, useRef, useState } from "react";
 import { NewLoadImage } from "../NewLoadImage/NewLoadImage";
 import Modal from "./Modal";
-import { useGameState } from "../../ContextProvider/GameStateContext/GameStateProvider";
+import { MARKER_SIZE_CATEGORIES } from "../../shared/MarkerOptions";
 
 /**
  * Component responsible for handling any edits needing to be done on an enemy player.
  * This component utilizes the Modal component and will send the data to the server when completed.
  */
-export default function EditCharacterModal({ callback, title, name, avatarUri, totalHp, size }: { name: string; title: string, avatarUri: string; totalHp: number; size?: number; callback: (data: { name: string; size: number; avatarUri: string; hp: number } | undefined) => void }) {
-  const gamestateContext = useGameState();
+export default function EditCharacterModal(
+  {
+    callback,
+    title,
+    name,
+    avatarUri,
+    size_category
+  }:
+    {
+      name: string;
+      title: string,
+      avatarUri: string;
+      size_category?: MARKER_SIZE_CATEGORIES;
+      callback: (data: { name: string; size_category: MARKER_SIZE_CATEGORIES; avatarUri: string; } | undefined) => void
+    }) {
 
   const [_name, setName] = useState<string>(name);
-  const [_size, setSize] = useState<number>(size ?? gamestateContext.getIconHeight());
+  const [_sizeCategory, setSizeCategory] = useState<MARKER_SIZE_CATEGORIES>(size_category ?? "MEDIUM");
   const [_defaultAvatar, setAvatar] = useState<string>(avatarUri);
-  const [_totalHp, setTotalHp] = useState<number>(totalHp);
 
   const newloadImageRef = useRef<any>(null);
 
-  const handleSizeChange = (size: number) => {
-    setSize(size);
-  };
   const handleNameChange = (name: string) => {
     setName(name);
   };
@@ -45,32 +54,79 @@ export default function EditCharacterModal({ callback, title, name, avatarUri, t
         <label htmlFor="enemySize" className="form-label">
           Size
         </label>
-        <input
-          className="form-control"
-          type="number"
-          id="enemySize"
-          value={_size}
-          onChange={(e: ChangeEvent<HTMLInputElement>) => {
-            handleSizeChange(+e.currentTarget.value);
-          }}
-        />
+        {/* <input */}
+        {/*   className="form-control" */}
+        {/*   type="number" */}
+        {/*   id="enemySize" */}
+        {/*   value={_size} */}
+        {/*   onChange={(e: ChangeEvent<HTMLInputElement>) => { */}
+        {/*     handleSizeChange(+e.currentTarget.value); */}
+        {/*   }} */}
+        {/* /> */}
+
+        <div className="btn-group" role="group" aria-label="Radio Button Size Selector">
+          <input
+            type="radio"
+            className="btn-check"
+            name="SizeSelectorRadio"
+            id="TinySelectorRadio"
+            onChange={() => { setSizeCategory("TINY") }}
+            checked={_sizeCategory === "TINY"}
+          />
+          <label className="btn btn-outline-primary" htmlFor="TinySelectorRadio">Tiny</label>
+
+          <input
+            type="radio"
+            className="btn-check"
+            name="SizeSelectorRadio"
+            id="SmallSelectorRadio"
+            onChange={() => { setSizeCategory("SMALL") }}
+            checked={_sizeCategory === "SMALL"}
+          />
+          <label className="btn btn-outline-primary" htmlFor="SmallSelectorRadio">Small</label>
+
+          <input
+            type="radio"
+            className="btn-check"
+            name="SizeSelectorRadio"
+            id="MediumSelectorRadio"
+            onChange={() => { setSizeCategory("MEDIUM") }}
+            checked={_sizeCategory === "MEDIUM"}
+          />
+          <label className="btn btn-outline-primary" htmlFor="MediumSelectorRadio">Medium</label>
+
+          <input
+            type="radio"
+            className="btn-check"
+            name="SizeSelectorRadio"
+            id="LargeSelectorRadio"
+            onChange={() => { setSizeCategory("LARGE") }}
+            checked={_sizeCategory === "LARGE"}
+          />
+          <label className="btn btn-outline-primary" htmlFor="LargeSelectorRadio">Large</label>
+
+          <input
+            type="radio"
+            className="btn-check"
+            name="SizeSelectorRadio"
+            id="HugeSelectorRadio"
+            onChange={() => { setSizeCategory("HUGE") }}
+            checked={_sizeCategory === "HUGE"}
+          />
+          <label className="btn btn-outline-primary" htmlFor="HugeSelectorRadio">Huge</label>
+
+          <input
+            type="radio"
+            className="btn-check"
+            name="SizeSelectorRadio"
+            id="GargantuanSelectorRadio"
+            onChange={() => { setSizeCategory("GARGANTUAN") }}
+            checked={_sizeCategory === "GARGANTUAN"}
+          />
+          <label className="btn btn-outline-primary" htmlFor="GargantuanSelectorRadio">Gargantuan</label>
+        </div>
       </div>
-      {/* Removed for new side panel layout */}
-      {/* <div className="mb-3"> */}
-      {/*   <label htmlFor="enemyTotalHp" className="form-label"> */}
-      {/*     Total Hp */}
-      {/*   </label> */}
-      {/*   <input */}
-      {/*     className="form-control" */}
-      {/*     type="number" */}
-      {/*     id="enemyTotalHp" */}
-      {/*     value={THP} */}
-      {/*     onChange={(e: ChangeEvent<HTMLInputElement>) => { */}
-      {/*       setTotalHp(+e.currentTarget.value); */}
-      {/*     }} */}
-      {/*   /> */}
-      {/* </div> */}
-    </div>
+    </div >
   );
 
   return (
@@ -84,7 +140,7 @@ export default function EditCharacterModal({ callback, title, name, avatarUri, t
         if (!newloadImageRef.current) return;
         const imageSrc = await newloadImageRef.current.getMinioFileUrl();
         if (!imageSrc) callback(undefined);
-        callback({ name: _name, size: _size, avatarUri: imageSrc, hp: _totalHp });
+        callback({ name: _name, size_category: _sizeCategory, avatarUri: imageSrc });
       }}
     />
   );

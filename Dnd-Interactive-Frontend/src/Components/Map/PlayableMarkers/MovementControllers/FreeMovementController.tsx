@@ -1,5 +1,5 @@
 import { LatLng, LeafletEvent, LeafletMouseEvent } from "leaflet";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Pane, useMapEvents } from "react-leaflet";
 import { useGameState } from "../../../../ContextProvider/GameStateContext/GameStateProvider";
 import { Tools, useGameToolContext } from "../../../../ContextProvider/GameToolProvider";
@@ -11,6 +11,7 @@ import DistanceLine from "../DistanceLine";
 import MarkerDisplay from "../MarkerDisplay";
 import { Summons } from "../../../../shared/Summons";
 import { CharacterStatus } from "../../../../shared/StatusTypes";
+import { MARKER_SIZE_CATEGORIES } from "../../../../shared/MarkerOptions";
 
 export default function FreeMovementController({ controllableUser, userType, onPositionChange, onGhostPositionChange }:
   {
@@ -29,7 +30,8 @@ export default function FreeMovementController({ controllableUser, userType, onP
   const [id, setId] = useState<string>(markerUser.userId ?? markerUser.id);
   const [name, setName] = useState<string>(markerUser.name);
   const [avatarUri, setAvatarUri] = useState<string>(markerUser.avatarUri);
-  const [markerSize, setMarkerSize] = useState<number>((markerUser as Enemy).size ?? mapContext.getIconHeight());
+  // const [markerSize, setMarkerSize] = useState<number>(mapContext.getIconHeight());
+  const [sizeCategory, setSizeCategory] = useState<MARKER_SIZE_CATEGORIES>((markerUser as Enemy | Summons).size_category ?? "MEDIUM");
   const [iconSize, setIconSize] = useState<number>(mapContext.getIconHeight());
   const [position, setPosition] = useState<LatLng>(new LatLng(markerUser.position.lat, markerUser.position.lng));
   const [toPosition, setToPosition] = useState<LatLng[]>([position]);
@@ -55,6 +57,23 @@ export default function FreeMovementController({ controllableUser, userType, onP
     isMovingRef.current = isMoving;
   }, [isMoving])
 
+  const calcSizeCategoryMultiplier = useCallback((): number => {
+    switch (sizeCategory) {
+      case "TINY":
+        return iconSize * 0.5;
+      case "SMALL":
+        return iconSize * 0.85;
+      case "MEDIUM":
+        return iconSize * 1;
+      case "LARGE":
+        return iconSize * 2;
+      case "HUGE":
+        return iconSize * 3;
+      case "GARGANTUAN":
+        return iconSize * 4;
+    }
+  }, [sizeCategory, iconSize]);
+
   useEffect(() => {
     // setup listeners for the player.
     if (userType !== "player") return;
@@ -71,7 +90,6 @@ export default function FreeMovementController({ controllableUser, userType, onP
       setName(value.detail.val);
     }
     const handleIconHeightChange = (value: any) => {
-      setMarkerSize(value.detail.val);
       setIconSize(value.detail.val);
     };
     const handleConnectionChange = (value: any) => {
@@ -135,7 +153,7 @@ export default function FreeMovementController({ controllableUser, userType, onP
       setPosition(value.detail.val);
     };
     const updateSize = (value: any) => {
-      setMarkerSize(value.detail.val);
+      setSizeCategory(value.detail.val);
     };
     const updateAvatar = (value: any) => {
       setAvatarUri(value.detail.val);
@@ -200,7 +218,7 @@ export default function FreeMovementController({ controllableUser, userType, onP
       setPosition(value.detail.val);
     };
     const updateSize = (value: any) => {
-      setMarkerSize(value.detail.val);
+      setSizeCategory(value.detail.val);
     };
     const updateColor = (value: any) => {
       setColor(value.detail.val);
@@ -323,7 +341,7 @@ export default function FreeMovementController({ controllableUser, userType, onP
           avatarURI={userType === "player" ? avatarUri : `/colyseus/getImage/${avatarUri}`}
           color={color}
           position={position}
-          size={markerSize}
+          size={calcSizeCategoryMultiplier()}
           health={health}
           totalHealth={totalHealth}
           className={isVisible ? "opacity-100" : "opacity-50"}
@@ -333,9 +351,14 @@ export default function FreeMovementController({ controllableUser, userType, onP
       </Pane>
       <DistanceLine start={position} end={toPosition.length > 0 ? toPosition[0] : position} color={color} size={iconSize} />
       <Pane name={`Free-${userType}-Ghost-Marker-${id}`} style={{ zIndex: 501 }}>
-        <MarkerDisplay name={name} avatarURI={userType === "player" ? avatarUri : `/colyseus/getImage/${avatarUri}`} color={color} position={toPosition[toPosition.length - 1] ?? position} size={markerSize}
+        <MarkerDisplay
+          name={name}
+          avatarURI={userType === "player" ? avatarUri : `/colyseus/getImage/${avatarUri}`}
+          color={color}
+          position={toPosition[toPosition.length - 1]}
+          size={calcSizeCategoryMultiplier()}
           isDraggable={true}
-          className={"opacity-50"}
+          className={`${isMoving ? "opacity-50" : "opacity-0"}`}
           displayName={false}
           health={health}
           totalHealth={totalHealth}

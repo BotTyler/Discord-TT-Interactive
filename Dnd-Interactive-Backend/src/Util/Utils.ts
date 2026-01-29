@@ -1,5 +1,6 @@
 import DOMPurify from "dompurify";
 import { JSDOM } from "jsdom";
+import { MARKER_SIZE_CATEGORIES } from "../shared/MarkerOptions";
 
 export const jsdomWindow = new JSDOM("").window;
 export const purify = DOMPurify(jsdomWindow);
@@ -98,5 +99,24 @@ function ValidateTypes(val: any, expected: ExpectedTypes): boolean {
       break;
     default:
       return typeof val === expected;
+  }
+}
+
+export function processMarkerStringSizes(value: string): MARKER_SIZE_CATEGORIES {
+  switch (value) {
+    case "TINY":
+      return "TINY";
+    case "SMALL":
+      return "SMALL";
+    case "MEDIUM":
+      return "MEDIUM";
+    case "LARGE":
+      return "LARGE";
+    case "HUGE":
+      return "HUGE";
+    case "GARGANTUAN":
+      return "GARGANTUAN";
+    default:
+      return "MEDIUM";
   }
 }

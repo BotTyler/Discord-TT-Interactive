@@ -112,8 +112,8 @@ export const NewLoadImage = forwardRef(function NewLoadImage({ startingImageSrc,
           <input
             type="radio"
             className="btn-check"
-            name="btnradio"
-            id="btnradio1"
+            name="NewLoadImage"
+            id="LoadImage"
             autoComplete="off"
             checked={isLoadActive === true}
             value={0}
@@ -123,15 +123,15 @@ export const NewLoadImage = forwardRef(function NewLoadImage({ startingImageSrc,
               resetValues();
             }}
           />
-          <label className="btn btn-outline-primary" htmlFor="btnradio1">
+          <label className="btn btn-outline-primary" htmlFor="LoadImage">
             Load
           </label>
 
           <input
             type="radio"
             className="btn-check"
-            name="btnradio"
-            id="btnradio2"
+            name="NewLoadImage"
+            id="NewImage"
             autoComplete="off"
             value={1}
             checked={isLoadActive === false}
@@ -140,7 +140,7 @@ export const NewLoadImage = forwardRef(function NewLoadImage({ startingImageSrc,
               resetValues();
             }}
           />
-          <label className="btn btn-outline-primary" htmlFor="btnradio2">
+          <label className="btn btn-outline-primary" htmlFor="NewImage">
             New
           </label>
         </div>

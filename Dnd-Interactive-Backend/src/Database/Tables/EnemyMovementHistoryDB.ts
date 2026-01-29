@@ -2,12 +2,13 @@ import { mLatLng } from "../../shared/PositionInterface";
 import { QueryResult } from "pg";
 import Database from "../Database";
 import { DAO, DatabaseBase } from "../Interface/DatabaseObjectInterface";
+import { MARKER_SIZE_CATEGORIES } from "../../shared/MarkerOptions";
 
 export class EnemyMovementHistoryDAO extends DAO {
   private id?: number;
   private history_id: number;
   private enemy_id: number;
-  private size: number;
+  private size_category: MARKER_SIZE_CATEGORIES;
   private position_lat: number;
   private position_lng: number;
   private initiaitive: number;
@@ -21,7 +22,7 @@ export class EnemyMovementHistoryDAO extends DAO {
   constructor(
     history_id: number,
     enemy_id: number,
-    size: number,
+    size_category: MARKER_SIZE_CATEGORIES,
     position: mLatLng,
     initiative: number,
     health: number,
@@ -36,7 +37,7 @@ export class EnemyMovementHistoryDAO extends DAO {
     this.id = id;
     this.history_id = history_id;
     this.enemy_id = enemy_id;
-    this.size = size;
+    this.size_category = size_category;
     this.position_lat = position.lat;
     this.position_lng = position.lng;
     this.initiaitive = initiative;
@@ -52,7 +53,7 @@ export class EnemyMovementHistoryDAO extends DAO {
     return [
       "history_id",
       "enemy_id",
-      "size",
+      "size_category",
       "position_lat",
       "position_lng",
       "initiative",
@@ -68,7 +69,7 @@ export class EnemyMovementHistoryDAO extends DAO {
     return [
       this.history_id,
       this.enemy_id,
-      this.size,
+      this.size_category,
       this.position_lat,
       this.position_lng,
       this.initiaitive,
@@ -118,7 +119,7 @@ export class EnemyMovementHistoryDB extends DatabaseBase<EnemyMovementHistoryDAO
         history_id: +val.history_id,
         name: val.name,
         image_name: val.image_name,
-        size: +val.size,
+        size_category: val.size_category,
         is_visible: val.is_visible,
         position_lat: +val.position_lat,
         position_lng: +val.position_lng,
@@ -136,7 +137,7 @@ export class EnemyMovementHistoryDB extends DatabaseBase<EnemyMovementHistoryDAO
 export interface EmhJoinInterface {
   id: number;
   history_id: number;
-  size: number;
+  size_category: MARKER_SIZE_CATEGORIES;
   enemy_id: number;
   position_lat: number;
   position_lng: number;
