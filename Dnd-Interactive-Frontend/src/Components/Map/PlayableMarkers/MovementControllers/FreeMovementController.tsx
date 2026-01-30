@@ -355,7 +355,7 @@ export default function FreeMovementController({ controllableUser, userType, onP
           name={name}
           avatarURI={userType === "player" ? avatarUri : `/colyseus/getImage/${avatarUri}`}
           color={color}
-          position={toPosition[toPosition.length - 1]}
+          position={toPosition[toPosition.length - 1] ?? position}
           size={calcSizeCategoryMultiplier()}
           isDraggable={true}
           className={`${isMoving ? "opacity-50" : "opacity-0"}`}
