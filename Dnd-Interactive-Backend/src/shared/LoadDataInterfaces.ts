@@ -55,6 +55,7 @@ export interface CampaignsDao {
 
 export interface LoadCampaign {
   id: number;
+  map_id: number;
   player_size: number;
   name: string;
   width: number;

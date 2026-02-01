@@ -1,18 +1,18 @@
 import { Room } from "colyseus";
+import { EnemyDAO, EnemyDB } from "../../Database/Tables/EnemyDB";
+import { ImageCatalogDAO, ImageCatalogDB } from "../../Database/Tables/ImageCatalogDB";
+import { Enemy } from "../../shared/Enemy";
+import { MARKER_SIZE_CATEGORIES } from "../../shared/MarkerOptions";
+import { Player } from "../../shared/Player";
+import { mLatLng } from "../../shared/PositionInterface";
+import { State } from "../../shared/State";
+import { CharacterStatus } from "../../shared/StatusTypes";
 import {
   authenticateHostAction,
   processMarkerStringSizes,
   ValidateAllInputs,
   ValidationInputType,
 } from "../../Util/Utils";
-import { ImageCatalogDAO, ImageCatalogDB } from "../../Database/Tables/ImageCatalogDB";
-import { EnemyDAO, EnemyDB } from "../../Database/Tables/EnemyDB";
-import { State } from "../../shared/State";
-import { mLatLng } from "../../shared/PositionInterface";
-import { Enemy } from "../../shared/Enemy";
-import { MARKER_SIZE_CATEGORIES } from "../../shared/MarkerOptions";
-import { Player } from "../../shared/Player";
-import { CharacterStatus, Conditions } from "../../shared/StatusTypes";
 
 export function RegisterEnemyStateHandler(room: Room<State>): void {
   room.onMessage("updateEnemyPosition", (client, data) => {
@@ -26,9 +26,11 @@ export function RegisterEnemyStateHandler(room: Room<State>): void {
         pos: mLatLng;
         clientToChange: string;
       } = ValidateAllInputs(data, inputList);
+
       if (!authenticateHostAction(client.sessionId, room)) {
         return;
       }
+      console.log("Authenticated Enemy Movement");
       const pos: mLatLng = new mLatLng(+validateParams.pos.lat, +validateParams.pos.lng);
       const enemyId: string = validateParams.clientToChange;
 
@@ -140,14 +142,14 @@ export function RegisterEnemyStateHandler(room: Room<State>): void {
       const validateParams: {
         id: string;
         health: number;
-        totalHealth: number;
+        total_health: number;
       } = ValidateAllInputs(data, inputList);
 
       const enemy: Enemy | null = room.state.enemies.get(validateParams.id) ?? null;
       if (enemy === null) return;
 
       enemy.health = validateParams.health;
-      enemy.totalHealth = validateParams.totalHealth;
+      enemy.totalHealth = validateParams.total_health;
     } catch (error) {
       console.error(error);
     }

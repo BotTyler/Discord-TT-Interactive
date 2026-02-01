@@ -182,7 +182,6 @@ export function saveState(room: Room<State>, client?: Client): void {
     // client.send("exportData", new Error("Data was not saved!!"));
     return;
   }
-
   // const player_id = this.state._getPlayerBySessionId(client.sessionId);
   // if (player_id === undefined) return; // this data cannot be inserted into the table
   const host_id: string | undefined = room.state.currentHostUserId;

@@ -1,17 +1,17 @@
-import { Client, Room } from "colyseus";
+import { Room } from "colyseus";
+import { ImageCatalogDAO, ImageCatalogDB } from "../../Database/Tables/ImageCatalogDB";
+import { MapDAO, MapDB } from "../../Database/Tables/MapDB";
+import { CampaignsDao } from "../../shared/LoadDataInterfaces";
+import { MapData } from "../../shared/Map";
+import { Player } from "../../shared/Player";
+import { mLatLng } from "../../shared/PositionInterface";
+import { GameStateEnum, State } from "../../shared/State";
 import {
   authenticateHostAction,
   saveState,
   ValidateAllInputs,
   ValidationInputType,
 } from "../../Util/Utils";
-import { ImageCatalogDAO, ImageCatalogDB } from "../../Database/Tables/ImageCatalogDB";
-import { MapDAO, MapDB } from "../../Database/Tables/MapDB";
-import { GameStateEnum, State } from "../../shared/State";
-import { Player } from "../../shared/Player";
-import { MapData } from "../../shared/Map";
-import { mLatLng } from "../../shared/PositionInterface";
-import { CampaignsDao } from "../../shared/LoadDataInterfaces";
 
 export function RegisterMapStateHandler(room: Room<State>): void {
   room.onMessage("setPlayerSize", (client, data) => {
@@ -69,7 +69,7 @@ export function RegisterMapStateHandler(room: Room<State>): void {
           iconHeight: validateParams.iconHeight,
           initiativeIndex: 0,
         },
-        data.id,
+        +mapId,
       );
       // Separate Players to make sure they do not overlap.
       let index: number = 0;
@@ -128,24 +128,5 @@ export function RegisterMapStateHandler(room: Room<State>): void {
     if (!authenticateHostAction(client.sessionId, room)) return;
     if (room.state.map === null) return;
     room.state.map.initiativeIndex = 0;
-  });
-  room.onMessage("exportMap", (client, data) => {
-    if (!authenticateHostAction(client.sessionId, room)) return;
-    try {
-      const inputList: ValidationInputType[] = [
-        { name: "isAutosave", type: "boolean", PostProcess: undefined },
-      ];
-
-      const validateParams: any = ValidateAllInputs(data, inputList);
-      if (validateParams.isAutosave) {
-        // For autosave we will not want to notify the client on a save.
-        // we only want to notify when it was intentional.
-        saveState(room);
-      } else {
-        saveState(room, client);
-      }
-    } catch (error) {
-      console.error(error);
-    }
   });
 }

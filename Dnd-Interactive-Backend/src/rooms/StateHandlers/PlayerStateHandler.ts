@@ -5,9 +5,9 @@ import {
   ValidateAllInputs,
   ValidationInputType,
 } from "../../Util/Utils";
-import { State } from "../../shared/State";
-import { mLatLng } from "../../shared/PositionInterface";
 import { Player } from "../../shared/Player";
+import { mLatLng } from "../../shared/PositionInterface";
+import { State } from "../../shared/State";
 import { CharacterStatus } from "../../shared/StatusTypes";
 import { Summons } from "../../shared/Summons";
 

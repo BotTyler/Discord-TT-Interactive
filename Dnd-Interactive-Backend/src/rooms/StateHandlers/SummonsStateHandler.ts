@@ -1,4 +1,12 @@
 import { Room } from "colyseus";
+import { ImageCatalogDAO, ImageCatalogDB } from "../../Database/Tables/ImageCatalogDB";
+import { SummonsDao, SummonsDB } from "../../Database/Tables/SummonsDb";
+import { MARKER_SIZE_CATEGORIES } from "../../shared/MarkerOptions";
+import { Player } from "../../shared/Player";
+import { mLatLng } from "../../shared/PositionInterface";
+import { State } from "../../shared/State";
+import { CharacterStatus } from "../../shared/StatusTypes";
+import { Summons } from "../../shared/Summons";
 import {
   authenticateHostAction,
   processMarkerStringSizes,
@@ -6,14 +14,6 @@ import {
   ValidateAllInputs,
   ValidationInputType,
 } from "../../Util/Utils";
-import { ImageCatalogDAO, ImageCatalogDB } from "../../Database/Tables/ImageCatalogDB";
-import { SummonsDao, SummonsDB } from "../../Database/Tables/SummonsDb";
-import { State } from "../../shared/State";
-import { mLatLng } from "../../shared/PositionInterface";
-import { Summons } from "../../shared/Summons";
-import { Player } from "../../shared/Player";
-import { MARKER_SIZE_CATEGORIES } from "../../shared/MarkerOptions";
-import { CharacterStatus } from "../../shared/StatusTypes";
 
 export function RegisterSummonsStateHandler(room: Room<State>): void {
   room.onMessage("updateSummonsPosition", (client, data) => {

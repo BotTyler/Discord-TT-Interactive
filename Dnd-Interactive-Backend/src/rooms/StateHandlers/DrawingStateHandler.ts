@@ -1,9 +1,9 @@
 import { Room } from "colyseus";
 import { softAuthenticate, ValidateAllInputs, ValidationInputType } from "../../Util/Utils";
-import { State } from "../../shared/State";
-import { mLatLng } from "../../shared/PositionInterface";
-import { Player } from "../../shared/Player";
 import { ArcDrawing, BeamDrawing, CircleDrawing, CubeDrawing } from "../../shared/DrawingInterface";
+import { Player } from "../../shared/Player";
+import { mLatLng } from "../../shared/PositionInterface";
+import { State } from "../../shared/State";
 
 export function RegisterDrawingStateHandler(room: Room<State>): void {
   room.onMessage("addDrawings", (client, data) => {

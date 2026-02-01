@@ -12,13 +12,6 @@ import { PlayerMovementHistoryDB } from "../../Database/Tables/PlayerMovementHis
 import { SaveHistoryDB } from "../../Database/Tables/SaveHistoryDB";
 import { SummonsHistoryDB } from "../../Database/Tables/SummonsHistoryDB";
 import { Enemy } from "../../shared/Enemy";
-import { MapData } from "../../shared/Map";
-import { Player } from "../../shared/Player";
-import { mLatLng } from "../../shared/PositionInterface";
-import { State } from "../../shared/State";
-import { CharacterStatus } from "../../shared/StatusTypes";
-import { Summons } from "../../shared/Summons";
-import { authenticateHostAction, ValidateAllInputs, ValidationInputType } from "../../Util/Utils";
 import {
   CampaignsDao,
   LoadCampaign,
@@ -26,6 +19,18 @@ import {
   PlayerSaveState,
   ShJoinInterface,
 } from "../../shared/LoadDataInterfaces";
+import { MapData } from "../../shared/Map";
+import { Player } from "../../shared/Player";
+import { mLatLng } from "../../shared/PositionInterface";
+import { State } from "../../shared/State";
+import { CharacterStatus } from "../../shared/StatusTypes";
+import { Summons } from "../../shared/Summons";
+import {
+  authenticateHostAction,
+  saveState,
+  ValidateAllInputs,
+  ValidationInputType,
+} from "../../Util/Utils";
 
 export function RegisterSaveAndLoadStateHandler(room: Room<State>): void {
   room.onMessage("getCampaigns", async (client, _data) => {
@@ -127,7 +132,7 @@ export function RegisterSaveAndLoadStateHandler(room: Room<State>): void {
           iconHeight: mapInterface.player_size,
           initiativeIndex: initiativeSave.initiative_index,
         },
-        data.id!,
+        +mapInterface.map_id,
       );
       room.state.map = map;
 
@@ -179,8 +184,8 @@ export function RegisterSaveAndLoadStateHandler(room: Room<State>): void {
       // Load Enemy Data
       enemyStates.forEach((enemyState: EmhJoinInterface): void => {
         const insertEnemy: Enemy = new Enemy({
-          avatarUri: enemyState.image_name,
           id: enemyState.enemy_id,
+          avatarUri: enemyState.image_name,
           name: enemyState.name,
           size_category: enemyState.size_category,
         });
@@ -196,8 +201,28 @@ export function RegisterSaveAndLoadStateHandler(room: Room<State>): void {
           return new CharacterStatus(status);
         });
 
-        room.state.enemies.set(`${enemyState.id}`, insertEnemy);
+        room.state.enemies.set(`${insertEnemy.id}`, insertEnemy);
       });
+    } catch (error) {
+      console.error(error);
+    }
+  });
+
+  room.onMessage("exportMap", (client, data) => {
+    if (!authenticateHostAction(client.sessionId, room)) return;
+    try {
+      const inputList: ValidationInputType[] = [
+        { name: "isAutosave", type: "boolean", PostProcess: undefined },
+      ];
+
+      const validateParams: any = ValidateAllInputs(data, inputList);
+      if (validateParams.isAutosave) {
+        // For autosave we will not want to notify the client on a save.
+        // we only want to notify when it was intentional.
+        saveState(room);
+      } else {
+        saveState(room, client);
+      }
     } catch (error) {
       console.error(error);
     }

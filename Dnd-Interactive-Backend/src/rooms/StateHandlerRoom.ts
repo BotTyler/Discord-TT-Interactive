@@ -1,19 +1,5 @@
 import { Client, Room } from "colyseus";
-import {
-  EnemyMovementHistoryDAO,
-  EnemyMovementHistoryDB,
-} from "../Database/Tables/EnemyMovementHistoryDB";
-import { InitiativeHistoryDAO, InitiativeHistoryDB } from "../Database/Tables/InitiativeHistoryDB";
 import { PlayerDAO, PlayerDB } from "../Database/Tables/PlayerDB";
-import {
-  PlayerMovementHistoryDAO,
-  PlayerMovementHistoryDB,
-} from "../Database/Tables/PlayerMovementHistoryDB";
-import { SaveHistoryDAO, SaveHistoryDB } from "../Database/Tables/SaveHistoryDB";
-import { SummonsHistoryDao, SummonsHistoryDB } from "../Database/Tables/SummonsHistoryDB";
-import { Enemy } from "../shared/Enemy";
-import { ExportDataInterface } from "../shared/ExportDataInterface";
-import { MARKER_SIZE_CATEGORIES } from "../shared/MarkerOptions";
 import { mLatLng } from "../shared/PositionInterface";
 import { IState, State } from "../shared/State";
 import { CharacterStatus } from "../shared/StatusTypes";
@@ -26,9 +12,9 @@ import { RegisterEnemyStateHandler } from "./StateHandlers/EnemyStateHandler";
 import { RegisterGameStateHandler } from "./StateHandlers/GameStateHandler";
 import { RegisterMapStateHandler } from "./StateHandlers/MapStateHandler";
 import { RegisterPlayerStateHandler } from "./StateHandlers/PlayerStateHandler";
-import { RegisterSaveAndLoadStateHandler } from "./StateHandlers/SaveAndLoadStateHandler";
 import { RegisterSummonsStateHandler } from "./StateHandlers/SummonsStateHandler";
 import { PlayerSaveState, ShJoinInterface } from "../shared/LoadDataInterfaces";
+import { RegisterSaveAndLoadStateHandler } from "./StateHandlers/SaveAndLoadStateHandler";
 
 export class StateHandlerRoom extends Room<State> {
   maxClients = 1000;
@@ -49,7 +35,7 @@ export class StateHandlerRoom extends Room<State> {
     RegisterSaveAndLoadStateHandler(this);
 
     //EXTRA
-    this.onMessage("*", (client, data) => {
+    this.onMessage("*", (_client, data) => {
       console.log(data);
       console.log("No message with that type found");
     });

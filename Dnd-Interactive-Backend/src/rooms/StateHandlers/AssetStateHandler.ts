@@ -1,8 +1,8 @@
 import { Room } from "colyseus";
 import { ImageCatalogDAO, ImageCatalogDB } from "../../Database/Tables/ImageCatalogDB";
-import { State } from "../../shared/State";
-import { Player } from "../../shared/Player";
 import { LoadImage } from "../../shared/LoadDataInterfaces";
+import { Player } from "../../shared/Player";
+import { State } from "../../shared/State";
 
 export function RegisterAssetStateHandler(room: Room<State>): void {
   // A method to gather all images submitted by the user that is stored in the minio database.

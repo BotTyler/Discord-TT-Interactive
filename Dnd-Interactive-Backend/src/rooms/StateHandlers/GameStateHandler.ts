@@ -5,8 +5,8 @@ import {
   ValidateAllInputs,
   ValidationInputType,
 } from "../../Util/Utils";
-import { MapMovementType, State } from "../../shared/State";
 import { Player } from "../../shared/Player";
+import { MapMovementType, State } from "../../shared/State";
 
 export function RegisterGameStateHandler(room: Room<State>): void {
   room.onMessage("ChangeGridColor", (client, data) => {

@@ -1,7 +1,7 @@
 import { Room } from "colyseus";
 import { sanitize, ValidateAllInputs, ValidationInputType } from "../../Util/Utils";
-import { State } from "../../shared/State";
 import { Player } from "../../shared/Player";
+import { State } from "../../shared/State";
 
 export function RegisterMessageStateHandler(room: Room<State>): void {
   room.onMessage("BroadcastMessage", (client, data) => {

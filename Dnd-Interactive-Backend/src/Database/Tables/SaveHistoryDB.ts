@@ -78,7 +78,7 @@ export class SaveHistoryDB extends DatabaseBase<SaveHistoryDAO> {
     save_history_id: number,
   ): Promise<LoadCampaign[]> {
     const query = `
-      SELECT SH.id, SH.player_size, MP."name", IC.width, IC.height, IC.image_name FROM Public."Save_History" SH
+      SELECT SH.id, MP.id as map_id, SH.player_size, MP."name", IC.width, IC.height, IC.image_name FROM Public."Save_History" SH
         JOIN public."Map" as MP on MP.id = SH.map
         JOIN public."Image_Catalog" as IC on IC.img_catalog_id = MP.image_id
 	    WHERE SH.map = $1
@@ -98,7 +98,8 @@ export class SaveHistoryDB extends DatabaseBase<SaveHistoryDAO> {
 
     return rows.map((val: LoadCampaign): LoadCampaign => {
       return {
-        id: val.id!,
+        id: +val.id!,
+        map_id: +val.map_id,
         name: val.name,
         image_name: val.image_name,
         player_size: +val.player_size,
