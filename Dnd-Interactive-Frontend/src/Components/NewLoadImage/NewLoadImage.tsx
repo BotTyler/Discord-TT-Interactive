@@ -1,9 +1,9 @@
-import { LoadImage } from "../../../src/shared/LoadDataInterfaces";
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useState } from "react";
 import { useAuthenticatedContext } from "../../ContextProvider/useAuthenticatedContext";
 import { getFileNameFromMinioString } from "../../Util/Util";
 import { useMessageContext } from "../../ContextProvider/Messages/MessageContextProvider";
 import { TOAST_LEVEL } from "../../ContextProvider/Messages/Toast";
+import { LoadImage } from "../../shared/LoadDataInterfaces";
 
 // Although the onChange method can be used to get the image url. This will not be linked with pg or minio. When the image should be used, we should use the forward ref method (getMinioFileUrl) to ensure the file is properly placed.
 // onChange will provide the full url to get the image within a src tag. But this should not be used for creating or updating players **************************************

@@ -1,10 +1,9 @@
 import { Enemy } from "../../../src/shared/Enemy";
 import { GameStateEnum, MapMovementType } from "../../../src/shared/State";
-import { MapData, MapFogPolygon } from "../../../src/shared/Map";
 import React, { useImperativeHandle } from "react";
 import { useAuthenticatedContext } from "../useAuthenticatedContext";
 import EnemyContextElement from "./EnemyContextElement";
-import FogContextElement from "./FogContextElement";
+import { MapData } from "../../shared/Map";
 
 export const GameMapContextHandler = React.forwardRef(function GameMapContextHandler({ }: {}, ref: any) {
   const authenticatedContext = useAuthenticatedContext();
@@ -25,9 +24,6 @@ export const GameMapContextHandler = React.forwardRef(function GameMapContextHan
   //Enemy list
   const [enemies, setEnemies] = React.useState<{ [key: string]: Enemy }>({});
   const [connectedEnemies, setConnectedEnemies] = React.useState<{ [key: string]: string }>({});
-  // Fog List
-  const [fogs, setFogs] = React.useState<{ [key: string]: MapFogPolygon }>({});
-  const [connectedFogs, setConnectedFogs] = React.useState<{ [key: string]: string }>({});
   // icon height
   const [iconHeight, setIconHeight] = React.useState<number>(0);
   // Init index
@@ -58,12 +54,6 @@ export const GameMapContextHandler = React.forwardRef(function GameMapContextHan
       getEnemy(id: string): Enemy | undefined {
         return enemies[id];
       },
-      getFogs(): { [key: string]: MapFogPolygon } {
-        return fogs;
-      },
-      getFog(id: string): MapFogPolygon | undefined {
-        return fogs[id];
-      },
       getIconHeight(): number {
         return iconHeight;
       },
@@ -77,7 +67,7 @@ export const GameMapContextHandler = React.forwardRef(function GameMapContextHan
         return gridShowing;
       }
     }),
-    [map, mapMovement, curHostId, currentGameState, enemies, fogs, iconHeight, initiativeIndex, gridColor, gridShowing]
+    [map, mapMovement, curHostId, currentGameState, enemies, iconHeight, initiativeIndex, gridColor, gridShowing]
   );
 
   const emitFieldChangeEvent = (field: string, value: any) => {
@@ -99,9 +89,6 @@ export const GameMapContextHandler = React.forwardRef(function GameMapContextHan
   React.useEffect(() => {
     emitFieldChangeEvent(`EnemiesChanged`, enemies);
   }, [enemies]);
-  React.useEffect(() => {
-    emitFieldChangeEvent(`FogsChanged`, fogs);
-  }, [fogs]);
   React.useEffect(() => {
     emitFieldChangeEvent(`IconHeightChanged`, iconHeight);
   }, [iconHeight]);
@@ -168,7 +155,7 @@ export const GameMapContextHandler = React.forwardRef(function GameMapContextHan
     if (map === null) return;
 
     // set the listeners for enemy
-    const enemyAdd = map.enemy.onAdd((item: Enemy, key: string) => {
+    const enemyAdd = authenticatedContext.room.state.enemies.onAdd((item: Enemy, key: string) => {
       setEnemies((prev) => {
         return { ...prev, [key]: item };
       });
@@ -178,7 +165,7 @@ export const GameMapContextHandler = React.forwardRef(function GameMapContextHan
     });
     // delete enemies
 
-    const enemyRemove = map.enemy.onRemove((item: Enemy, key: string) => {
+    const enemyRemove = authenticatedContext.room.state.enemies.onRemove((item: Enemy, key: string) => {
       setEnemies((prev) => {
         const { [key]: _, ...temp } = prev;
         return temp;
@@ -206,64 +193,12 @@ export const GameMapContextHandler = React.forwardRef(function GameMapContextHan
         return connectedEnemyObject;
       });
     };
-    const enemyListen = map.listen("enemy", (val) => handleEnemyChange(val));
+    const enemyListen = authenticatedContext.room.state.listen("enemies", (val) => handleEnemyChange(val));
 
     return () => {
       enemyListen();
       enemyAdd();
       enemyRemove();
-    };
-  }, [authenticatedContext.room, map]);
-
-  // all listeners for the Fogs list only (No Fogg Properties)
-  React.useEffect(() => {
-    if (map === null) return;
-
-    // set the listeners for enemy
-    const fogAdd = map.fogs.onAdd((item: MapFogPolygon, key: string) => {
-      setFogs((prev) => {
-        return { ...prev, [key]: item };
-      });
-      setConnectedFogs((prev) => {
-        return { ...prev, [key]: key };
-      });
-    });
-    // delete enemies
-
-    const fogRemove = map.fogs.onRemove((item: MapFogPolygon, key: string) => {
-      setFogs((prev) => {
-        const { [key]: _, ...temp } = prev;
-        return temp;
-      });
-      setConnectedFogs((prev) => {
-        const { [key]: _, ...temp } = prev;
-        return temp;
-      });
-    });
-
-    // full change
-    const handleFogChange = (i: any) => {
-      const itemList = [...i.$items]; // should be a list where an element 0 - key and 1 - enemy value
-      const fogObject: { [key: string]: MapFogPolygon } = {};
-      const connectedFogObject: { [key: string]: string } = {};
-      itemList.forEach((value) => {
-        fogObject[value[0]] = value[1];
-        connectedFogObject[value[0]] = value[0];
-      });
-
-      setFogs((prev) => {
-        return fogObject;
-      });
-      setConnectedFogs((prev) => {
-        return connectedFogObject;
-      });
-    };
-    const fogListen = map.listen("fogs", (val) => handleFogChange(val));
-
-    return () => {
-      fogListen();
-      fogAdd();
-      fogRemove();
     };
   }, [authenticatedContext.room, map]);
 
@@ -299,25 +234,6 @@ export const GameMapContextHandler = React.forwardRef(function GameMapContextHan
                 }
 
                 return newEnemies;
-              });
-            }}
-          />
-        );
-      })}
-      {Object.keys(connectedFogs).map((key) => {
-        return (
-          <FogContextElement
-            key={`FogContextElement-${key}`}
-            fog={fogs[key]}
-            onValueChanged={(field: string, value: unknown) => {
-              setFogs((prev) => {
-                const newFogs = { ...prev };
-                if (newFogs[key]) {
-                  // @ts-expect-error
-                  newFogs[key][field] = value;
-                }
-
-                return newFogs;
               });
             }}
           />

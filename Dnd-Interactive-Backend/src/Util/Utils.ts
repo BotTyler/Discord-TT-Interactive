@@ -1,6 +1,25 @@
 import DOMPurify from "dompurify";
 import { JSDOM } from "jsdom";
 import { MARKER_SIZE_CATEGORIES } from "../shared/MarkerOptions";
+import { Client, Room } from "colyseus";
+import { State } from "../shared/State";
+import { Player } from "../shared/Player";
+import { ExportDataInterface } from "../shared/ExportDataInterface";
+import { SaveHistoryDAO, SaveHistoryDB } from "../Database/Tables/SaveHistoryDB";
+import { CharacterStatus } from "../shared/StatusTypes";
+import {
+  PlayerMovementHistoryDAO,
+  PlayerMovementHistoryDB,
+} from "../Database/Tables/PlayerMovementHistoryDB";
+import { Summons } from "../shared/Summons";
+import { mLatLng } from "../shared/PositionInterface";
+import { SummonsHistoryDao, SummonsHistoryDB } from "../Database/Tables/SummonsHistoryDB";
+import { Enemy } from "../shared/Enemy";
+import {
+  EnemyMovementHistoryDAO,
+  EnemyMovementHistoryDB,
+} from "../Database/Tables/EnemyMovementHistoryDB";
+import { InitiativeHistoryDAO, InitiativeHistoryDB } from "../Database/Tables/InitiativeHistoryDB";
 
 export const jsdomWindow = new JSDOM("").window;
 export const purify = DOMPurify(jsdomWindow);
@@ -54,7 +73,7 @@ export type ValidationInputType = {
 export function ValidateAllInputs(
   reqInputs: Record<string, any>,
   validInputs: ValidationInputType[],
-): Object {
+): any {
   // console.log(reqInputs);
   const validatedRecord: Record<string, any> = {};
   for (const field of validInputs) {
@@ -119,4 +138,205 @@ export function processMarkerStringSizes(value: string): MARKER_SIZE_CATEGORIES 
     default:
       return "MEDIUM";
   }
+}
+
+//#region Validation
+/**
+ * This function will determine if the action taking place is allowed.
+ * @param issuer - the player that is calling for a change
+ * @param reciever - the player that is recieving the change
+ * @returns Boolean to determine if the action is validated
+ */
+export function softAuthenticate(
+  issuer_session_id: string,
+  reciever_id: string,
+  room: Room<State>,
+): boolean {
+  const issuer: Player | null = room.state.getPlayerBySessionId(issuer_session_id);
+  const reciever: Player | null = room.state.getPlayerByUserId(reciever_id);
+  if (issuer === null) return false;
+  if (reciever === null) return false;
+
+  return authenticateHostAction(issuer_session_id, room) || issuer.userId === reciever.userId;
+}
+
+export function authenticateHostAction(session_id: string, room: Room<State>): boolean {
+  // console.log("start authentication")
+  const user: Player | null = room.state.getPlayerBySessionId(session_id);
+  if (user === null) return false;
+
+  return (
+    room.state.currentHostUserId !== undefined &&
+    user.isHost &&
+    room.state.currentHostUserId === user.userId
+  );
+}
+
+// Save the current state
+// if a client is provided, they will be sent the status of the save.
+export function saveState(room: Room<State>, client?: Client): void {
+  const data: ExportDataInterface | null = room.state.exportCurrentMapData() ?? null;
+
+  if (data === null) {
+    console.log("data not saved!!");
+    // client.send("exportData", new Error("Data was not saved!!"));
+    return;
+  }
+
+  // const player_id = this.state._getPlayerBySessionId(client.sessionId);
+  // if (player_id === undefined) return; // this data cannot be inserted into the table
+  const host_id: string | undefined = room.state.currentHostUserId;
+  if (host_id === undefined) {
+    console.log("Host not defined");
+    return;
+  }
+
+  // TODO: This should be transformed into a transaction on the database side for now this is ok for test purposes.
+  SaveHistoryDB.getInstance()
+    .create(new SaveHistoryDAO(new Date(), data.map.id!, host_id, data.map.iconHeight))
+    .then((history_id: number | null) => {
+      if (history_id === null) return;
+
+      const savePromises: Promise<any>[] = [];
+      //we have the save history index we now need to insert into all other databases
+
+      // Create a checkpoint for all players in the player_movement_history DB
+      [...data.players.keys()].forEach((key) => {
+        const p: Player = data.players.get(key)!;
+        const position = p.position;
+        const initiative = p.initiative;
+        const health = p.health;
+        const totalHealth = p.totalHealth;
+        const deathSaves = p.deathSaves;
+        const lifeSaves = p.lifeSaves;
+        const statuses: string[] = p.statuses.map((val: CharacterStatus): string => {
+          return val.toString();
+        });
+
+        const playerSavePromise: Promise<any> = PlayerMovementHistoryDB.getInstance().create(
+          new PlayerMovementHistoryDAO(
+            history_id,
+            key,
+            position,
+            initiative,
+            health,
+            totalHealth,
+            deathSaves,
+            lifeSaves,
+            statuses,
+          ),
+        );
+        savePromises.push(playerSavePromise);
+
+        p.summons.forEach((curSummon: Summons): void => {
+          const summons_id: number = curSummon.id;
+          const size_category: MARKER_SIZE_CATEGORIES = curSummon.size_category;
+          const position: mLatLng = curSummon.position;
+          const health: number = curSummon.health;
+          const totalHealth: number = curSummon.totalHealth;
+          const deathSaves: number = curSummon.deathSaves;
+          const lifeSaves: number = curSummon.lifeSaves;
+          const isVisible: boolean = curSummon.isVisible;
+          const statuses: string[] = curSummon.statuses.map((val: CharacterStatus): string => {
+            return val.toString();
+          });
+
+          const summonSavePromise: Promise<any> = SummonsHistoryDB.getInstance().create(
+            new SummonsHistoryDao(
+              history_id,
+              summons_id,
+              p.userId,
+              size_category,
+              position,
+              health,
+              totalHealth,
+              deathSaves,
+              lifeSaves,
+              isVisible,
+              statuses,
+            ),
+          );
+
+          savePromises.push(summonSavePromise);
+        });
+      });
+
+      // Create a checkpoint for all enemies
+      [...data.enemies.keys()].forEach((key: string): void => {
+        const e: Enemy = data.enemies.get(key)!;
+
+        const enemy_id: number = e.id;
+        const position: mLatLng = e.position;
+        const size_category: MARKER_SIZE_CATEGORIES = e.size_category;
+        const initiaitive: number = e.initiative;
+        const health: number = e.health;
+        const totalHealth: number = e.totalHealth;
+        const deathSaves: number = e.deathSaves;
+        const lifeSaves: number = e.lifeSaves;
+        const isVisible: boolean = e.isVisible;
+        const statuses: string[] = e.statuses.map((val: CharacterStatus): string => {
+          return val.toString();
+        });
+
+        const enemySavePromise: Promise<any> = EnemyMovementHistoryDB.getInstance().create(
+          new EnemyMovementHistoryDAO(
+            history_id,
+            enemy_id,
+            size_category,
+            position,
+            initiaitive,
+            health,
+            totalHealth,
+            deathSaves,
+            lifeSaves,
+            isVisible,
+            statuses,
+          ),
+        );
+
+        savePromises.push(enemySavePromise);
+      });
+
+      const initiativeSavePromise: Promise<any> = InitiativeHistoryDB.getInstance().create(
+        new InitiativeHistoryDAO(history_id, data.map.initiativeIndex),
+      );
+      savePromises.push(initiativeSavePromise);
+
+      if (client !== undefined) {
+        Promise.allSettled(savePromises)
+          .then((value: PromiseSettledResult<any>[]): void => {
+            let errorAmount: number = 0;
+            value.forEach((promiseReturn: PromiseSettledResult<any>): void => {
+              if (promiseReturn.status === "rejected") {
+                errorAmount++;
+              }
+            });
+            /**
+              0 = SUCCESS
+              1 = WARNING - Partial Save
+              2 = ERROR - NO SAVE
+              */
+            const sendRes: { level: number } = { level: 0 };
+            if (errorAmount === 0) {
+              sendRes.level = 0;
+            } else if (errorAmount < value.length) {
+              sendRes.level = 1;
+            } else {
+              sendRes.level = 2;
+            }
+
+            client.send("SaveStatus", sendRes);
+          })
+          .catch((_e: any): void => {
+            // This should never happen.
+            console.error("Error in promise.settled of save function");
+          });
+      }
+    })
+    .catch((_e: any): void => {
+      if (client !== undefined) {
+        // Send back a compelte failure
+        client.send("SaveStatus", { level: 2 });
+      }
+    });
 }

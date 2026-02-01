@@ -1,6 +1,6 @@
 import { Enemy } from "../../../src/shared/Enemy";
 import { GameStateEnum, MapMovementType } from "../../../src/shared/State";
-import { MapData, MapFogPolygon } from "../../../src/shared/Map";
+import { MapData } from "../../../src/shared/Map";
 import React from "react";
 import Error from "../../Pages/Error/Error";
 import MainMenu from "../../Pages/MainMenu/MainMenu";
@@ -16,8 +16,6 @@ export interface GameStateInterface {
   getCurrentGameState: () => GameStateEnum;
   getEnemies: () => { [key: string]: Enemy };
   getEnemy: (id: string) => Enemy | null;
-  getFogs: () => { [key: string]: MapFogPolygon };
-  getFog: (id: string) => MapFogPolygon | null;
   getIconHeight: () => number;
   getInitiativeIndex: () => number;
   getGridColor: () => string;
@@ -40,12 +38,6 @@ const GameStateContext = React.createContext<GameStateInterface>({
     return {};
   },
   getEnemy: (id: string): Enemy | null => {
-    return null;
-  },
-  getFogs: () => {
-    return {};
-  },
-  getFog: (id: string) => {
     return null;
   },
   getIconHeight: () => {
@@ -131,14 +123,6 @@ export function GameStateContextProvider() {
     if (gameStateContextRef.current == null) return null;
     return gameStateContextRef.current.getEnemy(id);
   };
-  const getFogs = (): { [key: string]: MapFogPolygon } => {
-    if (gameStateContextRef.current == null) return {};
-    return gameStateContextRef.current.getFogs();
-  };
-  const getFog = (id: string): MapFogPolygon | null => {
-    if (gameStateContextRef.current == null) return null;
-    return gameStateContextRef.current.getFog(id);
-  };
   const getIconHeight = () => {
     if (gameStateContextRef.current == null) return 0;
     return gameStateContextRef.current.getIconHeight();
@@ -162,8 +146,6 @@ export function GameStateContextProvider() {
     getCurrentGameState: getGameState,
     getEnemies: getEnemies,
     getEnemy: getEnemy,
-    getFogs: getFogs,
-    getFog: getFog,
     getIconHeight: getIconHeight,
     getInitiativeIndex: getInitiativeIndex,
     getGridColor: getGridColor,

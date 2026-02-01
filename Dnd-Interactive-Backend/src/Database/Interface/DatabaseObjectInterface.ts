@@ -4,8 +4,6 @@ import Database from "../Database";
 const ALLOWED_TABLES = new Set([
   "Enemy",
   "Enemy_Movement_History",
-  "Fog",
-  "Fog_State_History",
   "Image",
   "Map",
   "Player",
