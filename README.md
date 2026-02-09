@@ -2,7 +2,7 @@
 
 ## About
 
-A clean, easy-to-use app that helps players and DMs manage their D&D sessions.
+A real-time, Discord-embedded tabletop app built with React, Express, Colyseus, and Docker that streamlines D&D combat for remote campaigns. Players can manage combat, share handouts, and chat seamlessly in a fantasy environment. Designed to bring the tabletop experience to Discord, giving players more control and immersion without needing to meet in person.
 
 ## Prerequisites
 
