@@ -127,7 +127,6 @@ export const NewLoadImage = forwardRef(function NewLoadImage({
 
   const getFullImgSrc = (): string => {
 
-    console.log(imageFile);
     // Determine if a new object is being used.
     if (imageFile !== null) {
       // Determine if it is a new file or loaded from an already created object.
@@ -141,12 +140,10 @@ export const NewLoadImage = forwardRef(function NewLoadImage({
     }
 
     // Determine if there is a preset
-    console.log(presetImage);
     if (presetImage !== null) {
       return presetImage;
     }
 
-    console.log(placeholder);
     // if all else fails use the placeholder.
     return placeholder;
   };
