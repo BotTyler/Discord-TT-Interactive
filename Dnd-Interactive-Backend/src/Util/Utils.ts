@@ -75,29 +75,33 @@ export function ValidateAllInputs(
   validInputs: ValidationInputType[],
 ): any {
   // console.log(reqInputs);
-  const validatedRecord: Record<string, any> = {};
-  for (const field of validInputs) {
-    const reqValue = reqInputs[field.name];
+  try {
+    const validatedRecord: Record<string, any> = {};
+    for (const field of validInputs) {
+      const reqValue = reqInputs[field.name];
 
-    // Check to make sure the value is there and of the right type
-    if (reqValue == null) {
-      console.error(`Value ${field.name} was found to be undefined!!`);
-      throw new Error(`Value ${field.name} was found to be undefined!!`);
-    }
+      // Check to make sure the value is there and of the right type
+      if (reqValue == null) {
+        console.error(`Value ${field.name} was found to be undefined!!`);
+        throw new Error(`Value ${field.name} was found to be undefined!!`);
+      }
 
-    if (!ValidateTypes(reqValue, field.type)) {
-      console.error(
-        `Value is not of the right type. Value: ${reqValue} Type: ${typeof reqValue} Expected: ${field.type}`,
-      );
-      throw new Error(
-        `Value is not of the right type. Value: ${reqValue} Type: ${typeof reqValue} Expected: ${field.type}`,
-      );
+      if (!ValidateTypes(reqValue, field.type)) {
+        console.error(
+          `Value is not of the right type. Value: ${reqValue} Type: ${typeof reqValue} Expected: ${field.type}`,
+        );
+        throw new Error(
+          `Value is not of the right type. Value: ${reqValue} Type: ${typeof reqValue} Expected: ${field.type}`,
+        );
+      }
+      // The value should be here, lets add it to the final record and santize the input if supported.
+      if (field.PostProcess) validatedRecord[field.name] = field.PostProcess(reqValue);
+      else validatedRecord[field.name] = reqValue;
     }
-    // The value should be here, lets add it to the final record and santize the input if supported.
-    if (field.PostProcess) validatedRecord[field.name] = field.PostProcess(reqValue);
-    else validatedRecord[field.name] = reqValue;
+    return validatedRecord;
+  } catch (ex: any) {
+    throw new Error("Internal Service Exception", ex);
   }
-  return validatedRecord;
 }
 
 /**
