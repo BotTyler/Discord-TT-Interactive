@@ -18,7 +18,6 @@ export default function ImportExport() {
   useEffect(() => {
     // Start interval
     const intervalId = setInterval(() => {
-      console.log("AUTOSAVING")
       authContext.room.send("exportMap", { isAutosave: true });
     }, 20 * 60 * 1000); // 20 minute
 

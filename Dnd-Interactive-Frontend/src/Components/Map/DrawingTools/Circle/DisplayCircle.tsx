@@ -34,10 +34,9 @@ export default function DisplayCircle({ player }: { player: Player }) {
   }, []);
 
   const handleRemove = () => {
-    if (authContext.user.id !== player.userId) return; // I do not want to remove any other shapes other than my own.
     switch (toolContext.curTool) {
       case Tools.DELETE:
-        authContext.room.send("removeCircle");
+        authContext.room.send("removeCircle", { playerId: player.userId });
         break;
       default:
         console.log("Nothing to handle");

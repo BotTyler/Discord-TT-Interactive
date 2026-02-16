@@ -1,6 +1,6 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useState } from "react";
 import { useAuthenticatedContext } from "../../ContextProvider/useAuthenticatedContext";
-import { getFileNameFromMinioString } from "../../Util/Util";
+import { getFileNameFromMinioString, removeColyseusPath } from "../../Util/Util";
 import { useMessageContext } from "../../ContextProvider/Messages/MessageContextProvider";
 import { TOAST_LEVEL } from "../../ContextProvider/Messages/Toast";
 import { LoadImage } from "../../shared/LoadDataInterfaces";
@@ -16,6 +16,8 @@ export const NewLoadImage = forwardRef(function NewLoadImage({
   showPreview?: boolean;
   startingImage?: string;
 }, ref: any) {
+
+
   const authContext = useAuthenticatedContext();
   const toastContext = useMessageContext();
   const placeholder = "Assets/placeholder.png";
@@ -35,6 +37,9 @@ export const NewLoadImage = forwardRef(function NewLoadImage({
 
 
   // Listen to any changes the would require some sort of update.
+  // NOTE: This will not be an authoritative source for usage in the app.
+  // Please use the getMinioFileUrl method to make sure the data is properly handled.
+  // This method should only be used in cases where a component wants to handle the preview of the image.
   useEffect(() => {
     if (!onChange) return;
 
@@ -48,8 +53,6 @@ export const NewLoadImage = forwardRef(function NewLoadImage({
         // the correct file extension should already be included.
         onChange(imageFile.imgsrc);
       }
-      // If all else fails use the placeholder.
-      return onChange(placeholder);
     }
 
     // No New File detected. Lets see if preset exist.
@@ -59,7 +62,7 @@ export const NewLoadImage = forwardRef(function NewLoadImage({
     }
 
     // There is nothing to call change with.
-    // Alert the user to incorrect usage of the function.
+    onChange(placeholder);
     return;
   }, [imageFile]);
 
@@ -71,6 +74,7 @@ export const NewLoadImage = forwardRef(function NewLoadImage({
         // This function will be the main call for submitting objects.
         // This will need to handle all image uploads to the server and send back the proper access URL.
         async getMinioFileUrl(): Promise<string | undefined> {
+
           if (imageFile !== null) {
             // Either a load or a new file was uploaded.
             if (imageFile.file !== null) {
@@ -91,15 +95,16 @@ export const NewLoadImage = forwardRef(function NewLoadImage({
 
             } else {
               // A preselected image was used. Lets use the imgSrc.
-              return imageFile.imgsrc;
+              return removeColyseusPath(imageFile.imgsrc);
             }
           }
 
           if (presetImage !== null) {
-            return presetImage;
+            return removeColyseusPath(presetImage);
           }
 
-          // TODO: Presenting a alert would be nice to tell the user what they did was invalid.
+
+          toastContext.addToast("[ERROR]", "No Image available to use.", TOAST_LEVEL.ERROR);
           return undefined;
 
         },

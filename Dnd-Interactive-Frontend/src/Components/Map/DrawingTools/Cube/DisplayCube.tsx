@@ -35,10 +35,9 @@ export default function DisplayCube({ player }: { player: Player }) {
   }, []);
 
   const handleRemove = () => {
-    if (authContext.user.id !== player.userId) return; // I do not want to remove any other shapes other than my own.
     switch (toolContext.curTool) {
       case Tools.DELETE:
-        authContext.room.send("removeCube");
+        authContext.room.send("removeCube", { playerId: player.userId });
         break;
       default:
         console.log("Nothing to handle");

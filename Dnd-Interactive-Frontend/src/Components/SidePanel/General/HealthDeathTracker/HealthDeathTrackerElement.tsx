@@ -370,6 +370,7 @@ export default function HealthDeathTrackerElement({ item, itemType }:
           <EditCharacterModal
             callback={(data) => {
               if (data === undefined) {
+                console.error("Value for edit is null");
                 setShowEditCharacter(false);
                 return;
               }

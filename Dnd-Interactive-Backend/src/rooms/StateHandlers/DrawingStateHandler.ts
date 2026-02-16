@@ -148,7 +148,7 @@ export function RegisterDrawingStateHandler(room: Room<State>): void {
       const player: Player | null = room.state.getPlayerBySessionId(client.sessionId);
       if (player === null) return;
 
-      const center: mLatLng = new mLatLng(+validateParams.center.lng, +validateParams.center.lat);
+      const center: mLatLng = new mLatLng(+validateParams.center.lat, +validateParams.center.lng);
       const toLocation: mLatLng = new mLatLng(
         +validateParams.toLocation.lat,
         +validateParams.toLocation.lng,
