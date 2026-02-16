@@ -62,7 +62,6 @@ export default function PlayerSummonsListElement({ }: {}) {
             return;
           }}
           title="Summon Add"
-          avatarUri={""}
           name=""
           key={`AddSummonModal`}
         />

@@ -29,17 +29,33 @@ export default function PopupWindow({ children, onClose, width = 100, height = 2
   }, [isMoving]);
 
   return (
-    <div className="border border-3 rounded-bottom overflow-hidden d-flex flex-column" style={{ userSelect: "none", width: `${width}px`, height: `${height}px`, position: "fixed", top: `${top}px`, left: `${left}px`, boxShadow: "0 6px 10px rgba(50,50,50, 1)", zIndex: 1000, resize: "both" }}>
+    <div
+      className="border border-2 rounded overflow-hidden d-flex flex-column shadow-lg"
+      style={{
+        userSelect: "none",
+        width: `${width}px`,
+        height: `${height}px`,
+        position: "fixed",
+        top: `${top}px`,
+        left: `${left}px`,
+        boxShadow: "0 6px 10px rgba(50,50,50, 1)",
+        zIndex: 1000,
+        resize: "both"
+      }}>
       <div id="header" className="w-100 position-relative" style={{ height: "30px", borderBottom: "1px inset grey" }}>
-        <button className="position-absolute btn btn-secondary d-flex justify-content-center align-items-center" style={{ top: 0, right: 0, left: 0, bottom: 0, borderRadius: 0 }} onMouseUp={MouseUpCallback} onMouseDown={MouseDownCallback}></button>
+        <div
+          className="position-absolute bg-secondary d-flex justify-content-center align-items-center"
+          style={{ top: 0, right: 0, left: 0, bottom: 0, borderRadius: 0, cursor: "pointer" }}
+          onMouseUp={MouseUpCallback}
+          onMouseDown={MouseDownCallback}></div>
         <button
-          className="close-button position-absolute btn btn-danger rounded-0"
+          className="close-button position-absolute btn btn-danger rounded-0 py-0"
           style={{ right: 0, top: 0, bottom: "-1px" }}
           onClick={() => {
             onClose();
           }}
         >
-          &times;
+          <i className="bi bi-x"></i>
         </button>
       </div>
       <div id="body" className="overflow-x-hidden overflow-y-auto bg-dark w-100 py-1" style={{ flex: "1 1 auto", height: "1px" }}>

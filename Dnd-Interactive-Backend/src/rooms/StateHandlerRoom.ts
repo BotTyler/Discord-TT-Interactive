@@ -15,6 +15,7 @@ import { RegisterPlayerStateHandler } from "./StateHandlers/PlayerStateHandler";
 import { RegisterSummonsStateHandler } from "./StateHandlers/SummonsStateHandler";
 import { PlayerSaveState, ShJoinInterface } from "../shared/LoadDataInterfaces";
 import { RegisterSaveAndLoadStateHandler } from "./StateHandlers/SaveAndLoadStateHandler";
+import { RegisterMessageStateHandler } from "./StateHandlers/MessageStateHandler";
 
 export class StateHandlerRoom extends Room<State> {
   maxClients = 1000;
@@ -33,6 +34,7 @@ export class StateHandlerRoom extends Room<State> {
 
     RegisterAssetStateHandler(this);
     RegisterSaveAndLoadStateHandler(this);
+    RegisterMessageStateHandler(this);
 
     //EXTRA
     this.onMessage("*", (_client, data) => {

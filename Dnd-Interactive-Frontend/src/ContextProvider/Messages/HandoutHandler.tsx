@@ -51,11 +51,11 @@ export default function HandoutHandler() {
       {handouts.map((val: HandoutInterface, index: number) => {
         return (
           <PopupWindow
-            width={500}
-            height={500}
+            width={window.innerWidth / 3}
+            height={window.innerHeight / 2}
             resizeable={true}
-            startx={getRandomX()}
-            starty={getRandomY()}
+            startx={window.innerWidth / 2}
+            starty={window.innerHeight / 2}
             key={`Handout-${val.id}`}
             onClose={() => {
               setHandouts((prev) => {

@@ -109,6 +109,8 @@ export function RegisterEnemyStateHandler(room: Room<State>): void {
         size_category: validateParams.size,
       });
       enemy.position = new mLatLng(+validateParams.position.lat, +validateParams.position.lng);
+
+      room.state.enemies.set(`${enemyId}`, enemy);
     } catch (error) {
       console.error(error);
     }
