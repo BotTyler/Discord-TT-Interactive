@@ -192,7 +192,6 @@ export function RegisterSummonsStateHandler(room: Room<State>): void {
   });
 
   room.onMessage("SummonHealth", (client, data) => {
-    if (!authenticateHostAction(client.sessionId, room)) return;
     try {
       const inputList: ValidationInputType[] = [
         { name: "id", type: "number", PostProcess: undefined },
