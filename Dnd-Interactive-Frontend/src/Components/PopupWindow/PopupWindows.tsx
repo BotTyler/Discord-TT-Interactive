@@ -4,22 +4,30 @@ export default function PopupWindow({ children, onClose, width = 100, height = 2
   const [top, setTop] = useState<number>(starty);
   const [left, setLeft] = useState<number>(startx);
   const [isMoving, setMoving] = useState<boolean>(false);
+  const [offsetMouse, setOffsetMouse] = useState<[number, number]>([-10, -10]);
 
   const MouseUpCallback = useCallback((event: MouseEvent) => {
     setMoving(false);
   }, []);
   const MouseDownCallback = useCallback((event: MouseEvent) => {
+    const targetRect = event.currentTarget.getBoundingClientRect();
+    setOffsetMouse((_prev) => {
+      return [
+        event.clientX - targetRect.left,
+        event.clientY - targetRect.top
+      ]
+    });
     setMoving(true);
   }, []);
 
   useEffect(() => {
     const MouseDragCallback = (event: any) => {
       if (!isMoving) return;
-      setTop((prev) => {
-        return prev + event.movementY;
+      setLeft((_prev) => {
+        return event.pageX - offsetMouse[0];
       });
-      setLeft((prev) => {
-        return prev + event.movementX;
+      setTop((_prev) => {
+        return event.pageY - offsetMouse[1];
       });
     };
     document.addEventListener("mousemove", MouseDragCallback);
