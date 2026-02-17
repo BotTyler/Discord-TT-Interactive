@@ -90,7 +90,7 @@ export function RegisterSummonsStateHandler(room: Room<State>): void {
         avatarUri: string;
         name: string;
         position: mLatLng;
-        size: string;
+        size: MARKER_SIZE_CATEGORIES;
       } = ValidateAllInputs(data, inputList);
 
       // NOTE: utilizes the player so no authentication is required.
@@ -111,7 +111,7 @@ export function RegisterSummonsStateHandler(room: Room<State>): void {
         id: summonId,
         avatarUri: validateParams.avatarUri,
         name: validateParams.name,
-        size_category: data.size_category,
+        size_category: validateParams.size,
         color: player.color,
       });
 
