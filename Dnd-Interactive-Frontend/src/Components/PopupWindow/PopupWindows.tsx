@@ -4,7 +4,7 @@ export default function PopupWindow({ children, onClose, width = 100, height = 2
   const [top, setTop] = useState<number>(starty);
   const [left, setLeft] = useState<number>(startx);
   const [isMoving, setMoving] = useState<boolean>(false);
-  const [offsetMouse, setOffsetMouse] = useState<[number, number]>([-10, -10]);
+  const [offsetMouse, setOffsetMouse] = useState<[number, number]>([0, 0]);
 
   const MouseUpCallback = useCallback((event: MouseEvent) => {
     setMoving(false);
