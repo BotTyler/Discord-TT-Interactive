@@ -40,7 +40,7 @@
     "@typescript-eslint/parser": "^8.42.0",
     "@vitejs/plugin-react": "^4.0.0",
     "sass": "^1.77.8",
-    "vite": "^5.2.9"
+    "vite": "^7.3.1"
   },
   "eslintConfig": {
     "parser": "@typescript-eslint/parser",
