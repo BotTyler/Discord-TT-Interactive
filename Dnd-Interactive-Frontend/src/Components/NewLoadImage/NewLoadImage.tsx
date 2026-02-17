@@ -47,17 +47,19 @@ export const NewLoadImage = forwardRef(function NewLoadImage({
       // Determine if a new file was loaded or if an existing one was used
       if (imageFile.file !== null) {
         // This is a new load to which the correct MINIO url is not prefixed.
-        onChange(`/colyseus/getImage/${imageFile.imgsrc}`);
+        onChange(`${imageFile.imgsrc}`);
+        return;
       } else {
         // This means the file was loaded from an existing save.
         // the correct file extension should already be included.
-        onChange(imageFile.imgsrc);
+        onChange(`/colyseus/getImage/${imageFile.imgsrc}`);
+        return;
       }
     }
 
     // No New File detected. Lets see if preset exist.
     if (presetImage !== null) {
-      onChange(presetImage);
+      onChange(`/colyseus/getImage/${presetImage}`);
       return;
     }
 
