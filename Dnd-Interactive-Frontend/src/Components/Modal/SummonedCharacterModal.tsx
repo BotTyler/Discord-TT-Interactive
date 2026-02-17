@@ -18,14 +18,14 @@ export default function EditCharacterModal(
     {
       name: string;
       title: string,
-      avatarUri: string;
+      avatarUri?: string;
       size_category?: MARKER_SIZE_CATEGORIES;
       callback: (data: { name: string; size_category: MARKER_SIZE_CATEGORIES; avatarUri: string; } | undefined) => void
     }) {
 
   const [_name, setName] = useState<string>(name);
   const [_sizeCategory, setSizeCategory] = useState<MARKER_SIZE_CATEGORIES>(size_category ?? "MEDIUM");
-  const [_defaultAvatar, setAvatar] = useState<string>(avatarUri);
+  const [_defaultAvatar, setAvatar] = useState<string | null>(avatarUri ?? null);
 
   const newloadImageRef = useRef<any>(null);
 
@@ -35,7 +35,9 @@ export default function EditCharacterModal(
 
   const uploadBody = (
     <div className="container-fluid">
-      <NewLoadImage startingImageSrc={_defaultAvatar} imgSrcPrefix={"/colyseus/getImage/"} ref={newloadImageRef} />
+      <NewLoadImage
+        startingImage={_defaultAvatar !== null ? `/colyseus/getImage/${_defaultAvatar}` : undefined}
+        ref={newloadImageRef} />
       <div className="mb-3">
         <label htmlFor="enemyName" className="form-label">
           Name

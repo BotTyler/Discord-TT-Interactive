@@ -1,75 +1,123 @@
-import { LoadImage } from "../../../src/shared/LoadDataInterfaces";
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useState } from "react";
 import { useAuthenticatedContext } from "../../ContextProvider/useAuthenticatedContext";
-import { getFileNameFromMinioString } from "../../Util/Util";
+import { getFileNameFromMinioString, removeColyseusPath } from "../../Util/Util";
 import { useMessageContext } from "../../ContextProvider/Messages/MessageContextProvider";
 import { TOAST_LEVEL } from "../../ContextProvider/Messages/Toast";
+import { LoadImage } from "../../shared/LoadDataInterfaces";
 
 // Although the onChange method can be used to get the image url. This will not be linked with pg or minio. When the image should be used, we should use the forward ref method (getMinioFileUrl) to ensure the file is properly placed.
 // onChange will provide the full url to get the image within a src tag. But this should not be used for creating or updating players **************************************
-export const NewLoadImage = forwardRef(function NewLoadImage({ startingImageSrc, imgSrcPrefix, showPreview = true, onChange }: { startingImageSrc: string; imgSrcPrefix: string; showPreview?: boolean; onChange?: (imageUrl: string) => void }, ref: any) {
+export const NewLoadImage = forwardRef(function NewLoadImage({
+  onChange,
+  showPreview = true,
+  startingImage,
+}: {
+  onChange?: (imageUrl: string) => void
+  showPreview?: boolean;
+  startingImage?: string;
+}, ref: any) {
+
+
   const authContext = useAuthenticatedContext();
   const toastContext = useMessageContext();
+  const placeholder = "Assets/placeholder.png";
 
-  const [imgSrc, setImgSrc] = useState<string>(`${imgSrcPrefix}${startingImageSrc}`);
-  const [imageFile, setImageFile] = useState<{ file: File | undefined; imgsrc: string } | undefined>(undefined);
+  // This object will hold values that are either loaded from a new file or selected from an existing object.
+  // The file will be loaded from an existing object if file is null.
+  // If file exist then the file will need to by streamed to MINIO first before usage.
+  const [imageFile, setImageFile] = useState<{ file: File | null; imgsrc: string } | null>(null);
+
+  const [presetImage, setPreset] = useState<string | null>(startingImage ?? null);
   const [knownImageList, setKnownImageList] = useState<LoadImage[]>([]);
   const [isLoadActive, setLoadActive] = useState<boolean>(true); // If true the load page should be shown first
 
   useEffect(() => {
-    setImgSrc(`${imgSrcPrefix}${startingImageSrc}`);
-  }, [startingImageSrc]);
+    setPreset(startingImage ?? null);
+  }, [startingImage]);
 
+
+  // Listen to any changes the would require some sort of update.
+  // NOTE: This will not be an authoritative source for usage in the app.
+  // Please use the getMinioFileUrl method to make sure the data is properly handled.
+  // This method should only be used in cases where a component wants to handle the preview of the image.
   useEffect(() => {
     if (!onChange) return;
-    if (!imageFile) {
-      onChange(imgSrc);
-      return;
+
+    if (imageFile !== null) {
+      // Determine if a new file was loaded or if an existing one was used
+      if (imageFile.file !== null) {
+        // This is a new load to which the correct MINIO url is not prefixed.
+        onChange(`${imageFile.imgsrc}`);
+        return;
+      } else {
+        // This means the file was loaded from an existing save.
+        // the correct file extension should already be included.
+        onChange(`/colyseus/getImage/${imageFile.imgsrc}`);
+        return;
+      }
     }
-    if (!imageFile.file) {
-      onChange(`/colyseus/getImage/${imageFile.imgsrc}`);
+
+    // No New File detected. Lets see if preset exist.
+    if (presetImage !== null) {
+      onChange(`/colyseus/getImage/${presetImage}`);
       return;
     }
 
-    onChange(imageFile.imgsrc);
-  }, [imgSrc, imageFile]);
+    // There is nothing to call change with.
+    onChange(placeholder);
+    return;
+  }, [imageFile]);
+
 
   useImperativeHandle(
     ref,
     () => {
       return {
+        // This function will be the main call for submitting objects.
+        // This will need to handle all image uploads to the server and send back the proper access URL.
         async getMinioFileUrl(): Promise<string | undefined> {
-          // If there is no image file then we can return the original imgSrc
-          if (!imageFile) {
-            return startingImageSrc;
+
+          if (imageFile !== null) {
+            // Either a load or a new file was uploaded.
+            if (imageFile.file !== null) {
+              // This is a new file lets upload it to minio.
+              const formData = new FormData();
+              formData.append("image", imageFile.file);
+              const response = await authContext.client.http
+                .post(`/uploadImage/${authContext.user.id}`, {
+                  body: formData,
+                })
+                .catch((e) => {
+                  toastContext.addToast("[ERROR]", "Failed to upload image", TOAST_LEVEL.ERROR);
+                  throw new Error(e);
+                });
+              toastContext.addToast("[SUCCESS]", "Image Uploaded!!", TOAST_LEVEL.SUCCES);
+              const data = response.data;
+              return data.fileName;
+
+            } else {
+              // A preselected image was used. Lets use the imgSrc.
+              return removeColyseusPath(imageFile.imgsrc);
+            }
           }
 
-          // If no new file is here there must be some src image from an already existing minio instance
-          if (!imageFile.file) return imageFile.imgsrc;
+          if (presetImage !== null) {
+            return removeColyseusPath(presetImage);
+          }
 
-          // A new File was uploaded we need to send this data to minio
-          const formData = new FormData();
-          formData.append("image", imageFile.file);
-          const response = await authContext.client.http
-            .post(`/uploadImage/${authContext.user.id}`, {
-              body: formData,
-            })
-            .catch((e) => {
-              toastContext.addToast("[ERROR]", "Failed to upload image", TOAST_LEVEL.ERROR);
-              throw new Error(e);
-            });
-          toastContext.addToast("[SUCCESS]", "Image Uploaded!!", TOAST_LEVEL.SUCCES);
-          const data = response.data;
-          return data.fileName;
+
+          toastContext.addToast("[ERROR]", "No Image available to use.", TOAST_LEVEL.ERROR);
+          return undefined;
+
         },
       };
     },
-    [imgSrc, imageFile]
+    [presetImage, imageFile]
   );
 
   const handleFileChange = useCallback((e: any) => {
-    const file = e.target.files[0];
-    if (file === undefined) return;
+    const file: File | null = e.target.files[0] ?? null;
+    if (file === null) return;
     setImageFile({ file: file, imgsrc: URL.createObjectURL(file) });
   }, []);
 
@@ -85,13 +133,30 @@ export const NewLoadImage = forwardRef(function NewLoadImage({ startingImageSrc,
   }, []);
 
   const getFullImgSrc = (): string => {
-    if (!imageFile) return imgSrc;
-    if (!imageFile.file) return `/colyseus/getImage/${imageFile.imgsrc}`;
-    return imageFile.imgsrc;
+
+    // Determine if a new object is being used.
+    if (imageFile !== null) {
+      // Determine if it is a new file or loaded from an already created object.
+      if (imageFile.file !== null) {
+        // A new Object was created. For right now we can just use the src.
+        // The minio url will be created when it is needed.
+        return imageFile.imgsrc;
+      } else {
+        return `/colyseus/getImage/${imageFile.imgsrc}`;
+      }
+    }
+
+    // Determine if there is a preset
+    if (presetImage !== null) {
+      return presetImage;
+    }
+
+    // if all else fails use the placeholder.
+    return placeholder;
   };
 
   const resetValues = () => {
-    setImageFile(undefined);
+    setImageFile(null);
   };
 
   const startCapturingImageList = () => {
@@ -154,11 +219,11 @@ export const NewLoadImage = forwardRef(function NewLoadImage({ startingImageSrc,
 
               if (index <= -1) {
                 // reset
-                setImageFile(undefined);
+                setImageFile(null);
               } else {
                 // Another load image was used.
                 const ImageObject = knownImageList[index];
-                setImageFile({ file: undefined, imgsrc: ImageObject.image_name });
+                setImageFile({ file: null, imgsrc: ImageObject.image_name });
               }
             }}
           >

@@ -18,7 +18,6 @@ export default function ImportExport() {
   useEffect(() => {
     // Start interval
     const intervalId = setInterval(() => {
-      console.log("AUTOSAVING")
       authContext.room.send("exportMap", { isAutosave: true });
     }, 20 * 60 * 1000); // 20 minute
 
@@ -34,7 +33,7 @@ export default function ImportExport() {
       1 - Warning - Partial save
       2 - ERROR - Complete Failure
     */
-    authContext.room.onMessage("SaveStatus", (status: { level: number }): void => {
+    const saveCallback = authContext.room.onMessage("SaveStatus", (status: { level: number }): void => {
       switch (status.level) {
         case 0:
           toastContext.addToast("[Success]", "Saved!", TOAST_LEVEL.SUCCES);
@@ -50,6 +49,10 @@ export default function ImportExport() {
           break
       }
     })
+
+    return () => {
+      saveCallback();
+    }
   }, [authContext.room])
 
   const handleExport = React.useCallback((e: React.MouseEvent) => {

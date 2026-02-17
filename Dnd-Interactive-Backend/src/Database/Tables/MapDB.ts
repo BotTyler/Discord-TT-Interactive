@@ -1,7 +1,7 @@
-import { LoadCampaign } from "../../shared/LoadDataInterfaces";
 import { QueryResult } from "pg";
 import Database from "../Database";
 import { DAO, DatabaseBase } from "../Interface/DatabaseObjectInterface";
+import { CampaignsDao } from "../../shared/LoadDataInterfaces";
 
 export class MapDAO extends DAO {
   public readonly id?: number;
@@ -45,18 +45,18 @@ export class MapDB extends DatabaseBase<MapDAO> {
     super("Map");
   }
 
-  async selectMapById(id: number): Promise<MapJoinInterface[]> {
+  async selectMapById(id: number): Promise<CampaignsDao[]> {
     const query = `SELECT * FROM public."Map" as mm JOIN public."Image_Catalog" as IC on IC.img_catalog_id = mm.image_id where id = $1 ORDER BY id DESC;`;
     console.log(query);
 
-    const result: QueryResult<MapJoinInterface> | null = await Database.getInstance()
+    const result: QueryResult<CampaignsDao> | null = await Database.getInstance()
       .query(query, [id])
       .catch((e) => {
-        console.error(`Could not ***select*** Fog State history (${this.tableName})\n\t${e}`);
+        console.error(`Could not ***select*** State history (${this.tableName})\n\t${e}`);
         return null;
       });
-    const rows: MapJoinInterface[] = result === null ? [] : result.rows;
-    return rows.map((ele: MapJoinInterface): MapJoinInterface => {
+    const rows: CampaignsDao[] = result === null ? [] : result.rows;
+    return rows.map((ele: CampaignsDao): CampaignsDao => {
       return {
         id: +ele.id,
         player_id: ele.player_id,
@@ -64,35 +64,35 @@ export class MapDB extends DatabaseBase<MapDAO> {
         image_name: ele.image_name,
         height: +ele.height,
         width: +ele.width,
-        icon_height: +ele.icon_height,
       };
     });
   }
 
-  async selectMapByUserId(userId: string): Promise<LoadCampaign[]> {
+  async selectMapByUserId(userId: string): Promise<CampaignsDao[]> {
     const query = `
-    SELECT MP.id, IC.image_name, IC.height, IC.width, MP."name" 
+    SELECT MP.id, IC.image_name, IC.height, IC.width, MP."name", MP.player_id
     FROM Public."Map" AS MP 
     JOIN Public."Image_Catalog" AS IC on IC.img_catalog_id = MP.image_id 
     WHERE MP.player_id = $1
       AND MP.is_deleted = false;`;
     console.log(query);
 
-    const result: QueryResult<LoadCampaign> | null = await Database.getInstance()
+    const result: QueryResult<CampaignsDao> | null = await Database.getInstance()
       .query(query, [userId])
       .catch((e) => {
         console.error(`Could not gather map data from the user`, e);
         return null;
       });
 
-    const rows: LoadCampaign[] = result === null ? [] : result.rows;
-    return rows.map((val: LoadCampaign): LoadCampaign => {
+    const rows: CampaignsDao[] = result === null ? [] : result.rows;
+    return rows.map((val: CampaignsDao): CampaignsDao => {
       return {
         id: +val.id,
         name: val.name,
         image_name: val.image_name,
         width: +val.width,
         height: +val.height,
+        player_id: val.player_id,
       };
     });
   }
@@ -113,14 +113,4 @@ export class MapDB extends DatabaseBase<MapDAO> {
 
     return result !== null;
   }
-}
-
-export interface MapJoinInterface {
-  id: number;
-  width: number;
-  height: number;
-  icon_height: number;
-  player_id: string;
-  image_name: string;
-  name: string;
 }

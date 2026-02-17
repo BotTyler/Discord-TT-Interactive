@@ -1,6 +1,7 @@
 import { QueryResult } from "pg";
 import Database from "../Database";
 import { DAO, DatabaseBase } from "../Interface/DatabaseObjectInterface";
+import { LoadCampaign, LoadSaveHistory } from "../../shared/LoadDataInterfaces";
 
 export class SaveHistoryDAO extends DAO {
   public readonly id?: number;
@@ -42,7 +43,7 @@ export class SaveHistoryDB extends DatabaseBase<SaveHistoryDAO> {
     super("Save_History");
   }
 
-  async selectByCampaignId(campaign_id: string, player_id: string): Promise<SaveHistoryDAO[]> {
+  async selectByCampaignId(campaign_id: string, player_id: string): Promise<LoadSaveHistory[]> {
     const query = `SELECT * FROM Public."Save_History" 
         where map = $1 
           AND player_id = $2
@@ -58,10 +59,53 @@ export class SaveHistoryDB extends DatabaseBase<SaveHistoryDAO> {
         );
         return null;
       });
-
     const rows: SaveHistoryDAO[] = result === null ? [] : result.rows;
-    return rows.map((val: SaveHistoryDAO): SaveHistoryDAO => {
-      return new SaveHistoryDAO(val.date, +val.map, val.player_id, +val.player_size, +val.id!);
+
+    return rows.map((val: SaveHistoryDAO): LoadSaveHistory => {
+      return {
+        id: val.id!,
+        map: val.map,
+        date: val.date,
+        player_id: val.player_id,
+        player_size: +val.player_size,
+      };
+    });
+  }
+
+  async selectByCampaignIdWithMap(
+    campaign_id: number,
+    player_id: string,
+    save_history_id: number,
+  ): Promise<LoadCampaign[]> {
+    const query = `
+      SELECT SH.id, MP.id as map_id, SH.player_size, MP."name", IC.width, IC.height, IC.image_name FROM Public."Save_History" SH
+        JOIN public."Map" as MP on MP.id = SH.map
+        JOIN public."Image_Catalog" as IC on IC.img_catalog_id = MP.image_id
+	    WHERE SH.map = $1
+        AND SH.player_id = $2
+        AND SH.id = $3;`;
+    console.log(query);
+
+    const result: QueryResult<LoadCampaign> | null = await Database.getInstance()
+      .query(query, [campaign_id, player_id, save_history_id])
+      .catch((e) => {
+        console.error(
+          `Could not ***select**** Campaign Id: ${campaign_id} from (${this.tableName})`,
+        );
+        return null;
+      });
+    const rows: LoadCampaign[] = result === null ? [] : result.rows;
+
+    return rows.map((val: LoadCampaign): LoadCampaign => {
+      return {
+        id: +val.id!,
+        map_id: +val.map_id,
+        name: val.name,
+        image_name: val.image_name,
+        player_size: +val.player_size,
+        height: +val.height,
+        width: +val.width,
+      };
     });
   }
 }

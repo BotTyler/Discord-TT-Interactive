@@ -2,7 +2,7 @@ import { mLatLng } from "../../shared/PositionInterface";
 import { QueryResult } from "pg";
 import Database from "../Database";
 import { DAO, DatabaseBase } from "../Interface/DatabaseObjectInterface";
-import { LoadPlayerInterface } from "../../shared/LoadDataInterfaces";
+import { PlayerSaveState } from "../../shared/LoadDataInterfaces";
 
 export class PlayerMovementHistoryDAO extends DAO {
   public readonly pmh_id?: number;
@@ -90,7 +90,7 @@ export class PlayerMovementHistoryDB extends DatabaseBase<PlayerMovementHistoryD
     super("Player_Movement_History");
   }
 
-  async getPlayerMovementAtHistoryId(history_id: number): Promise<LoadPlayerInterface[]> {
+  async getPlayerMovementAtHistoryId(history_id: number): Promise<PlayerSaveState[]> {
     const query = `SELECT * FROM public."Player_Movement_History" where history_id = $1;`;
     console.log(query);
 
@@ -102,32 +102,20 @@ export class PlayerMovementHistoryDB extends DatabaseBase<PlayerMovementHistoryD
       });
 
     const rows: PlayerSaveState[] = result === null ? [] : result.rows;
-    return rows.map((val: PlayerSaveState): LoadPlayerInterface => {
+    return rows.map((val: PlayerSaveState): PlayerSaveState => {
       return {
         player_id: val.player_id,
         position_lat: +val.position_lat,
         position_lng: +val.position_lng,
         health: +val.health,
-        totalHealth: +val.total_health,
-        lifeSaves: +val.life_saves,
-        deathSaves: +val.death_saves,
+        total_health: +val.total_health,
+        life_saves: +val.life_saves,
+        death_saves: +val.death_saves,
         initiative: +val.initiative,
         statuses: val.statuses,
+        history_id: val.history_id,
+        pmh_id: val.pmh_id,
       };
     });
   }
-}
-
-interface PlayerSaveState {
-  pmh_id: number;
-  history_id: number;
-  player_id: string;
-  position_lat: number;
-  position_lng: number;
-  initiative: number;
-  health: number;
-  total_health: number;
-  death_saves: number;
-  life_saves: number;
-  statuses: string[];
 }

@@ -1,5 +1,4 @@
 import { GameStateEnum } from "../../../src/shared/State";
-import { LoadCampaign, LoadSaveHistory } from "../../../src/shared/LoadDataInterfaces";
 import { MapData } from "../../../src/shared/Map";
 import { Player } from "../../../src/shared/Player";
 import { useEffect, useState } from "react";
@@ -10,20 +9,21 @@ import { useGameState } from "../../ContextProvider/GameStateContext/GameStatePr
 import { useAuthenticatedContext } from "../../ContextProvider/useAuthenticatedContext";
 import "./HostMM.css";
 import { Button, Modal } from "react-bootstrap";
+import { LoadSaveHistory, CampaignsDao } from "../../shared/LoadDataInterfaces";
 
 export default function HostMM({ otherPlayers }: { otherPlayers: Player[] }) {
   const authContext = useAuthenticatedContext();
   function removeHost() {
     authContext.room.send("removeHost");
   }
-  const [campaignList, setCampaignList] = useState<LoadCampaign[]>([]);
-  const [curCampaign, setCurCampaign] = useState<LoadCampaign | undefined>(undefined);
+  const [campaignList, setCampaignList] = useState<CampaignsDao[]>([]);
+  const [curCampaign, setCurCampaign] = useState<CampaignsDao | undefined>(undefined);
   const [isMapUpload, setMapUpload] = useState<boolean>(false);
 
-  const [pendingDeleteMap, setPendingDeleteMap] = useState<LoadCampaign | null>(null);
+  const [pendingDeleteMap, setPendingDeleteMap] = useState<CampaignsDao | null>(null);
 
   useEffect(() => {
-    const handleResultCallback = authContext.room.onMessage("CampaignResult", (val: LoadCampaign[]) => {
+    const handleResultCallback = authContext.room.onMessage("CampaignResult", (val: CampaignsDao[]) => {
       setCampaignList(val);
     });
     authContext.room.send("getCampaigns");
@@ -43,7 +43,7 @@ export default function HostMM({ otherPlayers }: { otherPlayers: Player[] }) {
           </div>
           <div className="p-0 overflow-hidden container-fluid m-0 rounded-4 border border-2 border-secondary" style={{ height: "150px", backgroundColor: `var(--bs-light-bg-subtle)` }}>
             <ul className="list-group list-group-horizontal overflow-x-auto w-100 h-100 user-select-none">
-              {campaignList.map((val: LoadCampaign) => {
+              {campaignList.map((val: CampaignsDao) => {
                 return (
                   <li
                     className={`list-group-item h-100 ${val.id === curCampaign?.id ? "active" : ""}`}
@@ -178,7 +178,7 @@ export function CampaignComponent({ name, imageUrl }: { name: string; imageUrl: 
   );
 }
 
-export function VersionHistory({ campaign }: { campaign: LoadCampaign | undefined }) {
+export function VersionHistory({ campaign }: { campaign: CampaignsDao | undefined }) {
   const [versionHistoryList, setVersionHistoryList] = useState<LoadSaveHistory[]>([]);
   const [selectedVersion, setSelectedVersion] = useState<number>(-1);
   const authContext = useAuthenticatedContext();

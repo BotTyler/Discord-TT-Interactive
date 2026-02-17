@@ -10,8 +10,6 @@ import DrawCircle from "./DrawingTools/Circle/DrawCircle";
 import DrawCube from "./DrawingTools/Cube/DrawCube";
 import DrawLine from "./DrawingTools/Lines/DrawLine";
 import EnemyMarkerList from "./PlayableMarkers/Enemy/EnemyMarkerList";
-import FogCreation from "./Fog/FogCreation";
-import ShowFog from "./Fog/ShowFog";
 import PlayerMarkerList from "./PlayableMarkers/Player/PlayerMarkerList";
 import GridDisplay from "./Grid/GridDisplay";
 import DrawBeam from "./DrawingTools/Beam/DrawBeam";
@@ -87,10 +85,6 @@ export default function InteractiveMap({ map }: { map: MapData }) {
           <DrawArc />
           <DrawBeam />
           <DrawRuler />
-          <Pane name="fog" style={{ zIndex: 600 }}>
-            <ShowFog />
-          </Pane>
-          <FogCreation />
         </MapContainer>
       </div>
     </>

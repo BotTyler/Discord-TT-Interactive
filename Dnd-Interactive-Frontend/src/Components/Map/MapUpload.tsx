@@ -24,7 +24,7 @@ export default function MapUpload({ callback }: { callback: (data: ClientMapData
 
   const uploadBody = (
     <div className="container-fluid">
-      <NewLoadImage startingImageSrc={`Assets/placeholder.png`} imgSrcPrefix="" ref={newloadImageRef} />
+      <NewLoadImage ref={newloadImageRef} />
       <div className="mb-3">
         <label htmlFor="CampaignNameInput" className="form-label">
           Campaign Name

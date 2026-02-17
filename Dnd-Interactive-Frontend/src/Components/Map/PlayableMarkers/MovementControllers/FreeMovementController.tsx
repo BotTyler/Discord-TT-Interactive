@@ -358,7 +358,7 @@ export default function FreeMovementController({ controllableUser, userType, onP
           position={toPosition[toPosition.length - 1] ?? position}
           size={calcSizeCategoryMultiplier()}
           isDraggable={true}
-          className={`${isMoving ? "opacity-50" : "opacity-0"}`}
+          className={`opacity-50`}
           displayName={false}
           health={health}
           totalHealth={totalHealth}

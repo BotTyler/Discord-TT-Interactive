@@ -19,8 +19,6 @@ export default function HandoutsPanel() {
         {/* load save buttons */}
         <div className="w-100">
           <NewLoadImage
-            startingImageSrc={`Assets/placeholder.png`}
-            imgSrcPrefix=""
             ref={newloadImageRef}
             showPreview={false}
             onChange={(imageUrl: string) => {

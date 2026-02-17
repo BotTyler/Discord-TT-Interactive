@@ -414,7 +414,7 @@ export default function GridMovementController({ controllableUser, userType, onP
           position={toPosition[toPosition.length - 1] ?? position}
           size={isMoving ? Math.max(calcSizeCategoryMultiplier(), iconSize) : calcSizeCategoryMultiplier()}
           isDraggable={true}
-          className={`opacity-50 ${isMoving ? "opacity-50" : "opacity-0"}`}
+          className={`opacity-50`}
           displayName={false}
           health={health}
           totalHealth={totalHealth}

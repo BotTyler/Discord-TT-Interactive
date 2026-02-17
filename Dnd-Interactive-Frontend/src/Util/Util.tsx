@@ -13,6 +13,12 @@ export function getFileNameFromMinioString(minioFileName: string): string {
   // 2 -> second group in that match (0=initial string) (1=either audio or images) (2=name of the file)
 }
 
+export function removeColyseusPath(fullSrcUrl: string): string {
+  const regex = /\/colyseus\/getImage\/(.*)/gm
+  const match = regex.exec(fullSrcUrl);
+  return match ? match[1] : fullSrcUrl;
+}
+
 export function clamp(num: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, num));
 }

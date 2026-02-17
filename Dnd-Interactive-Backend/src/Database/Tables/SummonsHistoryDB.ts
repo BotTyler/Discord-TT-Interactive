@@ -3,6 +3,7 @@ import { QueryResult } from "pg";
 import Database from "../Database";
 import { DAO, DatabaseBase } from "../Interface/DatabaseObjectInterface";
 import { MARKER_SIZE_CATEGORIES } from "../../shared/MarkerOptions";
+import { ShJoinInterface } from "../../shared/LoadDataInterfaces";
 
 export class SummonsHistoryDao extends DAO {
   private id?: number;
@@ -133,22 +134,4 @@ export class SummonsHistoryDB extends DatabaseBase<SummonsHistoryDao> {
       };
     });
   }
-}
-
-export interface ShJoinInterface {
-  id: number;
-  summons_id: number;
-  history_id: number;
-  player_id: string;
-  size_category: MARKER_SIZE_CATEGORIES;
-  position_lat: number;
-  position_lng: number;
-  name: string;
-  image_name: string;
-  health: number;
-  total_health: number;
-  death_saves: number;
-  life_saves: number;
-  is_visible: boolean;
-  statuses: string[];
 }

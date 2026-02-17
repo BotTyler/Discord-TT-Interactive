@@ -34,15 +34,22 @@ export default function DisplayArc({ player }: { player: Player }) {
   }, []);
 
   const handleRemove = () => {
-    if (authContext.user.id !== player.userId) return; // I do not want to remove any other shapes other than my own.
     switch (toolContext.curTool) {
       case Tools.DELETE:
-        authContext.room.send("removeArc");
+        authContext.room.send("removeArc", { playerId: player.userId });
         break;
       default:
         console.log("Nothing to handle");
     }
   };
 
-  return arc != null ? <Arc key={`ArcDraw-${player.userId}`} center={new LatLng(arc.center.lat, arc.center.lng)} toLocation={new LatLng(arc.toLocation.lat, arc.toLocation.lng)} angle={arc.angle} color={color} removeCallback={handleRemove} /> : "";
+  return arc != null ?
+    <Arc
+      key={`ArcDraw-${player.userId}`}
+      center={new LatLng(arc.center.lat, arc.center.lng)}
+      toLocation={new LatLng(arc.toLocation.lat, arc.toLocation.lng)}
+      angle={arc.angle}
+      color={color}
+      removeCallback={handleRemove}
+    /> : "";
 }

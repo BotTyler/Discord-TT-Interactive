@@ -23,7 +23,8 @@ export default function PlayerMM({ currentPlayer, otherPlayers }: { currentPlaye
     return (
       <div className="d-flex py-1 justify-content-center align-items-center h-100">
         {player ? (
-          <PlayerBanner player={player} isMain={false} key={`PlayerMMBanner-Other-${player.userId}-${index}`} hostOnClick={() => { }} />
+          <PlayerBanner player={player} isMain={false} key={`PlayerMMBanner-Other-${player.userId}-${index}`} hostOnClick={() => {
+          }} />
         ) : (
           <div className="h-100 w-100 border-3 text-center justify-content-center d-flex flex-column border rounded-5 bg-dark bg-opacity-75 border-dark">
             <WaitingComponent />
