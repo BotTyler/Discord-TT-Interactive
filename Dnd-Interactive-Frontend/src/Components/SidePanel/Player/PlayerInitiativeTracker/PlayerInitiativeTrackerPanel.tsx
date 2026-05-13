@@ -97,6 +97,7 @@ export default function PlayerInitiativeTrackerPanel({ }: {}) {
   React.useEffect(() => {
     sortPlayers();
     sortEnemies();
+
     const handlePlayersInitChange = () => {
       sortPlayers();
     };
@@ -106,7 +107,6 @@ export default function PlayerInitiativeTrackerPanel({ }: {}) {
     const EnemiesVisibilityChange = (): void => {
       sortEnemies();
     }
-
     const handleInitiativeIndexChange = (val: any) => {
       setInitiativeIndex(val.detail.val);
     };
@@ -115,11 +115,15 @@ export default function PlayerInitiativeTrackerPanel({ }: {}) {
     window.addEventListener("EnemiesInitiativeChange", EnemiesInitiativeChange);
     window.addEventListener("EnemiesVisibilityChange", EnemiesVisibilityChange);
     window.addEventListener("InitiativeIndexChanged", handleInitiativeIndexChange);
+    window.addEventListener("PlayersChanged", handlePlayersInitChange);
+    window.addEventListener("EnemiesChanged", EnemiesInitiativeChange);
     return () => {
       window.removeEventListener("PlayersInitiativeChange", handlePlayersInitChange);
       window.removeEventListener("EnemiesInitiativeChange", EnemiesInitiativeChange);
       window.removeEventListener("EnemiesVisibilityChange", EnemiesVisibilityChange);
       window.removeEventListener("InitiativeIndexChanged", handleInitiativeIndexChange);
+      window.removeEventListener("PlayersChanged", handlePlayersInitChange);
+      window.removeEventListener("EnemiesChanged", EnemiesInitiativeChange);
     };
   }, []);
 
