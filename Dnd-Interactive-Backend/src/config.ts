@@ -1,7 +1,5 @@
 import config from "@colyseus/tools";
 import { StateHandlerRoom } from "./rooms/StateHandlerRoom";
-// import multer from "multer";
-// import * as Minio from "minio";
 import { JWT } from "@colyseus/auth";
 import { WebSocketTransport } from "@colyseus/ws-transport";
 import MinioClient from "./Minio/MinioClient";
@@ -41,19 +39,6 @@ export default config({
     //setup the minio storage
     const storage = multer.memoryStorage(); // Store files in memory
     const upload = multer({ storage: storage });
-
-    // const minioClient = new Minio.Client({
-    //   endPoint: process.env.MINIO_ENDPOINT!,
-    //   port: +process.env.MINIO_PORT!,
-    //   useSSL: false,
-    //   accessKey: process.env.MINIO_ACCESS_KEY!,
-    //   secretKey: process.env.MINIO_SECRET_KEY!,
-    // });
-
-    // custom express methods
-
-    // If you don't want people accessing your server stats, comment this line.
-    //router.use("/colyseus", monitor(server as Partial<MonitorOptions>));
 
     // Fetch token from developer portal and return to the embedded app
     app.post("/token", async (req, res) => {
@@ -132,7 +117,7 @@ export default config({
 
       try {
         const bucket = process.env.MINIO_BUCKET!;
-        const userId = req.params.userId;
+        const userId: string = req.params.userId[0];
         if (!req.file) return res.status(400).send("No file uploaded.");
         if (!(await MinioClient.getInstance().bucketExists(bucket)))
           return res.status(400).json({ error: "BUCKET DOES NOT EXIST" });
@@ -156,28 +141,6 @@ export default config({
         res.destroy(e);
       }
     });
-
-    /**
-     * Use @colyseus/playground
-     * (It is not recommended to expose this route in a production environment)
-     */
-    // if (process.env.NODE_ENV !== "production") {
-    //   app.use("/", playground);
-    // }
-
-    /**
-     * Use @colyseus/monitor
-     * It is recommended to protect this route with a password
-     * Read more: https://docs.colyseus.io/tools/monitor/#restrict-access-to-the-panel-using-a-password
-     */
-    //app.use("/colyseus", monitor());
-
-    //
-    // See more about the Authentication Module:
-    // https://docs.colyseus.io/authentication/
-    //
-    // app.use(auth.prefix, auth.routes())
-    //
   },
 
   beforeListen: () => {
