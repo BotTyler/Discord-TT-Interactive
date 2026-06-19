@@ -1,11 +1,10 @@
-import { Room } from "colyseus";
+import { Client } from "colyseus";
 import { EnemyDAO, EnemyDB } from "../../Database/Tables/EnemyDB";
 import { ImageCatalogDAO, ImageCatalogDB } from "../../Database/Tables/ImageCatalogDB";
 import { Enemy } from "../../shared/Enemy";
 import { MARKER_SIZE_CATEGORIES } from "../../shared/MarkerOptions";
 import { Player } from "../../shared/Player";
 import { mLatLng } from "../../shared/PositionInterface";
-import { State } from "../../shared/State";
 import { CharacterStatus } from "../../shared/StatusTypes";
 import {
   authenticateHostAction,
@@ -13,9 +12,10 @@ import {
   ValidateAllInputs,
   ValidationInputType,
 } from "../../Util/Utils";
+import { StateHandlerRoom } from "../StateHandlerRoom";
 
-export function RegisterEnemyStateHandler(room: Room<State>): void {
-  room.onMessage("updateEnemyPosition", (client, data) => {
+export function RegisterEnemyStateHandler(room: StateHandlerRoom): void {
+  room.onMessage("updateEnemyPosition", (client: Client, data: any): void => {
     try {
       const inputList: ValidationInputType[] = [
         { name: "pos", type: "object", PostProcess: undefined },
@@ -44,7 +44,7 @@ export function RegisterEnemyStateHandler(room: Room<State>): void {
     }
   });
 
-  room.onMessage("updateEnemyGhostPosition", (client, data) => {
+  room.onMessage("updateEnemyGhostPosition", (client: Client, data: any): void => {
     try {
       const inputList: ValidationInputType[] = [
         { name: "pos", type: "object", PostProcess: undefined },
@@ -73,7 +73,7 @@ export function RegisterEnemyStateHandler(room: Room<State>): void {
     }
   });
 
-  room.onMessage("addEnemy", async (client, data) => {
+  room.onMessage("addEnemy", async (client: Client, data: any): Promise<void> => {
     if (!authenticateHostAction(client.sessionId, room)) return;
     try {
       const inputList: ValidationInputType[] = [
@@ -115,7 +115,8 @@ export function RegisterEnemyStateHandler(room: Room<State>): void {
       console.error(error);
     }
   });
-  room.onMessage("deleteEnemy", (client, data) => {
+
+  room.onMessage("deleteEnemy", (client: Client, data: any): void => {
     if (!authenticateHostAction(client.sessionId, room)) return;
     try {
       const inputList: ValidationInputType[] = [
@@ -132,7 +133,7 @@ export function RegisterEnemyStateHandler(room: Room<State>): void {
     }
   });
 
-  room.onMessage("EnemyHealth", (client, data) => {
+  room.onMessage("EnemyHealth", (client: Client, data: any): void => {
     if (!authenticateHostAction(client.sessionId, room)) return;
     try {
       const inputList: ValidationInputType[] = [
@@ -157,7 +158,7 @@ export function RegisterEnemyStateHandler(room: Room<State>): void {
     }
   });
 
-  room.onMessage("updateEnemy", async (client, data) => {
+  room.onMessage("updateEnemy", async (client: Client, data: any): Promise<void> => {
     if (!authenticateHostAction(client.sessionId, room)) return;
     try {
       const inputList: ValidationInputType[] = [
@@ -197,7 +198,7 @@ export function RegisterEnemyStateHandler(room: Room<State>): void {
     }
   });
 
-  room.onMessage("changeEnemyInitiative", (client, data) => {
+  room.onMessage("changeEnemyInitiative", (client: Client, data: any): void => {
     if (!authenticateHostAction(client.sessionId, room)) return;
     try {
       const inputList: ValidationInputType[] = [
@@ -219,7 +220,7 @@ export function RegisterEnemyStateHandler(room: Room<State>): void {
     }
   });
 
-  room.onMessage("enemyHeal", (client, data) => {
+  room.onMessage("enemyHeal", (client: Client, data: any): void => {
     if (!authenticateHostAction(client.sessionId, room)) return;
     try {
       const inputList: ValidationInputType[] = [
@@ -240,7 +241,7 @@ export function RegisterEnemyStateHandler(room: Room<State>): void {
       console.error(error);
     }
   });
-  room.onMessage("enemyDamage", (client, data) => {
+  room.onMessage("enemyDamage", (client: Client, data: any): void => {
     if (!authenticateHostAction(client.sessionId, room)) return;
     try {
       const inputList: ValidationInputType[] = [
@@ -262,7 +263,7 @@ export function RegisterEnemyStateHandler(room: Room<State>): void {
       console.error(error);
     }
   });
-  room.onMessage("enemyDeathAdd", (client, data) => {
+  room.onMessage("enemyDeathAdd", (client: Client, data: any): void => {
     if (!authenticateHostAction(client.sessionId, room)) return;
     try {
       const inputList: ValidationInputType[] = [
@@ -282,7 +283,7 @@ export function RegisterEnemyStateHandler(room: Room<State>): void {
       console.error(error);
     }
   });
-  room.onMessage("enemyDeathRemove", (client, data) => {
+  room.onMessage("enemyDeathRemove", (client: Client, data: any): void => {
     if (!authenticateHostAction(client.sessionId, room)) return;
     try {
       const inputList: ValidationInputType[] = [
@@ -302,7 +303,7 @@ export function RegisterEnemyStateHandler(room: Room<State>): void {
       console.error(error);
     }
   });
-  room.onMessage("enemySaveAdd", (client, data) => {
+  room.onMessage("enemySaveAdd", (client: Client, data: any): void => {
     if (!authenticateHostAction(client.sessionId, room)) return;
     try {
       const inputList: ValidationInputType[] = [
@@ -326,7 +327,7 @@ export function RegisterEnemyStateHandler(room: Room<State>): void {
       console.error(error);
     }
   });
-  room.onMessage("enemySaveRemove", (client, data) => {
+  room.onMessage("enemySaveRemove", (client: Client, data: any): void => {
     if (!authenticateHostAction(client.sessionId, room)) return;
     try {
       const inputList: ValidationInputType[] = [
@@ -346,7 +347,7 @@ export function RegisterEnemyStateHandler(room: Room<State>): void {
       console.error(error);
     }
   });
-  room.onMessage("toggleEnemyVisibility", (client, data) => {
+  room.onMessage("toggleEnemyVisibility", (client: Client, data: any): void => {
     if (!authenticateHostAction(client.sessionId, room)) return;
     try {
       const inputList: ValidationInputType[] = [
@@ -366,7 +367,7 @@ export function RegisterEnemyStateHandler(room: Room<State>): void {
     }
   });
 
-  room.onMessage("setEnemyStatuses", (client, data) => {
+  room.onMessage("setEnemyStatuses", (client: Client, data: any): void => {
     if (!authenticateHostAction(client.sessionId, room)) return;
     try {
       const inputList: ValidationInputType[] = [

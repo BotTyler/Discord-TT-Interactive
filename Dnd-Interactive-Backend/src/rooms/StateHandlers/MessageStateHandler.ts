@@ -1,10 +1,10 @@
-import { Room } from "colyseus";
+import { Client } from "colyseus";
 import { sanitize, ValidateAllInputs, ValidationInputType } from "../../Util/Utils";
 import { Player } from "../../shared/Player";
-import { State } from "../../shared/State";
+import { StateHandlerRoom } from "../StateHandlerRoom";
 
-export function RegisterMessageStateHandler(room: Room<State>): void {
-  room.onMessage("BroadcastMessage", (client, data) => {
+export function RegisterMessageStateHandler(room: StateHandlerRoom): void {
+  room.onMessage("BroadcastMessage", (client: Client, data: any): void => {
     // input validation
     try {
       const checkMessageType = (val: string) => {
@@ -47,7 +47,7 @@ export function RegisterMessageStateHandler(room: Room<State>): void {
     }
   });
 
-  room.onMessage("BroadcastHandout", (client, data) => {
+  room.onMessage("BroadcastHandout", (_client: Client, data: any): void => {
     try {
       const inputList: ValidationInputType[] = [
         { name: "playerIds", PostProcess: undefined, type: "array" },
@@ -55,7 +55,7 @@ export function RegisterMessageStateHandler(room: Room<State>): void {
       ];
       const validateParams: any = ValidateAllInputs(data, inputList);
 
-      validateParams.playerIds.forEach((x: string) => {
+      validateParams.playerIds.forEach((x: string): void => {
         // we need to grab the player
         const player: Player | null = room.state.getPlayerByUserId(x);
         if (player === null) {

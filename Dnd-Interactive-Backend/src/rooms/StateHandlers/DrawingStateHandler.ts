@@ -1,12 +1,12 @@
-import { Room } from "colyseus";
+import { Client } from "colyseus";
 import { softAuthenticate, ValidateAllInputs, ValidationInputType } from "../../Util/Utils";
 import { ArcDrawing, BeamDrawing, CircleDrawing, CubeDrawing } from "../../shared/DrawingInterface";
 import { Player } from "../../shared/Player";
 import { mLatLng } from "../../shared/PositionInterface";
-import { State } from "../../shared/State";
+import { StateHandlerRoom } from "../StateHandlerRoom";
 
-export function RegisterDrawingStateHandler(room: Room<State>): void {
-  room.onMessage("addDrawings", (client, data) => {
+export function RegisterDrawingStateHandler(room: StateHandlerRoom): void {
+  room.onMessage("addDrawings", (client: Client, data: any): void => {
     try {
       const inputList: ValidationInputType[] = [
         { name: "points", type: "array", PostProcess: undefined },
@@ -16,7 +16,8 @@ export function RegisterDrawingStateHandler(room: Room<State>): void {
       } = ValidateAllInputs(data, inputList);
 
       const player: Player | null = room.state.getPlayerBySessionId(client.sessionId);
-      if (player === null) return false;
+      if (player === null) return;
+
       player.drawings = validateParams.points.map((val: { lat: number; lng: number }): mLatLng => {
         return new mLatLng(+val.lat, +val.lng);
       });
@@ -24,7 +25,7 @@ export function RegisterDrawingStateHandler(room: Room<State>): void {
       console.error(error);
     }
   });
-  room.onMessage("removeDrawing", (client, data) => {
+  room.onMessage("removeDrawing", (client: Client, data: any): void => {
     try {
       const inputList: ValidationInputType[] = [
         { name: "playerId", type: "string", PostProcess: undefined },
@@ -44,7 +45,7 @@ export function RegisterDrawingStateHandler(room: Room<State>): void {
   });
 
   // Cube Drawings
-  room.onMessage("addCube", (client, data) => {
+  room.onMessage("addCube", (client: Client, data: any): void => {
     try {
       const inputList: ValidationInputType[] = [
         { name: "center", type: "object", PostProcess: undefined },
@@ -68,7 +69,7 @@ export function RegisterDrawingStateHandler(room: Room<State>): void {
     }
   });
 
-  room.onMessage("removeCube", (client, data) => {
+  room.onMessage("removeCube", (client: Client, data: any): void => {
     try {
       const inputList: ValidationInputType[] = [
         { name: "playerId", type: "string", PostProcess: undefined },
@@ -87,7 +88,7 @@ export function RegisterDrawingStateHandler(room: Room<State>): void {
   });
 
   // Circle Drawings
-  room.onMessage("addCircle", (client, data) => {
+  room.onMessage("addCircle", (client: Client, data: any): void => {
     try {
       const inputList: ValidationInputType[] = [
         { name: "center", type: "object", PostProcess: undefined },
@@ -111,7 +112,7 @@ export function RegisterDrawingStateHandler(room: Room<State>): void {
     }
   });
 
-  room.onMessage("removeCircle", (client, data) => {
+  room.onMessage("removeCircle", (client: Client, data: any): void => {
     try {
       const inputList: ValidationInputType[] = [
         { name: "playerId", type: "string", PostProcess: undefined },
@@ -131,7 +132,7 @@ export function RegisterDrawingStateHandler(room: Room<State>): void {
   });
 
   // Arc Drawings
-  room.onMessage("addArc", (client, data) => {
+  room.onMessage("addArc", (client: Client, data: any): void => {
     try {
       const inputList: ValidationInputType[] = [
         { name: "center", type: "object", PostProcess: undefined },
@@ -161,7 +162,7 @@ export function RegisterDrawingStateHandler(room: Room<State>): void {
     }
   });
 
-  room.onMessage("removeArc", (client, data) => {
+  room.onMessage("removeArc", (client: Client, data: any): void => {
     try {
       const inputList: ValidationInputType[] = [
         { name: "playerId", type: "string", PostProcess: undefined },
@@ -181,7 +182,7 @@ export function RegisterDrawingStateHandler(room: Room<State>): void {
   });
 
   // Beam Drawings
-  room.onMessage("addBeam", (client, data) => {
+  room.onMessage("addBeam", (client: Client, data: any): void => {
     try {
       const inputList: ValidationInputType[] = [
         { name: "start", type: "object", PostProcess: undefined },
@@ -208,7 +209,7 @@ export function RegisterDrawingStateHandler(room: Room<State>): void {
     }
   });
 
-  room.onMessage("removeBeam", (client, data) => {
+  room.onMessage("removeBeam", (client: Client, data: any): void => {
     try {
       const inputList: ValidationInputType[] = [
         { name: "playerId", type: "string", PostProcess: undefined },

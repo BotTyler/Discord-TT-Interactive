@@ -17,11 +17,16 @@ import { PlayerSaveState, ShJoinInterface } from "../shared/LoadDataInterfaces";
 import { RegisterSaveAndLoadStateHandler } from "./StateHandlers/SaveAndLoadStateHandler";
 import { RegisterMessageStateHandler } from "./StateHandlers/MessageStateHandler";
 
-export class StateHandlerRoom extends Room<State> {
+export class StateHandlerRoom extends Room {
   maxClients = 1000;
+  state: State = new State({
+    channelId: "",
+    roomName: "",
+  });
 
   onCreate(options: IState) {
-    this.setState(new State(options));
+    this.state.roomName = options.roomName;
+    this.state.channelId = options.channelId;
 
     RegisterPlayerStateHandler(this);
     RegisterSummonsStateHandler(this);
@@ -143,42 +148,41 @@ export class StateHandlerRoom extends Room<State> {
     }
   }
 
-  async onLeave(client: Client, consented: boolean) {
+  // Unconsented Leave
+  onDrop(client: Client<any>): void {
+    console.log(`Client Unconsented Disconnect: ${client.sessionId}`);
+    // The client has around 30 seconds to reconnect.
+    this.allowReconnection(client, 30);
+
     const player: Player | null = this.state.getPlayerBySessionId(client.sessionId);
     if (player === null) return;
+    player.isConnected = false;
+  }
 
+  onReconnect(client: Client): void | Promise<any> {
+    console.log(`Client Reconnected: ${client.sessionId}`);
+    const player: Player | null = this.state.getPlayerBySessionId(client.sessionId);
+    if (player === null) return;
+    player.isConnected = true;
+  }
+
+  // Player is leaving
+  onLeave(client: Client): void {
+    console.log(`Client Leaving: ${client.sessionId}`);
+    const player: Player | null = this.state.getPlayerBySessionId(client.sessionId);
+    if (player === null) return;
     player.isConnected = false;
 
-    try {
-      if (consented) {
-        console.log("Consent Disconnect!!!");
-        throw new Error("Consented Disconnect");
-      }
-      console.log("waiting for reconnect");
-      // 7 because I like the number 7   0.0
-      await this.allowReconnection(client, 7);
-      console.log("Client Reconnected");
-      player.isConnected = true;
-    } catch (e) {
-      console.log("Client Disconnected");
-      const player = this.state.getPlayerBySessionId(client.sessionId)!;
-
-      // Since this client disconnected lets make sure they are not the host
-      if (!player.isHost) {
-        return;
-      }
-      saveState(this);
-      player.isHost = false; // If the user rejoins, this will need to be reset.
-      // Since this is the host we need to panic. 0.o
-      this.state.PANIC();
-    }
+    // If this is the host. Make sure to reset the state.
+    if (!player.isHost) return;
+    saveState(this);
+    player.isHost = false;
+    this.state.PANIC();
   }
 
   onDispose() {
     console.log("Dispose StateHandlerRoom");
-    // this.saveState();
-    // this.state.RESET_GAME();
-    // this.state.removeAllPlayers();
+    this.state.RESET_GAME();
   }
 
   //#endregion

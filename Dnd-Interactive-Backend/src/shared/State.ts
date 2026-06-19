@@ -63,6 +63,8 @@ export class State extends Schema {
     this.channelId = attributes.channelId;
   }
 
+  // Note: Do not Reset the game here.
+  // The save game functionality during the logout may result in a race condition between Save and Reset.
   PANIC(): boolean {
     this.gameState = GameStateEnum.MAINMENU;
     this.currentHostUserId = undefined;

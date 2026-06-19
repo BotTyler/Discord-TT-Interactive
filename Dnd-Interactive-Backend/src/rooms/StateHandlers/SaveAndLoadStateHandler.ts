@@ -1,4 +1,4 @@
-import { Room } from "colyseus";
+import { Client } from "colyseus";
 import {
   EmhJoinInterface,
   EnemyMovementHistoryDB,
@@ -22,7 +22,6 @@ import {
 import { MapData } from "../../shared/Map";
 import { Player } from "../../shared/Player";
 import { mLatLng } from "../../shared/PositionInterface";
-import { State } from "../../shared/State";
 import { CharacterStatus } from "../../shared/StatusTypes";
 import { Summons } from "../../shared/Summons";
 import {
@@ -31,9 +30,10 @@ import {
   ValidateAllInputs,
   ValidationInputType,
 } from "../../Util/Utils";
+import { StateHandlerRoom } from "../StateHandlerRoom";
 
-export function RegisterSaveAndLoadStateHandler(room: Room<State>): void {
-  room.onMessage("getCampaigns", async (client, _data) => {
+export function RegisterSaveAndLoadStateHandler(room: StateHandlerRoom): void {
+  room.onMessage("getCampaigns", async (client: Client, _data: any): Promise<void> => {
     const player: Player | null = room.state.getPlayerBySessionId(client.sessionId);
     if (player === null) return client.error(666, "You are not Connected");
     const mapList: CampaignsDao[] = await MapDB.getInstance().selectMapByUserId(player.userId);
@@ -41,7 +41,7 @@ export function RegisterSaveAndLoadStateHandler(room: Room<State>): void {
     client.send("CampaignResult", mapList);
   });
 
-  room.onMessage("getVersionsByCampaign", async (client, data) => {
+  room.onMessage("getVersionsByCampaign", async (client: Client, data: any): Promise<void> => {
     try {
       const player: Player | null = room.state.getPlayerBySessionId(client.sessionId);
       if (player === null) return client.error(666, "You are not Connected");
@@ -66,7 +66,7 @@ export function RegisterSaveAndLoadStateHandler(room: Room<State>): void {
   });
 
   // Function that will set all the values of a room based on the chosen save
-  room.onMessage("loadMap", async (client, data) => {
+  room.onMessage("loadMap", async (client: Client, data: any): Promise<void> => {
     if (!authenticateHostAction(client.sessionId, room)) return;
     try {
       const inputList: ValidationInputType[] = [
@@ -208,7 +208,7 @@ export function RegisterSaveAndLoadStateHandler(room: Room<State>): void {
     }
   });
 
-  room.onMessage("exportMap", (client, data) => {
+  room.onMessage("exportMap", (client: Client, data: any): void => {
     if (!authenticateHostAction(client.sessionId, room)) return;
     try {
       const inputList: ValidationInputType[] = [

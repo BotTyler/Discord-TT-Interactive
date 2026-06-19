@@ -1,4 +1,4 @@
-import { Room } from "colyseus";
+import { Client } from "colyseus";
 import {
   authenticateHostAction,
   sanitize,
@@ -6,10 +6,11 @@ import {
   ValidationInputType,
 } from "../../Util/Utils";
 import { Player } from "../../shared/Player";
-import { MapMovementType, State } from "../../shared/State";
+import { MapMovementType } from "../../shared/State";
+import { StateHandlerRoom } from "../StateHandlerRoom";
 
-export function RegisterGameStateHandler(room: Room<State>): void {
-  room.onMessage("ChangeGridColor", (client, data) => {
+export function RegisterGameStateHandler(room: StateHandlerRoom): void {
+  room.onMessage("ChangeGridColor", (client: Client, data: any): void => {
     if (!authenticateHostAction(client.sessionId, room)) return;
     try {
       const inputList: ValidationInputType[] = [
@@ -26,7 +27,7 @@ export function RegisterGameStateHandler(room: Room<State>): void {
     }
   });
 
-  room.onMessage("GridDisplay", (client, data) => {
+  room.onMessage("GridDisplay", (client: Client, data: any): void => {
     if (!authenticateHostAction(client.sessionId, room)) return;
     try {
       const inputList: ValidationInputType[] = [
@@ -42,7 +43,7 @@ export function RegisterGameStateHandler(room: Room<State>): void {
     }
   });
 
-  room.onMessage("setHost", (client, _data) => {
+  room.onMessage("setHost", (client: Client, _data: any): void => {
     if (room.state.currentHostUserId !== undefined) return;
 
     const player: Player | null = room.state.getPlayerBySessionId(client.sessionId);
@@ -53,7 +54,7 @@ export function RegisterGameStateHandler(room: Room<State>): void {
     room.state.RESET_GAME();
   });
 
-  room.onMessage("removeHost", (client, _data) => {
+  room.onMessage("removeHost", (_client: Client, _data: any): void => {
     if (room.state.currentHostUserId === undefined) return;
 
     const player: Player | null = room.state.getPlayerByUserId(room.state.currentHostUserId);
@@ -63,7 +64,7 @@ export function RegisterGameStateHandler(room: Room<State>): void {
   });
 
   // GAME STATES
-  room.onMessage("setGameState", (client, data) => {
+  room.onMessage("setGameState", (client: Client, data: any): void => {
     if (!authenticateHostAction(client.sessionId, room)) return;
     try {
       const inputList: ValidationInputType[] = [
@@ -80,7 +81,7 @@ export function RegisterGameStateHandler(room: Room<State>): void {
     }
   });
 
-  room.onMessage("SetMapMovementType", (client, data) => {
+  room.onMessage("SetMapMovementType", (client: Client, data: any): void => {
     if (!authenticateHostAction(client.sessionId, room)) return;
     try {
       const inputList: ValidationInputType[] = [
