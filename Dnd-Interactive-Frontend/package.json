@@ -23,7 +23,7 @@
     "eslint-plugin-react-hooks": "7.1.1",
     "leaflet": "^1.9.4",
     "lexical": "^0.23.1",
-    "lodash": "^4.17.21",
+    "lodash": "^4.18.0",
     "react": "^18.2.0",
     "react-bootstrap": "^2.10.9",
     "react-dom": "^18.2.0",
@@ -39,7 +39,7 @@
     "@types/react-dom": "^18.2.7",
     "@typescript-eslint/parser": "^8.42.0",
     "@vitejs/plugin-react": "^4.0.0",
-    "sass": "^1.77.8",
+    "sass": "^1.101.0",
     "vite": "^7.3.5"
   },
   "eslintConfig": {
