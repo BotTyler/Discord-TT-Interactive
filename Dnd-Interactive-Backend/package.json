@@ -18,7 +18,7 @@
   "dependencies": {
     "@types/jsdom": "^21.1.7",
     "colyseus": "^0.17.10",
-    "dompurify": "^3.2.2",
+    "dompurify": "^3.4.11",
     "dotenv": "^16.0.1",
     "express": "^4.19.2",
     "jsdom": "^25.0.1",
