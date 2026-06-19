@@ -84,6 +84,7 @@ export class State extends Schema {
       player.deathSaves = 0;
       player.lifeSaves = 0;
       player.health = player.totalHealth;
+      player.initiative = 0;
     });
     this.enemies.clear();
     this.lastSavedPlayerContext = [];
