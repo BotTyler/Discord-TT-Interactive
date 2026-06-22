@@ -54,6 +54,7 @@ export default function DrawBeam() {
     mouseup: (e: LeafletMouseEvent) => {
       if (drawingToolContext.curTool !== DrawingTools.BEAM) return;
       if (e.originalEvent.button !== 2) return;
+      if (authContext.room === null) return;
       authContext.room.send("addBeam", { start: start, end: end, width: 5 });
 
       setStart(null);

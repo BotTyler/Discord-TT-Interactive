@@ -43,11 +43,11 @@ export default function DrawLine({ player }: { player: Player }) {
     },
     mouseup: (e: LeafletMouseEvent) => {
       if (drawingToolContext.curTool !== DrawingTools.FREE) return;
-
       if (current === undefined) return;
-      setCurrentLine((prev) => {
-        const insert = [...prev!, e.latlng];
 
+      setCurrentLine((prev) => {
+        if (authContext.room === null) return;
+        const insert = [...prev!, e.latlng];
         authContext.room.send("addDrawings", { points: insert });
         return undefined;
       });

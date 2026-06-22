@@ -9,6 +9,7 @@ export default function PlayerMM({ currentPlayer, otherPlayers }: { currentPlaye
   const authContext = useAuthenticatedContext();
 
   function setHost() {
+    if (authContext.room === null) return;
     authContext.room.send("setHost");
   }
   useEffect(() => {

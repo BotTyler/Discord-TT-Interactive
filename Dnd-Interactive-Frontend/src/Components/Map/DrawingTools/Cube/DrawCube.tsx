@@ -58,6 +58,7 @@ export default function DrawCube() {
     mouseup: (e: LeafletMouseEvent) => {
       if (drawingToolContext.curTool !== DrawingTools.CUBE) return;
       if (e.originalEvent.button !== 2) return;
+      if (authContext.room === null) return;
       authContext.room.send("addCube", { center: cubeCenter, radius: cubeRadius });
 
       setCubeCenter(undefined);
@@ -67,7 +68,7 @@ export default function DrawCube() {
 
   return drawingReady() ? (
     <>
-      <Cube center={cubeCenter!} radius={cubeRadius!} color="#fff" key={`CurrentCube`} removeCallback={() => {}} />
+      <Cube center={cubeCenter!} radius={cubeRadius!} color="#fff" key={`CurrentCube`} removeCallback={() => { }} />
       <DistanceLine start={new LatLng(cubeCenter!.lat, cubeCenter!.lng - cubeRadius!)} end={new LatLng(cubeCenter!.lat, cubeCenter!.lng + cubeRadius!)} size={playerSize} color={"red"} key={`CurrentCubeCreationDistanceLine`} />
     </>
   ) : (

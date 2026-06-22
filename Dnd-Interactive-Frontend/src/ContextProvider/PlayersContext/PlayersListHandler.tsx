@@ -3,7 +3,7 @@ import React, { useImperativeHandle } from "react";
 import { useAuthenticatedContext } from "../useAuthenticatedContext";
 import PlayerElementHandler from "./PlayerElementHandler";
 
-export const PlayersListHandler = React.forwardRef(function PlayersListHandler({ }: {}, ref: any) {
+export const PlayersListHandler = React.forwardRef(function PlayersListHandler(ref: any) {
   const [players, setPlayers] = React.useState<{ [key: string]: Player }>({});
   const [connectedPlayers, setConnectedPlayers] = React.useState<{ [key: string]: string }>({});
   const authenticatedContext = useAuthenticatedContext();
@@ -29,6 +29,7 @@ export const PlayersListHandler = React.forwardRef(function PlayersListHandler({
   }, [connectedPlayers]);
 
   React.useEffect(() => {
+    if (authenticatedContext.room === null) return;
     try {
       const playerAdd = authenticatedContext.room.state.players.onAdd((player: any, _key: any) => {
         setPlayers((players) => ({ ...players, [player.userId]: player }));
@@ -67,7 +68,7 @@ export const PlayersListHandler = React.forwardRef(function PlayersListHandler({
               setPlayers((players) => {
                 const newPlayers = { ...players };
                 if (newPlayers[key]) {
-                  // @ts-expect-error
+                  // @ts-expect-error Ignore issue
                   newPlayers[key][field] = value;
                 }
 

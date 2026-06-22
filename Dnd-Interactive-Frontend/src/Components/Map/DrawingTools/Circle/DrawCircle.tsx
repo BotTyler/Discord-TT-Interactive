@@ -60,6 +60,7 @@ export default function DrawCircle() {
     mouseup: (e: LeafletMouseEvent) => {
       if (drawingToolContext.curTool !== DrawingTools.CIRCLE) return;
       if (e.originalEvent.button !== 2) return;
+      if (authContext.room === null) return;
       authContext.room.send("addCircle", { center: circleCenter, radius: circleRadius });
 
       setCircleCenter(undefined);

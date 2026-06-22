@@ -6,7 +6,7 @@ import { Player } from "../../../../shared/Player";
 import StatusDropdown from "../../../StatusModal/StatusModal";
 import { CharacterStatus } from "../../../../shared/StatusTypes";
 
-export default function PlayerProfilePanelElement({ }: {}) {
+export default function PlayerProfilePanelElement() {
   const authContext = useAuthenticatedContext();
   const playerContext = usePlayers();
 
@@ -53,6 +53,7 @@ export default function PlayerProfilePanelElement({ }: {}) {
 
   const sendColorChange = useCallback(
     throttle((val: string) => {
+      if (authContext.room === null) return;
       authContext.room.send("changePlayerColor", { color: val });
     }, 200),
     []
@@ -85,6 +86,7 @@ export default function PlayerProfilePanelElement({ }: {}) {
         showStatusModal ?
           <StatusDropdown
             onSubmit={(result: string[]): void => {
+              if (authContext.room === null) return;
               authContext.room.send("setPlayerStatuses", { statuses: result });
               setShowStatusModal(false);
             }}

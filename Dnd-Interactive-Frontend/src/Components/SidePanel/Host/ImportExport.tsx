@@ -18,6 +18,7 @@ export default function ImportExport() {
   useEffect(() => {
     // Start interval
     const intervalId = setInterval(() => {
+      if (authContext.room === null) return;
       authContext.room.send("exportMap", { isAutosave: true });
     }, 20 * 60 * 1000); // 20 minute
 
@@ -28,6 +29,7 @@ export default function ImportExport() {
   }, []);
 
   useEffect(() => {
+    if (authContext.room === null) return;
     /**
       0 - Success
       1 - Warning - Partial save
@@ -56,6 +58,7 @@ export default function ImportExport() {
   }, [authContext.room])
 
   const handleExport = React.useCallback((e: React.MouseEvent) => {
+    if (authContext.room === null) return;
     authContext.room.send("exportMap", { isAutosave: false });
     toastContext.addToast("[PENDING]", "SAVING....", TOAST_LEVEL.NONE);
   }, []);
@@ -68,6 +71,7 @@ export default function ImportExport() {
       <button
         className="btn btn-primary col-4 p-0"
         onClick={() => {
+          if (authContext.room === null) return;
           authContext.room.send("setGameState", {
             gameState: GameStateEnum.MAINMENU,
           });

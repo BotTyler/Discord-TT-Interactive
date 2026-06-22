@@ -14,6 +14,7 @@ import { LoadSaveHistory, CampaignsDao } from "../../shared/LoadDataInterfaces";
 export default function HostMM({ otherPlayers }: { otherPlayers: Player[] }) {
   const authContext = useAuthenticatedContext();
   function removeHost() {
+    if (authContext.room === null) return;
     authContext.room.send("removeHost");
   }
   const [campaignList, setCampaignList] = useState<CampaignsDao[]>([]);
@@ -23,6 +24,7 @@ export default function HostMM({ otherPlayers }: { otherPlayers: Player[] }) {
   const [pendingDeleteMap, setPendingDeleteMap] = useState<CampaignsDao | null>(null);
 
   useEffect(() => {
+    if (authContext.room === null) return;
     const handleResultCallback = authContext.room.onMessage("CampaignResult", (val: CampaignsDao[]) => {
       setCampaignList(val);
     });
@@ -116,7 +118,7 @@ export default function HostMM({ otherPlayers }: { otherPlayers: Player[] }) {
         <Modal.Header closeButton>
           <Modal.Title>Delete?</Modal.Title>
         </Modal.Header>
-        <Modal.Body>Are you sure you want to delete '{pendingDeleteMap !== null ? pendingDeleteMap!.name : "None"}'?</Modal.Body>
+        <Modal.Body><p>{`Are you sure you want to delete ${pendingDeleteMap !== null ? pendingDeleteMap.name : "None"}'?`}</p></Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => {
             setPendingDeleteMap(null);
@@ -125,6 +127,7 @@ export default function HostMM({ otherPlayers }: { otherPlayers: Player[] }) {
           </Button>
           <Button variant="primary" onClick={() => {
             if (pendingDeleteMap === null) return;
+            if (authContext.room === null) return;
             authContext.room.send("deleteMap", { campaign_id: pendingDeleteMap.id });
             setPendingDeleteMap(null);
           }}>
@@ -140,6 +143,7 @@ export default function HostMM({ otherPlayers }: { otherPlayers: Player[] }) {
               return;
             }
             // gamestateContext.setGameMap(data);
+            if (authContext.room === null) return;
             authContext.room.send("setGameMap", data); // this may need to be changed
 
             setMapUpload(false);
@@ -183,6 +187,7 @@ export function VersionHistory({ campaign }: { campaign: CampaignsDao | undefine
   const [selectedVersion, setSelectedVersion] = useState<number>(-1);
   const authContext = useAuthenticatedContext();
   useEffect(() => {
+    if (authContext.room === null) return;
     const historyListener = authContext.room.onMessage("CampaignVersionHistoryResult", (message: LoadSaveHistory[]) => {
       setVersionHistoryList(message);
     });
@@ -198,6 +203,7 @@ export function VersionHistory({ campaign }: { campaign: CampaignsDao | undefine
       return;
     }
     setSelectedVersion(-1);
+    if (authContext.room === null) return;
     authContext.room.send("getVersionsByCampaign", { campaign_id: campaign.id });
   }, [campaign]);
   return (
@@ -211,6 +217,7 @@ export function VersionHistory({ campaign }: { campaign: CampaignsDao | undefine
                 className={`list-group-item user-select-none ${selectedVersion === index ? "active" : ""}`}
                 key={`Version-History-Item-${val.id}`}
                 onClick={() => {
+                  if (authContext.room === null) return;
                   setSelectedVersion(index);
 
                   if (index === -1) {
@@ -257,6 +264,7 @@ export function MapPreviewComponent() {
           type="button"
           className={`btn btn-primary rounded-0`}
           onClick={() => {
+            if (authContext.room === null) return;
             authContext.room.send("setGameState", {
               gameState: GameStateEnum.HOSTPLAY,
             });
@@ -269,6 +277,7 @@ export function MapPreviewComponent() {
           type="button"
           className={`btn btn-primary rounded-0`}
           onClick={() => {
+            if (authContext.room === null) return;
             authContext.room.send("setGameState", {
               gameState: GameStateEnum.ALLPLAY,
             });

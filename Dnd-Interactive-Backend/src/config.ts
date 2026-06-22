@@ -7,6 +7,14 @@ import multer from "multer";
 import sharp from "sharp";
 import { ImageCatalogDAO, ImageCatalogDB } from "./Database/Tables/ImageCatalogDB";
 import { GAME_NAME } from "./shared/Constants";
+import {
+  AuthenticationDetail,
+  IDiscordGuildsMembersResource,
+  IDiscordUserResource,
+  UserDetail,
+} from "./shared/UserDetails";
+import { sanitize } from "./Util/Utils";
+import { getUserAvatarUrl, getUserDisplayName } from "./Util/DiscordAuthenticationUtils";
 
 export default config({
   options: {
@@ -42,8 +50,18 @@ export default config({
 
     // Fetch token from developer portal and return to the embedded app
     app.post("/token", async (req, res) => {
+      const body: any = req.body();
+      if (body == null || body.guildId == null || body.code == null) res.status(400).send(null);
+      const guildId: string = sanitize(body.guildId);
+      const code: string = sanitize(body.code);
+
       try {
-        const response = await fetch(`https://discord.com/api/oauth2/token`, {
+        /*
+          ======================================
+          Get oauth2 token for discord
+          ======================================
+        */
+        const access_token: string = await fetch(`https://discord.com/api/oauth2/token`, {
           method: "POST",
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
@@ -52,19 +70,19 @@ export default config({
             client_id: process.env.VITE_CLIENT_ID,
             client_secret: process.env.CLIENT_SECRET,
             grant_type: "authorization_code",
-            code: req.body.code,
+            code: code,
           }),
-        });
+        })
+          .then((value: Response): Promise<{ access_token: string }> => value.json())
+          .then((json: { access_token: string }): string => json.access_token);
 
-        const { access_token } = (await response.json()) as {
-          access_token: string;
-        };
-
-        //
-        // Retrieve user data from Discord API
-        // https://discord.com/developers/docs/resources/user#user-object
-        //
-        const profile = await (
+        /*
+        ====================================================================
+        Retrieve user data from Discord API
+        https://discord.com/developers/docs/resources/user#user-object
+        ====================================================================
+        */
+        const discordUserProfile: IDiscordUserResource = await (
           await fetch(`https://discord.com/api/users/@me`, {
             method: "GET",
             headers: {
@@ -72,23 +90,53 @@ export default config({
               Authorization: `Bearer ${access_token}`,
             },
           })
-        ).json();
+        )
+          .json()
+          .then((value: any): IDiscordUserResource => {
+            return value as IDiscordUserResource;
+          });
 
-        // TODO: store user profile into a database
-        const user = profile;
+        /*
+        ====================================================================
+        Retrieve current guild data from Discord API
+        ====================================================================
+        */
+        const discordGuild: IDiscordGuildsMembersResource = await fetch(
+          `https://discord.com/api/users/@me/guilds/${guildId}/member`,
+          {
+            method: "get",
+            headers: { Authorization: `Bearer ${access_token}` },
+          },
+        )
+          .then(async (j) => j.json())
+          .catch((e) => {
+            console.log(e);
+            return null;
+          });
 
-        res.send({
-          access_token: access_token, // Discord Access Token
-          token: await JWT.sign(user), // Colyseus JWT token
-          user: user, // User data
-        });
+        /*
+          =================================================================
+          Construct User Details
+          =================================================================
+        */
+        const userDeatil: UserDetail = {
+          id: discordUserProfile.id,
+          name: getUserDisplayName(discordGuild, discordUserProfile),
+          avartar_uri: getUserAvatarUrl(discordGuild, discordUserProfile),
+          discriminator: discordUserProfile.discriminator,
+        };
+
+        const authDetail: AuthenticationDetail = {
+          user: userDeatil,
+          jwt: await JWT.sign(userDeatil),
+          access_token: access_token,
+        };
+        res.send(authDetail);
       } catch (e: any) {
         console.error(e);
-        res.status(400).send({ error: e.message });
+        res.status(400).send(null);
       }
     });
-
-    // app.get("/getImage/:bucket/:imageName", async (req, res) => {
 
     // TODO: All endpoints need to use JWT authentication to secure it from outside use. Only members inside of colyseus rooms should access this endpoint
     app.get("/getImage/:userId/images/:imageName", async (req, res) => {

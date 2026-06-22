@@ -39,6 +39,7 @@ export default function DisplayBeam({ player }: { player: Player }) {
   }, []);
 
   const handleRemove = () => {
+    if (authContext.room === null) return;
     switch (toolContext.curTool) {
       case Tools.DELETE:
         authContext.room.send("removeBeam", { playerId: player.userId });

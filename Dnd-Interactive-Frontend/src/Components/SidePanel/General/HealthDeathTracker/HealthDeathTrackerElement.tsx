@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Enemy } from "../../../../../src/shared/Enemy";
 import { Player } from "../../../../../src/shared/Player";
-import { useGameState } from "../../../../ContextProvider/GameStateContext/GameStateProvider";
 import { useAuthenticatedContext } from "../../../../ContextProvider/useAuthenticatedContext";
 import { Summons } from "../../../../shared/Summons";
 import EditCharacterModal from "../../../Modal/SummonedCharacterModal";
@@ -19,7 +18,6 @@ export default function HealthDeathTrackerElement({ item, itemType }:
     itemType: "player" | "enemy" | "summons";
   }) {
   const authContext = useAuthenticatedContext();
-  const gamestate = useGameState();
 
   const [id, setId] = useState<any>((item as Player).userId ?? (item as Enemy | Summons).id);
   const [name, setName] = useState<string>(item.name);
@@ -114,6 +112,7 @@ export default function HealthDeathTrackerElement({ item, itemType }:
       health={health}
       totalHealth={totalHealth}
       HealthChange={(val: number): void => {
+        if (authContext.room === null) return;
         switch (itemType) {
           case "player":
             break;
@@ -134,6 +133,7 @@ export default function HealthDeathTrackerElement({ item, itemType }:
         }
       }}
       TotalHealthChange={(val: number): void => {
+        if (authContext.room === null) return;
         switch (itemType) {
           case "player":
             break;
@@ -163,6 +163,7 @@ export default function HealthDeathTrackerElement({ item, itemType }:
       id={id}
       deathAdd={
         () => {
+          if (authContext.room === null) return;
           switch (itemType) {
             case "player":
               break;
@@ -175,6 +176,7 @@ export default function HealthDeathTrackerElement({ item, itemType }:
           }
         }}
       deathRemove={() => {
+        if (authContext.room === null) return;
         switch (itemType) {
           case "player":
             break;
@@ -187,6 +189,7 @@ export default function HealthDeathTrackerElement({ item, itemType }:
         }
       }}
       saveAdd={() => {
+        if (authContext.room === null) return;
         switch (itemType) {
           case "player":
             break;
@@ -199,6 +202,7 @@ export default function HealthDeathTrackerElement({ item, itemType }:
         }
       }}
       saveRemove={() => {
+        if (authContext.room === null) return;
         switch (itemType) {
           case "player":
             break;
@@ -216,6 +220,7 @@ export default function HealthDeathTrackerElement({ item, itemType }:
   const healDamageElement = (
     <HealDamageComponent
       HealthClick={(val: number) => {
+        if (authContext.room === null) return;
         switch (itemType) {
           case "player":
             break;
@@ -228,6 +233,7 @@ export default function HealthDeathTrackerElement({ item, itemType }:
         }
       }}
       DamageClick={(val: number) => {
+        if (authContext.room === null) return;
         switch (itemType) {
           case "player":
             break;
@@ -253,6 +259,7 @@ export default function HealthDeathTrackerElement({ item, itemType }:
   }
 
   const handleDuplicateCallback = () => {
+    if (authContext.room === null) return;
     switch (itemType) {
       case "player":
         break;
@@ -275,6 +282,7 @@ export default function HealthDeathTrackerElement({ item, itemType }:
     }
   };
   const handleDeleteCallback = () => {
+    if (authContext.room === null) return;
     switch (itemType) {
       case "player":
         break;
@@ -287,6 +295,7 @@ export default function HealthDeathTrackerElement({ item, itemType }:
     }
   };
   const handleVisibilityToggle = (): void => {
+    if (authContext.room === null) return;
     switch (itemType) {
       case "player":
         break;
@@ -300,6 +309,7 @@ export default function HealthDeathTrackerElement({ item, itemType }:
   }
 
   const handleStatusRequest = (result: string[]): void => {
+    if (authContext.room === null) return;
     switch (itemType) {
       case "player":
         break;
@@ -373,6 +383,7 @@ export default function HealthDeathTrackerElement({ item, itemType }:
                 setShowEditCharacter(false);
                 return;
               }
+              if (authContext.room === null) return;
 
               switch (itemType) {
                 case "enemy":

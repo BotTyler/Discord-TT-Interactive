@@ -7,7 +7,7 @@ import HealthDeathTrackerElement from "../../General/HealthDeathTracker/HealthDe
 import { mLatLng } from "../../../../shared/PositionInterface";
 import EditCharacterModal from "../../../Modal/SummonedCharacterModal";
 
-export default function PlayerSummonsListElement({ }: {}) {
+export default function PlayerSummonsListElement() {
   const authContext = useAuthenticatedContext();
   const players = usePlayers();
 
@@ -51,6 +51,7 @@ export default function PlayerSummonsListElement({ }: {}) {
         <EditCharacterModal
           callback={(data) => {
             if (data !== undefined) {
+              if (authContext.room === null) return;
               authContext.room.send("addSummons", {
                 avatarUri: data.avatarUri,
                 name: data.name,

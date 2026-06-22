@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
+    "target": "es2022",
     "module": "ESNext",
-    "useDefineForClassFields": false,
+    "useDefineForClassFields": true,
     "lib": [
       "DOM",
       "DOM.Iterable",
@@ -20,5 +20,8 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "experimentalDecorators": true
-  }
+  },
+  "include": [
+    "src"
+  ]
 }

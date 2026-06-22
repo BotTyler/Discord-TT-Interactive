@@ -5,7 +5,7 @@ import { useGameState } from "../../../../ContextProvider/GameStateContext/GameS
 import { usePlayers } from "../../../../ContextProvider/PlayersContext/PlayersContext";
 import { useAuthenticatedContext } from "../../../../ContextProvider/useAuthenticatedContext";
 
-export default function InitiativeListHandler({ }: {}) {
+export default function InitiativeListHandler() {
   const players = usePlayers();
   const gameStateContext = useGameState();
   const authContext = useAuthenticatedContext();
@@ -17,8 +17,8 @@ export default function InitiativeListHandler({ }: {}) {
 
   React.useEffect(() => {
     const fullList: React.ReactNode[] = [];
-    var playersIndex = 0;
-    var enemiesIndex = 0;
+    let playersIndex = 0;
+    let enemiesIndex = 0;
     while (playersIndex < sortedPlayers.length && enemiesIndex < sortedEnemies.length) {
       const curPlayer = sortedPlayers[playersIndex];
       if (curPlayer.isHost) {
@@ -34,6 +34,7 @@ export default function InitiativeListHandler({ }: {}) {
             initiative={curPlayer.initiative}
             name={curPlayer.name}
             onInitiativeChange={(val: number) => {
+              if (authContext.room === null) return;
               authContext.room.send("changeInitiative", { initiative: val, clientToChange: curPlayer.userId });
             }}
             isActive={isActive}
@@ -48,6 +49,7 @@ export default function InitiativeListHandler({ }: {}) {
             initiative={curEnemy.initiative}
             name={curEnemy.name}
             onInitiativeChange={(val: number) => {
+              if (authContext.room === null) return;
               authContext.room.send("changeEnemyInitiative", { initiative: val, id: curEnemy.id + "" });
             }}
             isActive={isActive}
@@ -69,6 +71,7 @@ export default function InitiativeListHandler({ }: {}) {
           initiative={curPlayer.initiative}
           name={curPlayer.name}
           onInitiativeChange={(val: number) => {
+            if (authContext.room === null) return;
             authContext.room.send("changeInitiative", { initiative: val, clientToChange: curPlayer.userId });
           }}
           isActive={isActive}
@@ -88,6 +91,7 @@ export default function InitiativeListHandler({ }: {}) {
           initiative={curEnemy.initiative}
           name={curEnemy.name}
           onInitiativeChange={(val: number) => {
+            if (authContext.room === null) return;
             authContext.room.send("changeEnemyInitiative", { initiative: val, id: curEnemy.id + "" });
           }}
           isActive={isActive}

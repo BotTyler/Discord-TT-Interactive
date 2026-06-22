@@ -9,7 +9,7 @@ export interface MessageInterface {
   type: string;
 }
 
-export const MessageHandler = forwardRef(function MessageHandler({ }: {}, ref: any) {
+export const MessageHandler = forwardRef(function MessageHandler(ref: any) {
   const defaultMessage: MessageInterface = {
     created: new Date(),
     displayName: "System",
@@ -34,6 +34,7 @@ export const MessageHandler = forwardRef(function MessageHandler({ }: {}, ref: a
   }, [allMessage]);
 
   React.useEffect(() => {
+    if (authContext.room === null) return;
     const handleMessageChange = (data: { message: MessageInterface }) => {
       const player = playersContext.getPlayer(authContext.user.id)!;
       if (player.isHost && data.message.type === "player") return; // host should not see player messages

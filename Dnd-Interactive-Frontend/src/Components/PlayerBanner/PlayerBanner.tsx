@@ -204,6 +204,7 @@ export default function PlayerBanner({ player, isMain, hostOnClick }: { player: 
             setShowModal(false);
           }}
           submitCallback={() => {
+            if (authContext.room === null) return;
             setShowModal(false);
             authContext.room.send("changePlayerColor", { color: modalColor });
           }}
