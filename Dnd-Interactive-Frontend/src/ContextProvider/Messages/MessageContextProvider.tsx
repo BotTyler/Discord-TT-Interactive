@@ -25,7 +25,7 @@ export function MessageContextProvider({ children }: { children: React.ReactNode
       toastListRef.current.addToast(title, message, level);
     },
     [toastListRef]
-  ); // Use useCallback to avoid unnecessary re-renders
+  );
 
   const sendPlayerMessage = (message: string) => {
     if (authContext.room === null) return;

@@ -2,6 +2,7 @@ import { Player } from "../../../src/shared/Player"
 import React, { useImperativeHandle } from "react";
 import { useAuthenticatedContext } from "../useAuthenticatedContext";
 import PlayerElementHandler from "./PlayerElementHandler";
+import { Callbacks } from "@colyseus/schema";
 
 export const PlayersListHandler = React.forwardRef(function PlayersListHandler(ref: any) {
   const [players, setPlayers] = React.useState<{ [key: string]: Player }>({});
@@ -30,32 +31,29 @@ export const PlayersListHandler = React.forwardRef(function PlayersListHandler(r
 
   React.useEffect(() => {
     if (authenticatedContext.room === null) return;
-    try {
-      const playerAdd = authenticatedContext.room.state.players.onAdd((player: any, _key: any) => {
-        setPlayers((players) => ({ ...players, [player.userId]: player }));
-        setConnectedPlayers((prev) => {
-          return { ...prev, [player.userId]: player.userId };
-        });
+    const roomCallback = Callbacks.get(authenticatedContext.room);
+    const playerAdd = roomCallback.onAdd("players", (player: any, _key: any) => {
+      setPlayers((players) => ({ ...players, [player.userId]: player }));
+      setConnectedPlayers((prev) => {
+        return { ...prev, [player.userId]: player.userId };
       });
+    });
 
-      const playerRemove = authenticatedContext.room.state.players.onRemove((player: any, _key: any) => {
-        setPlayers((players) => {
-          const { [player.userId]: _, ...temp } = players;
-          return temp;
-        });
-        setConnectedPlayers((prev) => {
-          const { [player.userId]: _, ...temp } = prev;
-          return temp;
-        });
+    const playerRemove = roomCallback.onRemove("players", (player: any, _key: any) => {
+      setPlayers((players) => {
+        const { [player.userId]: _, ...temp } = players;
+        return temp;
       });
+      setConnectedPlayers((prev) => {
+        const { [player.userId]: _, ...temp } = prev;
+        return temp;
+      });
+    });
 
-      return () => {
-        playerAdd();
-        playerRemove();
-      };
-    } catch (e) {
-      console.error("Couldn't connect:", e);
-    }
+    return () => {
+      playerAdd();
+      playerRemove();
+    };
   }, [authenticatedContext.room]);
   return (
     <>

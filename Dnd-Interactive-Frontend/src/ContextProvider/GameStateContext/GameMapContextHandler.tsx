@@ -4,6 +4,7 @@ import React, { useImperativeHandle } from "react";
 import { useAuthenticatedContext } from "../useAuthenticatedContext";
 import EnemyContextElement from "./EnemyContextElement";
 import { MapData } from "../../shared/Map";
+import { Callbacks } from "@colyseus/sdk";
 
 export const GameMapContextHandler = React.forwardRef(function GameMapContextHandler(ref: any) {
   const authenticatedContext = useAuthenticatedContext();
@@ -112,11 +113,13 @@ export const GameMapContextHandler = React.forwardRef(function GameMapContextHan
 
   React.useEffect(() => {
     if (authenticatedContext.room === null) return;
-    const GameStateCallback = authenticatedContext.room.state.listen("gameState", (value: any) => {
+    const roomCallback = Callbacks.get(authenticatedContext.room);
+
+    const GameStateCallback = roomCallback.listen("gameState", (value: any) => {
       setGameState(value);
     });
 
-    const mapCallback = authenticatedContext.room.state.listen("map", (value: any) => {
+    const mapCallback = roomCallback.listen("map", (value: any) => {
       if (value === null || value.mapBase64 == null) {
         setMap(null);
       } else {
@@ -124,7 +127,7 @@ export const GameMapContextHandler = React.forwardRef(function GameMapContextHan
       }
     });
 
-    const hostIdListener = authenticatedContext.room.state.listen("currentHostUserId", (value: any) => {
+    const hostIdListener = roomCallback.listen("currentHostUserId", (value: any) => {
       if (value == undefined) {
         setCurHostId(undefined);
         return;
@@ -132,13 +135,13 @@ export const GameMapContextHandler = React.forwardRef(function GameMapContextHan
       setCurHostId(value);
     });
 
-    const mapMovementListener = authenticatedContext.room.state.listen("mapMovement", (value: MapMovementType) => {
+    const mapMovementListener = roomCallback.listen("mapMovement", (value: MapMovementType) => {
       setMapMovement(value);
     })
-    const gridColorListener = authenticatedContext.room.state.listen("gridColor", (value: string) => {
+    const gridColorListener = roomCallback.listen("gridColor", (value: string) => {
       setGridColor(value);
     })
-    const gridShowingListener = authenticatedContext.room.state.listen("gridShowing", (value: boolean) => {
+    const gridShowingListener = roomCallback.listen("gridShowing", (value: boolean) => {
       setGridShowing(value);
     })
 
@@ -156,9 +159,10 @@ export const GameMapContextHandler = React.forwardRef(function GameMapContextHan
   React.useEffect(() => {
     if (map === null) return;
     if (authenticatedContext.room === null) return;
+    const roomCallback = Callbacks.get(authenticatedContext.room);
 
     // set the listeners for enemy
-    const enemyAdd = authenticatedContext.room.state.enemies.onAdd((item: Enemy, key: string) => {
+    const enemyAdd = roomCallback.onAdd("enemies", (item: any, key: any): void => {
       setEnemies((prev) => {
         return { ...prev, [key]: item };
       });
@@ -167,8 +171,7 @@ export const GameMapContextHandler = React.forwardRef(function GameMapContextHan
       });
     });
     // delete enemies
-
-    const enemyRemove = authenticatedContext.room.state.enemies.onRemove((item: Enemy, key: string) => {
+    const enemyRemove = roomCallback.onRemove("enemies", (item: any, key: any) => {
       setEnemies((prev) => {
         const { [key]: _, ...temp } = prev;
         return temp;
@@ -197,7 +200,7 @@ export const GameMapContextHandler = React.forwardRef(function GameMapContextHan
       });
     };
 
-    const enemyListen = authenticatedContext.room.state.listen("enemies", (val: any): void => handleEnemyChange(val));
+    const enemyListen = roomCallback.listen("enemies", (val: any): void => handleEnemyChange(val));
 
     return () => {
       enemyListen();
@@ -208,11 +211,14 @@ export const GameMapContextHandler = React.forwardRef(function GameMapContextHan
 
   React.useEffect(() => {
     if (map === null) return;
-    const iconHeightListener = map.listen("iconHeight", (val: number): void => {
+    if (authenticatedContext.room === null) return;
+    const roomCallback = Callbacks.get(authenticatedContext.room);
+
+    const iconHeightListener = roomCallback.listen(map, "iconHeight", (val: number): void => {
       setIconHeight(val);
     });
 
-    const initiativeIndexListener = map.listen("initiativeIndex", (val: number): void => {
+    const initiativeIndexListener = roomCallback.listen(map, "initiativeIndex", (val: number): void => {
       setInitiative(val);
     });
 

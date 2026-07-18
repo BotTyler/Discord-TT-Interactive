@@ -11,7 +11,7 @@ export enum TOAST_LEVEL {
 /**
  * Bootstrap Toast component that will display to the screen in the bottom right corner
  */
-export default function Toast({ message, title, level, callback }: { message: string; title: string; level: TOAST_LEVEL, callback: Function }) {
+export default function Toast({ message, title, level, callback }: { message: string; title: string; level: TOAST_LEVEL, callback: () => void }) {
   useEffect(() => {
     const timer = setTimeout(() => {
       callback();

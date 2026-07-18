@@ -6,6 +6,7 @@ import { useAuthenticatedContext } from "../useAuthenticatedContext";
 import { Summons } from "../../shared/Summons";
 import SummonsElementHandler from "./SummonsElementHandler";
 import { CharacterStatus } from "../../shared/StatusTypes";
+import { Callbacks } from "@colyseus/schema";
 
 // this class def can be simpler
 export default function PlayerElementHandler({ player, onValueChanged }: { player: Player; onValueChanged: (field: string, value: unknown) => void }) {
@@ -113,68 +114,70 @@ export default function PlayerElementHandler({ player, onValueChanged }: { playe
   }, [summons]);
 
   React.useEffect(() => {
+    if (authContext.room === null) return;
+    const roomCallbacks = Callbacks.get(authContext.room);
     // set all listeners with the colyseus backend
-    const userIdListener = player.listen("userId", (value: string) => {
+    const userIdListener = roomCallbacks.listen(player, "userId", (value: string) => {
       setUserId(value);
     });
-    const avatarListener = player.listen("avatarUri", (value: string) => {
+    const avatarListener = roomCallbacks.listen(player, "avatarUri", (value: string) => {
       setAvatar(value);
     });
-    const nameListener = player.listen("name", (value: string) => {
+    const nameListener = roomCallbacks.listen(player, "name", (value: string) => {
       setName(value);
     });
-    const sessionIdListener = player.listen("sessionId", (value: string) => {
+    const sessionIdListener = roomCallbacks.listen(player, "sessionId", (value: string) => {
       setSessionId(value);
     });
-    const isHostListener = player.listen("isHost", (value: boolean) => {
+    const isHostListener = roomCallbacks.listen(player, "isHost", (value: boolean) => {
       setIsHost(value);
     });
-    const colorListener = player.listen("color", (value: string) => {
+    const colorListener = roomCallbacks.listen(player, "color", (value: string) => {
       setColor(value);
     });
-    const initiativeListener = player.listen("initiative", (value: number) => {
+    const initiativeListener = roomCallbacks.listen(player, "initiative", (value: number) => {
       setInitiative(value);
     });
-    const positionListener = player.listen("position", (value: mLatLng) => {
+    const positionListener = roomCallbacks.listen(player, "position", (value: mLatLng) => {
       setPosition(value);
     });
-    const toPositionListener = player.listen("toPosition", (value: mLatLng[]) => {
+    const toPositionListener = roomCallbacks.listen(player, "toPosition", (value: mLatLng[]) => {
       setToPosition(value);
     });
-    const healthListener = player.listen("health", (value: number) => {
+    const healthListener = roomCallbacks.listen(player, "health", (value: number) => {
       setHealth(value);
     });
-    const totalHealthListener = player.listen("totalHealth", (value: number) => {
+    const totalHealthListener = roomCallbacks.listen(player, "totalHealth", (value: number) => {
       setTotalHealth(value);
     });
-    const deathSavesListener = player.listen("deathSaves", (value: number) => {
+    const deathSavesListener = roomCallbacks.listen(player, "deathSaves", (value: number) => {
       setDeathSaves(value);
     });
-    const lifeSavesListener = player.listen("lifeSaves", (value: number) => {
+    const lifeSavesListener = roomCallbacks.listen(player, "lifeSaves", (value: number) => {
       setLifeSaves(value);
     });
-    const drawingsListener = player.listen("drawings", (value: mLatLng[]) => {
+    const drawingsListener = roomCallbacks.listen(player, "drawings", (value: mLatLng[]) => {
       setDrawings(value);
     });
-    const cubeDrawingListener = player.listen("cubeDrawing", (value: CubeDrawing | null) => {
+    const cubeDrawingListener = roomCallbacks.listen(player, "cubeDrawing", (value: CubeDrawing | null) => {
       setCubeDrawings(value ?? null);
     });
-    const circleDrawingListener = player.listen("circleDrawing", (value: CircleDrawing | null) => {
+    const circleDrawingListener = roomCallbacks.listen(player, "circleDrawing", (value: CircleDrawing | null) => {
       setCircleDrawings(value ?? null);
     });
-    const arcDrawingListener = player.listen("arcDrawing", (value: ArcDrawing | null) => {
+    const arcDrawingListener = roomCallbacks.listen(player, "arcDrawing", (value: ArcDrawing | null) => {
       setArcDrawings(value ?? null);
     });
-    const beamDrawingListener = player.listen("beamDrawing", (value: BeamDrawing | null) => {
+    const beamDrawingListener = roomCallbacks.listen(player, "beamDrawing", (value: BeamDrawing | null) => {
       setBeamDrawing(value ?? null);
     });
-    const connectionListener = player.listen("isConnected", (value: boolean) => {
+    const connectionListener = roomCallbacks.listen(player, "isConnected", (value: boolean) => {
       setConnected(value);
     });
-    const statusesListener = player.listen("statuses", (value: CharacterStatus[]) => {
+    const statusesListener = roomCallbacks.listen(player, "statuses", (value: CharacterStatus[]) => {
       setStatuses([...value]);
     });
-    const summonsListener = player.listen("summons", (value: Summons[]) => {
+    const summonsListener = roomCallbacks.listen(player, "summons", (value: Summons[]) => {
       setSummons([...value]);
       // setConnectedSummons([...value]);
     });

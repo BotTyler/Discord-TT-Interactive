@@ -10,9 +10,9 @@ export enum Tools {
 
 export function GameToolProvider({ children }: { children: React.ReactNode }) {
   const [tool, setTools] = useState(Tools.SELECT);
-  const [startEventHandler, setStartEventHandler] = useState<Record<Tools, Function>>({} as Record<Tools, Function>);
-  const [cancelEventHandler, setCancelEventHandler] = useState<Record<Tools, Function>>({} as Record<Tools, Function>);
-  const [submitEventHandler, setSubmitEventHandler] = useState<Record<Tools, Function>>({} as Record<Tools, Function>);
+  const [startEventHandler, setStartEventHandler] = useState<Record<Tools, () => void>>({} as Record<Tools, () => void>);
+  const [cancelEventHandler, setCancelEventHandler] = useState<Record<Tools, () => void>>({} as Record<Tools, () => void>);
+  const [submitEventHandler, setSubmitEventHandler] = useState<Record<Tools, () => void>>({} as Record<Tools, () => void>);
   // const [a, setA] = useState<number[]>([0]);
 
   const setCurrentTools = (nTool: Tools) => {
@@ -43,17 +43,17 @@ export function GameToolProvider({ children }: { children: React.ReactNode }) {
     if (func !== undefined) func();
   };
 
-  const setStartHandler = (tool: Tools, callback: Function) => {
+  const setStartHandler = (tool: Tools, callback: () => void) => {
     setStartEventHandler((prev) => {
       return { ...prev, [tool]: callback };
     });
   };
-  const setSubmitHandler = (tool: Tools, callback: Function) => {
+  const setSubmitHandler = (tool: Tools, callback: () => void) => {
     setSubmitEventHandler((prev) => {
       return { ...prev, [tool]: callback };
     });
   };
-  const setCancelHandler = (tool: Tools, callback: Function) => {
+  const setCancelHandler = (tool: Tools, callback: () => void) => {
     setCancelEventHandler((prev) => {
       return { ...prev, [tool]: callback };
     });
@@ -78,9 +78,9 @@ export function GameToolProvider({ children }: { children: React.ReactNode }) {
 interface GameToolContextInterface {
   setTool: (tool: Tools) => void;
   curTool: Tools;
-  registerStartHandlers: (tool: Tools, callback: Function) => void;
-  registerSubmitHandlers: (tool: Tools, callback: Function) => void;
-  registerCancelHandlers: (tool: Tools, callback: Function) => void;
+  registerStartHandlers: (tool: Tools, callback: () => void) => void;
+  registerSubmitHandlers: (tool: Tools, callback: () => void) => void;
+  registerCancelHandlers: (tool: Tools, callback: () => void) => void;
   submitCurrentTool: () => void;
 }
 
@@ -89,13 +89,13 @@ const GameToolContext = React.createContext<GameToolContextInterface>({
   setTool: (tool: Tools) => {
     console.log("not implemented yet");
   },
-  registerStartHandlers: (tool: Tools, callback: Function) => {
+  registerStartHandlers: (tool: Tools, callback: () => void) => {
     console.log("not implemented yet");
   },
-  registerSubmitHandlers: (tool: Tools, callback: Function) => {
+  registerSubmitHandlers: (tool: Tools, callback: () => void) => {
     console.log("not implemented yet");
   },
-  registerCancelHandlers: (tool: Tools, callback: Function) => {
+  registerCancelHandlers: (tool: Tools, callback: () => void) => {
     console.log("not implemented yet");
   },
   submitCurrentTool: () => {
