@@ -1,7 +1,7 @@
 import { Schema, type } from "@colyseus/schema";
 import { mLatLng } from "./PositionInterface";
 import { CharacterStatus } from "./StatusTypes";
-import { MARKER_SIZE_CATEGORIES } from "./MarkerOptions";
+import type { MARKER_SIZE_CATEGORIES } from "./MarkerOptions";
 
 export type TEnemyOptions = Pick<Enemy, "id" | "avatarUri" | "name" | "size_category">;
 
