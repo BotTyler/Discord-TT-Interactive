@@ -1,7 +1,7 @@
 import React, { forwardRef, useImperativeHandle } from "react";
 import Toast, { TOAST_LEVEL } from "./Toast";
 
-export const ToastListHandler = forwardRef(function ToastListHandler(ref: any) {
+export const ToastListHandler = forwardRef(function ToastListHandler(_params: any, ref: any) {
   const [toast, setToast] = React.useState<{ title: string; message: string, level: TOAST_LEVEL, id: string }[]>([]);
   useImperativeHandle(ref, () => ({
     addToast(title: string, message: string, level: TOAST_LEVEL) {

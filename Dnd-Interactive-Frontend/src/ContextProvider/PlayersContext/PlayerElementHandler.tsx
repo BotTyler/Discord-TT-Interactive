@@ -116,6 +116,8 @@ export default function PlayerElementHandler({ player, onValueChanged }: { playe
   React.useEffect(() => {
     if (authContext.room === null) return;
     const roomCallbacks = Callbacks.get(authContext.room);
+
+    console.info("Setting up listeners for", player);
     // set all listeners with the colyseus backend
     const userIdListener = roomCallbacks.listen(player, "userId", (value: string) => {
       setUserId(value);

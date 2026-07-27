@@ -24,35 +24,6 @@ $ nvm install V22.20.0
 $ nvm ls
 ```
 
-### Environment
-
-Make sure to fill out anything surrounded by \<\>. These can be setup by configuring each of the persistent storages.
-
-```Environment
-# Discord Auth Tokens
-VITE_CLIENT_ID=<Discord_Client_id>
-CLIENT_SECRET=<Discord_Client_Secret>
-
-#Database
-DB_USER=dnd-prod-user
-DB_PASSWORD=<DB_Password>
-DB_HOST=<DB_IP>
-DB_PORT=5432
-DB_NAME=dnd-prod
-
-#Minio Auth
-MINIO_ACCESS_KEY=<MINIO_ACCESS>
-MINIO_SECRET_KEY=<MINIO_SECRET>
-MINIO_ENDPOINT=<MINIO_IP>
-MINIO_PORT=9000
-
-#MINIO BUCKET INFORMATION
-MINIO_BUCKET=dev
-
-# JWT authentication secret (Random String)
-JWT_SECRET=<Random_String>
-```
-
 ## Post Setup
 
 Install the dependencies.

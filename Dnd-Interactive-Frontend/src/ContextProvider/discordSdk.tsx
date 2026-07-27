@@ -5,7 +5,6 @@ const isEmbedded = queryParams.get("frame_id") != null;
 
 let discordSdk: DiscordSDK | DiscordSDKMock;
 if (isEmbedded) {
-
   discordSdk = new DiscordSDK(import.meta.env.VITE_CLIENT_ID);
 } else {
   console.error("THIS APP IS MEANT TO BE EMBEDDED IN DISCORD!!!");

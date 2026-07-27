@@ -5,7 +5,7 @@ import { useGameState } from "../../../../ContextProvider/GameStateContext/GameS
 import { usePlayers } from "../../../../ContextProvider/PlayersContext/PlayersContext";
 import { useAuthenticatedContext } from "../../../../ContextProvider/useAuthenticatedContext";
 
-export default function InitiativeListHandler() {
+export default function InitiativeListHandler(_params: any) {
   const players = usePlayers();
   const gameStateContext = useGameState();
   const authContext = useAuthenticatedContext();

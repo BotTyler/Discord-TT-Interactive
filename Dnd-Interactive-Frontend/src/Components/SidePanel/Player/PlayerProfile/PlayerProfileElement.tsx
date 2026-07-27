@@ -6,7 +6,7 @@ import { Player } from "../../../../shared/Player";
 import StatusDropdown from "../../../StatusModal/StatusModal";
 import { CharacterStatus } from "../../../../shared/StatusTypes";
 
-export default function PlayerProfilePanelElement() {
+export default function PlayerProfilePanelElement(_params: any) {
   const authContext = useAuthenticatedContext();
   const playerContext = usePlayers();
 

@@ -4,7 +4,7 @@ import { useAuthenticatedContext } from "../useAuthenticatedContext";
 import PlayerElementHandler from "./PlayerElementHandler";
 import { Callbacks } from "@colyseus/schema";
 
-export const PlayersListHandler = React.forwardRef(function PlayersListHandler(ref: any) {
+export const PlayersListHandler = React.forwardRef(function PlayersListHandler(_params: any, ref: any) {
   const [players, setPlayers] = React.useState<{ [key: string]: Player }>({});
   const [connectedPlayers, setConnectedPlayers] = React.useState<{ [key: string]: string }>({});
   const authenticatedContext = useAuthenticatedContext();
@@ -30,9 +30,13 @@ export const PlayersListHandler = React.forwardRef(function PlayersListHandler(r
   }, [connectedPlayers]);
 
   React.useEffect(() => {
-    if (authenticatedContext.room === null) return;
+    if (authenticatedContext.room === null) {
+      console.warn("Room is null");
+      return;
+    }
     const roomCallback = Callbacks.get(authenticatedContext.room);
     const playerAdd = roomCallback.onAdd("players", (player: any, _key: any) => {
+      console.info("Adding Player", player)
       setPlayers((players) => ({ ...players, [player.userId]: player }));
       setConnectedPlayers((prev) => {
         return { ...prev, [player.userId]: player.userId };
@@ -40,6 +44,7 @@ export const PlayersListHandler = React.forwardRef(function PlayersListHandler(r
     });
 
     const playerRemove = roomCallback.onRemove("players", (player: any, _key: any) => {
+      console.info("Removing Player", player);
       setPlayers((players) => {
         const { [player.userId]: _, ...temp } = players;
         return temp;

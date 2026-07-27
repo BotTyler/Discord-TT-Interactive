@@ -26,102 +26,42 @@ $ nvm ls
 - [Frontend](./Dnd-Interactive-Frontend/README.md)
 - [Backend](./Dnd-Interactive-Backend/README.md)
 
-## Cloudflare Tunnel
+## Automation
 
-Both the frontend and backend should be up and running separately. The cloudflared links will be used within [discord developer](https://discord.com/developers/applications) 'URL Mappings' tab.
+Running and deploying the application is simple thanks to a Docker Compose file that bundles all the configuration needed to get it up and running.
 
-| Prefix    | Target                       |
-| --------- | ---------------------------- |
-| /         | \<Frontend-cloudflared-url\> |
-| /colyseus | \<Backend-cloudflared-url\>  |
+The only requirement is a `.env` file located at [`./automation/`](./automation/).
 
-```YAML
-version: "3.3"
+```.env
+# Discord Auth Tokens
+VITE_CLIENT_ID=<ID>
+CLIENT_SECRET=<SECRET>
 
-networks:
-  DndNetwork:
-    external: true
-services:
-  # Cloudflare Tunnel service
-  cloudflared-dev-frontend:
-    image: cloudflare/cloudflared:latest
-    container_name: cloudflared-dev-frontend
-    networks:
-      - DndNetwork
-    command: tunnel --url http://<ip>:3000 # Points to your application service
-    restart: unless-stopped
-  cloudflared-dev-backend:
-    image: cloudflare/cloudflared:latest
-    container_name: cloudflared-dev-backend
-    networks:
-      - DndNetwork
-    command: tunnel --url http://<ip>:2567 # Points to your application service
-    restart: unless-stopped
+#Database
+DB_USER=dnd-prod-user
+DB_PASSWORD=<PASSWORD>
+DB_HOST=<DB_HOST_IP>
+DB_PORT=5432
+DB_NAME=dnd-prod
+POSTGRES_ADMIN_PASSWORD=<ADMIN_PASSWORD>
+PGADMIN_EMAIL=<PGADMIN_EMAIL>
+PGADMIN_PASSWORD=<PGADMIN_PASSWORD>
+
+#Minio Auth
+MINIO_ACCESS_KEY=<MINIO_ACCESS_KEY>
+MINIO_SECRET_KEY=<MINIO_SECRET_KEY>
+MINIO_ENDPOINT=<MINIO_HOST>
+MINIO_PORT=9000
+
+#MINIO BUCKET INFORMATION
+MINIO_BUCKET=dev
+
+# JWT authentication secret (Random String)
+JWT_SECRET=<honestly, slam head into keyboard>
 ```
 
 ```bash
-$ docker compose -f docker-compose.yml up
-```
-
-## Persistence
-
-```YAML
-networks:
-  DndNetwork:
-    external: true
-volumes:
-  postgres-db:
-  miniofiles:
-  pgadmin-data:
-services:
-  postgres-dev:
-    image: postgres
-    container_name: postgres-dev
-    networks:
-      - DndNetwork
-    restart: always
-    environment:
-        POSTGRES_PASSWORD: <PASSWORD>
-    volumes:
-        - postgres-db:/var/lib/postgresql
-    ports:
-        - "5432:5432"
-  pgadmin-dev:
-    image: dpage/pgadmin4
-    container_name: pgadmin-dev
-    networks:
-      - DndNetwork
-    restart: always
-    environment:
-      PGADMIN_DEFAULT_EMAIL: <EMAIL>
-      PGADMIN_DEFAULT_PASSWORD: <PASSWORD>
-
-      PGADMIN_LISTEN_PORT: 80
-    volumes:
-      - pgadmin-data:/var/lib/pgadmin
-    ports:
-      - "5050:80"
-    depends_on:
-      - postgres-dev
-  minio:
-    image: minio/minio
-    container_name: minio
-    restart: always
-    environment:
-      MINIO_ROOT_USER: <MINIO_ROOT>
-      MINIO_ROOT_PASSWORD: <MINIO_PASSWORD>
-    ports:
-      - "9000:9000"
-      - "9001:9001"
-    command: server /data --console-address ":9001"
-    volumes:
-      - miniofiles:/data
-    networks:
-      - DndNetwork
-```
-
-```bash
-$ docker compose -f docker-compose.yml up
+docker compose up -d --build
 ```
 
 ### Database (Postgress and PGAdmin)

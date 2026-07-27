@@ -15,6 +15,7 @@ import {
 } from "./shared/UserDetails";
 import { sanitize } from "./Util/Utils";
 import { getUserAvatarUrl, getUserDisplayName } from "./Util/DiscordAuthenticationUtils";
+import express from "express";
 
 export default config({
   options: {
@@ -40,9 +41,7 @@ export default config({
   },
 
   initializeExpress: (app) => {
-    /**
-     * Bind your custom express routes here:
-     */
+    app.use(express.json()); // Required for serialization of endpoints
 
     //setup the minio storage
     const storage = multer.memoryStorage(); // Store files in memory
@@ -50,10 +49,19 @@ export default config({
 
     // Fetch token from developer portal and return to the embedded app
     app.post("/token", async (req, res) => {
-      const body: any = req.body();
-      if (body == null || body.guildId == null || body.code == null) res.status(400).send(null);
-      const guildId: string = sanitize(body.guildId);
-      const code: string = sanitize(body.code);
+      const body: any = req.body ?? null;
+      if (body === null) {
+        console.warn("Token request with no body");
+        res.status(400).send({ data: null, message: "Incorrect parameters" });
+        return;
+      }
+      const code: string | null = sanitize(body.code) ?? null;
+      const guildId: string | null = sanitize(body.guildId) ?? null;
+      if (code === null || guildId === null || code.length === 0 || guildId.length === 0) {
+        console.warn("User access code not provided");
+        res.status(400).send({ data: null, message: "Incorrect parameters" });
+        return;
+      }
 
       try {
         /*
@@ -110,7 +118,7 @@ export default config({
         )
           .then(async (j) => j.json())
           .catch((e) => {
-            console.log(e);
+            console.error("Fail to gether guild information", e);
             return null;
           });
 
@@ -188,6 +196,17 @@ export default config({
         console.error(e);
         res.destroy(e);
       }
+    });
+
+    // If all else fails go here.
+    app.use((req, res) => {
+      console.warn(
+        `Cannot ${req.method} ${req.originalUrl}. Verify the url of the request is going to the correct destination.`,
+      );
+      res.status(404).json({
+        error: "NOT FOUND",
+        message: `Cannot ${req.method} ${req.originalUrl}`,
+      });
     });
   },
 

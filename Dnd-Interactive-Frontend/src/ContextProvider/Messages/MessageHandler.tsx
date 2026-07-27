@@ -9,7 +9,7 @@ export interface MessageInterface {
   type: string;
 }
 
-export const MessageHandler = forwardRef(function MessageHandler(ref: any) {
+export const MessageHandler = forwardRef(function MessageHandler(_params: any, ref: any) {
   const defaultMessage: MessageInterface = {
     created: new Date(),
     displayName: "System",

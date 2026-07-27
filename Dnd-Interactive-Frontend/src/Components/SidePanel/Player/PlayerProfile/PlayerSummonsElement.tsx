@@ -7,7 +7,7 @@ import HealthDeathTrackerElement from "../../General/HealthDeathTracker/HealthDe
 import { mLatLng } from "../../../../shared/PositionInterface";
 import EditCharacterModal from "../../../Modal/SummonedCharacterModal";
 
-export default function PlayerSummonsListElement() {
+export default function PlayerSummonsListElement(_params: any) {
   const authContext = useAuthenticatedContext();
   const players = usePlayers();
 

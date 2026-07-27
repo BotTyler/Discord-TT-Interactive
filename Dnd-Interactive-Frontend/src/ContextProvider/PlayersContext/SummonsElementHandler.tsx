@@ -80,6 +80,7 @@ export default function SummonsElementHandler({ summon }: { summon: Summons; }) 
   React.useEffect(() => {
     if (authContext.room === null) return;
     const roomCallbacks = Callbacks.get(authContext.room);
+    console.info("Setting up summons listener", summon);
     // set all listeners with the colyseus backend
     const idListener = roomCallbacks.listen(summon, "id", (value: number) => {
       setId(value);

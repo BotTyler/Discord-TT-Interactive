@@ -36,7 +36,9 @@ export function PlayersContextProvider({ children }: { children: React.ReactNode
   React.useEffect(() => {
     const start = () => {
       // I need to make sure that I am listed as a player
-      if (!getPlayer(authContext.user.id)) return;
+      if (!getPlayer(authContext.user.id)) {
+        return;
+      };
       setReady(true);
     };
     if (refReady) return; // if this is true I no longer need the event listener

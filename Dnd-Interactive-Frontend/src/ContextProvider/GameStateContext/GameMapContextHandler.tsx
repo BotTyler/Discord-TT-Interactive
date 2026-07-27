@@ -6,7 +6,7 @@ import EnemyContextElement from "./EnemyContextElement";
 import { MapData } from "../../shared/Map";
 import { Callbacks } from "@colyseus/sdk";
 
-export const GameMapContextHandler = React.forwardRef(function GameMapContextHandler(ref: any) {
+export const GameMapContextHandler = React.forwardRef(function GameMapContextHandler(_params: any, ref: any) {
   const authenticatedContext = useAuthenticatedContext();
   const [currentGameState, setGameState] = React.useState<GameStateEnum>(GameStateEnum.MAINMENU);
 

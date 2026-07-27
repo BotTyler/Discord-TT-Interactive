@@ -112,16 +112,19 @@ function useAuthenticatedContextSetup(): ColyseusAuthenticationDetail | null {
 
   React.useEffect(() => {
     const setUpDiscordSdk = async () => {
+      console.info("Setting up discord sdk")
       // Now we create a colyseus client
       // const wsUrl = `wss://${location.host}/.proxy/colyseus`;
       // const wsUrl = "https://brook-remain-narrow-hosts.trycloudflare.com/";
       const wsUrl = `/.proxy/colyseus`;
       const colyseusClientSdk = new Client(wsUrl); // this will be used to connect to express endpoints
 
+      console.info("calling discordSdk.ready()")
       await discordSdk.ready();
 
       // Authorize with Discord Client
       // Required on the frontend to interface with the active discord session.
+      console.info("Authorizing with Discord...")
       const { code } = await discordSdk.commands.authorize({
         client_id: import.meta.env.VITE_CLIENT_ID,
         response_type: "code",
@@ -137,16 +140,22 @@ function useAuthenticatedContextSetup(): ColyseusAuthenticationDetail | null {
           "rpc.voice.read",
         ],
       });
+      console.info("Discord authorization success")
 
       // Retrieve a JWT for authentication with colyseus
+      console.info("Retrieving JWT for colyseus auth")
       const authDetail: AuthenticationDetail | null = await colyseusClientSdk.http.post("/token", {
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          code,
+          code: code,
+          guildId: discordSdk.guildId
         }),
-      }).then(response => response.data);
+      })
+        .then(response => response.data)
+        .catch(err => console.error("Exception thrown gathering JWT token", err));
+      console.info("Token received")
 
       if (authDetail === null || authDetail.access_token === null) {
         throw new Error('Authentication Failed!');
