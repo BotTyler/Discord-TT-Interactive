@@ -9,6 +9,7 @@ export default function PlayerSizeInput() {
   const handleSubmit = React.useCallback(
     () => {
       // submit is called send this to the server
+      if (authContext.room === null) return;
       authContext.room.send("setPlayerSize", { size: size });
     },
     [size]

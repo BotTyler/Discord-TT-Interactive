@@ -34,6 +34,7 @@ export default function DisplayArc({ player }: { player: Player }) {
   }, []);
 
   const handleRemove = () => {
+    if (authContext.room === null) return;
     switch (toolContext.curTool) {
       case Tools.DELETE:
         authContext.room.send("removeArc", { playerId: player.userId });

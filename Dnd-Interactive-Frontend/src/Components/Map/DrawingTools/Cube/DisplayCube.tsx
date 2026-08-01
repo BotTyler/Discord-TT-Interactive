@@ -35,6 +35,7 @@ export default function DisplayCube({ player }: { player: Player }) {
   }, []);
 
   const handleRemove = () => {
+    if (authContext.room === null) return;
     switch (toolContext.curTool) {
       case Tools.DELETE:
         authContext.room.send("removeCube", { playerId: player.userId });

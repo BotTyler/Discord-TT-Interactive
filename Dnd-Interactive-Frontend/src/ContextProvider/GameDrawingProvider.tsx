@@ -11,9 +11,9 @@ export enum DrawingTools {
 
 export function GameDrawingProvider({ children }: { children: React.ReactNode }) {
   const [tool, setTools] = useState(DrawingTools.FREE);
-  const [startEventHandler, setStartEventHandler] = useState<Record<DrawingTools, Function>>({} as Record<DrawingTools, Function>);
-  const [cancelEventHandler, setCancelEventHandler] = useState<Record<DrawingTools, Function>>({} as Record<DrawingTools, Function>);
-  const [submitEventHandler, setSubmitEventHandler] = useState<Record<DrawingTools, Function>>({} as Record<DrawingTools, Function>);
+  const [startEventHandler, setStartEventHandler] = useState<Record<DrawingTools, () => void>>({} as Record<DrawingTools, () => void>);
+  const [cancelEventHandler, setCancelEventHandler] = useState<Record<DrawingTools, () => void>>({} as Record<DrawingTools, () => void>);
+  const [submitEventHandler, setSubmitEventHandler] = useState<Record<DrawingTools, () => void>>({} as Record<DrawingTools, () => void>);
   // const [a, setA] = useState<number[]>([0]);
 
   const setCurrentTools = (nTool: DrawingTools) => {
@@ -44,17 +44,17 @@ export function GameDrawingProvider({ children }: { children: React.ReactNode })
     if (func !== undefined) func();
   };
 
-  const setStartHandler = (tool: DrawingTools, callback: Function) => {
+  const setStartHandler = (tool: DrawingTools, callback: () => void) => {
     setStartEventHandler((prev) => {
       return { ...prev, [tool]: callback };
     });
   };
-  const setSubmitHandler = (tool: DrawingTools, callback: Function) => {
+  const setSubmitHandler = (tool: DrawingTools, callback: () => void) => {
     setSubmitEventHandler((prev) => {
       return { ...prev, [tool]: callback };
     });
   };
-  const setCancelHandler = (tool: DrawingTools, callback: Function) => {
+  const setCancelHandler = (tool: DrawingTools, callback: () => void) => {
     setCancelEventHandler((prev) => {
       return { ...prev, [tool]: callback };
     });
@@ -79,9 +79,9 @@ export function GameDrawingProvider({ children }: { children: React.ReactNode })
 interface GameDrawingToolContextInterface {
   setTool: (tool: DrawingTools) => void;
   curTool: DrawingTools;
-  registerStartHandlers: (tool: DrawingTools, callback: Function) => void;
-  registerSubmitHandlers: (tool: DrawingTools, callback: Function) => void;
-  registerCancelHandlers: (tool: DrawingTools, callback: Function) => void;
+  registerStartHandlers: (tool: DrawingTools, callback: () => void) => void;
+  registerSubmitHandlers: (tool: DrawingTools, callback: () => void) => void;
+  registerCancelHandlers: (tool: DrawingTools, callback: () => void) => void;
   submitCurrentTool: () => void;
 }
 
@@ -90,13 +90,13 @@ const GameDrawingToolContext = React.createContext<GameDrawingToolContextInterfa
   setTool: (tool: DrawingTools) => {
     console.log("not implemented yet");
   },
-  registerStartHandlers: (tool: DrawingTools, callback: Function) => {
+  registerStartHandlers: (tool: DrawingTools, callback: () => void) => {
     console.log("not implemented yet");
   },
-  registerSubmitHandlers: (tool: DrawingTools, callback: Function) => {
+  registerSubmitHandlers: (tool: DrawingTools, callback: () => void) => {
     console.log("not implemented yet");
   },
-  registerCancelHandlers: (tool: DrawingTools, callback: Function) => {
+  registerCancelHandlers: (tool: DrawingTools, callback: () => void) => {
     console.log("not implemented yet");
   },
   submitCurrentTool: () => {

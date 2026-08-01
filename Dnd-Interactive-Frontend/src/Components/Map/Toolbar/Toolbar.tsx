@@ -32,15 +32,15 @@ export default function Toolbar() {
           >
             <i className="bi bi-cursor fs-3"></i>
           </button>
-          <button
-            type="button"
-            className={`btn btn-secondary ${toolContext.curTool === Tools.FOG ? "active" : ""} ${amIHost() ? "" : "d-none"}`}
-            onClick={() => {
-              toolContext.setTool(Tools.FOG);
-            }}
-          >
-            <i className="bi bi-cloud fs-3"></i>
-          </button>
+          {/* <button */}
+          {/*   type="button" */}
+          {/*   className={`btn btn-secondary ${toolContext.curTool === Tools.FOG ? "active" : ""} ${amIHost() ? "" : "d-none"}`} */}
+          {/*   onClick={() => { */}
+          {/*     toolContext.setTool(Tools.FOG); */}
+          {/*   }} */}
+          {/* > */}
+          {/*   <i className="bi bi-cloud fs-3"></i> */}
+          {/* </button> */}
           <button
             type="button"
             className={`btn btn-secondary ${toolContext.curTool === Tools.VISIBILITY ? "active" : ""} ${amIHost() ? "" : "d-none"}`}

@@ -1,8 +1,7 @@
 import DOMPurify from "dompurify";
 import { JSDOM } from "jsdom";
 import { MARKER_SIZE_CATEGORIES } from "../shared/MarkerOptions";
-import { Client, Room } from "colyseus";
-import { State } from "../shared/State";
+import { Client } from "colyseus";
 import { Player } from "../shared/Player";
 import { ExportDataInterface } from "../shared/ExportDataInterface";
 import { SaveHistoryDAO, SaveHistoryDB } from "../Database/Tables/SaveHistoryDB";
@@ -20,6 +19,7 @@ import {
   EnemyMovementHistoryDB,
 } from "../Database/Tables/EnemyMovementHistoryDB";
 import { InitiativeHistoryDAO, InitiativeHistoryDB } from "../Database/Tables/InitiativeHistoryDB";
+import { StateHandlerRoom } from "../rooms/StateHandlerRoom";
 
 export const jsdomWindow = new JSDOM("").window;
 export const purify = DOMPurify(jsdomWindow);
@@ -154,7 +154,7 @@ export function processMarkerStringSizes(value: string): MARKER_SIZE_CATEGORIES 
 export function softAuthenticate(
   issuer_session_id: string,
   reciever_id: string,
-  room: Room<State>,
+  room: StateHandlerRoom,
 ): boolean {
   const issuer: Player | null = room.state.getPlayerBySessionId(issuer_session_id);
   const reciever: Player | null = room.state.getPlayerByUserId(reciever_id);
@@ -164,7 +164,7 @@ export function softAuthenticate(
   return authenticateHostAction(issuer_session_id, room) || issuer.userId === reciever.userId;
 }
 
-export function authenticateHostAction(session_id: string, room: Room<State>): boolean {
+export function authenticateHostAction(session_id: string, room: StateHandlerRoom): boolean {
   // console.log("start authentication")
   const user: Player | null = room.state.getPlayerBySessionId(session_id);
   if (user === null) return false;
@@ -178,7 +178,7 @@ export function authenticateHostAction(session_id: string, room: Room<State>): b
 
 // Save the current state
 // if a client is provided, they will be sent the status of the save.
-export function saveState(room: Room<State>, client?: Client): void {
+export function saveState(room: StateHandlerRoom, client?: Client): void {
   const data: ExportDataInterface | null = room.state.exportCurrentMapData() ?? null;
 
   if (data === null) {

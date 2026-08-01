@@ -59,6 +59,7 @@ export default function DrawArc() {
     mouseup: (e: LeafletMouseEvent) => {
       if (drawingToolContext.curTool !== DrawingTools.ARC) return;
       if (e.originalEvent.button !== 2) return;
+      if (authContext.room === null) return;
       // we need to submit
       authContext.room.send("addArc", { center: arcCenter, toLocation: toLocation, angle: 45 }); // angle hard coded will be remove when ui updates
       setArcCenter(undefined);

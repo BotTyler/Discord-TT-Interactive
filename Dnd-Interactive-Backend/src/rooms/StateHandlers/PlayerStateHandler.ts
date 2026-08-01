@@ -1,4 +1,4 @@
-import { Room } from "colyseus";
+import { Client } from "colyseus";
 import {
   authenticateHostAction,
   softAuthenticate,
@@ -7,12 +7,12 @@ import {
 } from "../../Util/Utils";
 import { Player } from "../../shared/Player";
 import { mLatLng } from "../../shared/PositionInterface";
-import { State } from "../../shared/State";
 import { CharacterStatus } from "../../shared/StatusTypes";
 import { Summons } from "../../shared/Summons";
+import { StateHandlerRoom } from "../StateHandlerRoom";
 
-export function RegisterPlayerStateHandler(room: Room<State>): void {
-  room.onMessage("updatePosition", (client, data) => {
+export function RegisterPlayerStateHandler(room: StateHandlerRoom): void {
+  room.onMessage("updatePosition", (client: Client, data: any): void => {
     try {
       const inputList: ValidationInputType[] = [
         { name: "pos", type: "object", PostProcess: undefined },
@@ -38,7 +38,7 @@ export function RegisterPlayerStateHandler(room: Room<State>): void {
     }
   });
 
-  room.onMessage("updatePlayerGhostPosition", (client, data) => {
+  room.onMessage("updatePlayerGhostPosition", (client: Client, data: any): void => {
     try {
       const inputList: ValidationInputType[] = [
         { name: "pos", type: "array", PostProcess: undefined },
@@ -64,7 +64,7 @@ export function RegisterPlayerStateHandler(room: Room<State>): void {
     }
   });
 
-  room.onMessage("changePlayerColor", (client, data) => {
+  room.onMessage("changePlayerColor", (client: Client, data: any): void => {
     try {
       const inputList: ValidationInputType[] = [
         { name: "color", type: "string", PostProcess: undefined },
@@ -87,7 +87,7 @@ export function RegisterPlayerStateHandler(room: Room<State>): void {
     }
   });
 
-  room.onMessage("changeInitiative", (client, data) => {
+  room.onMessage("changeInitiative", (client: Client, data: any): void => {
     if (!authenticateHostAction(client.sessionId, room)) return;
     try {
       const inputList: ValidationInputType[] = [
@@ -109,7 +109,7 @@ export function RegisterPlayerStateHandler(room: Room<State>): void {
     }
   });
 
-  room.onMessage("setPlayerStatuses", (client, data) => {
+  room.onMessage("setPlayerStatuses", (client: Client, data: any): void => {
     try {
       const inputList: ValidationInputType[] = [
         { name: "statuses", type: "array", PostProcess: undefined },

@@ -1,22 +1,21 @@
-import { Room } from "colyseus";
+import { Client } from "colyseus";
 import { ImageCatalogDAO, ImageCatalogDB } from "../../Database/Tables/ImageCatalogDB";
 import { SummonsDao, SummonsDB } from "../../Database/Tables/SummonsDb";
 import { MARKER_SIZE_CATEGORIES } from "../../shared/MarkerOptions";
 import { Player } from "../../shared/Player";
 import { mLatLng } from "../../shared/PositionInterface";
-import { State } from "../../shared/State";
 import { CharacterStatus } from "../../shared/StatusTypes";
 import { Summons } from "../../shared/Summons";
 import {
-  authenticateHostAction,
   processMarkerStringSizes,
   softAuthenticate,
   ValidateAllInputs,
   ValidationInputType,
 } from "../../Util/Utils";
+import { StateHandlerRoom } from "../StateHandlerRoom";
 
-export function RegisterSummonsStateHandler(room: Room<State>): void {
-  room.onMessage("updateSummonsPosition", (client, data) => {
+export function RegisterSummonsStateHandler(room: StateHandlerRoom): void {
+  room.onMessage("updateSummonsPosition", (client: Client, data: any): void => {
     try {
       const inputList: ValidationInputType[] = [
         { name: "pos", type: "object", PostProcess: undefined },
@@ -47,7 +46,7 @@ export function RegisterSummonsStateHandler(room: Room<State>): void {
     }
   });
 
-  room.onMessage("updateSummonsGhostPosition", (client, data) => {
+  room.onMessage("updateSummonsGhostPosition", (client: Client, data: any): void => {
     try {
       const inputList: ValidationInputType[] = [
         { name: "pos", type: "array", PostProcess: undefined },
@@ -78,7 +77,7 @@ export function RegisterSummonsStateHandler(room: Room<State>): void {
     }
   });
 
-  room.onMessage("addSummons", async (client, data) => {
+  room.onMessage("addSummons", async (client: Client, data: any): Promise<void> => {
     try {
       const inputList: ValidationInputType[] = [
         { name: "avatarUri", type: "string", PostProcess: undefined },
@@ -122,7 +121,7 @@ export function RegisterSummonsStateHandler(room: Room<State>): void {
       console.error(error);
     }
   });
-  room.onMessage("deleteSummons", (client, data) => {
+  room.onMessage("deleteSummons", (client: Client, data: any): void => {
     try {
       // Player_id as room.action can be called on by different people. (host vs player)
       const inputList: ValidationInputType[] = [
@@ -144,7 +143,7 @@ export function RegisterSummonsStateHandler(room: Room<State>): void {
       console.error(error);
     }
   });
-  room.onMessage("updateSummons", async (client, data) => {
+  room.onMessage("updateSummons", async (client: Client, data: any): Promise<void> => {
     try {
       const inputList: ValidationInputType[] = [
         { name: "id", type: "number", PostProcess: undefined },
@@ -191,7 +190,7 @@ export function RegisterSummonsStateHandler(room: Room<State>): void {
     }
   });
 
-  room.onMessage("SummonHealth", (client, data) => {
+  room.onMessage("SummonHealth", (client: Client, data: any): void => {
     try {
       const inputList: ValidationInputType[] = [
         { name: "id", type: "number", PostProcess: undefined },
@@ -218,7 +217,7 @@ export function RegisterSummonsStateHandler(room: Room<State>): void {
     }
   });
 
-  room.onMessage("summonHeal", (client, data) => {
+  room.onMessage("summonHeal", (client: Client, data: any): void => {
     try {
       const inputList: ValidationInputType[] = [
         { name: "id", type: "number", PostProcess: undefined },
@@ -243,7 +242,7 @@ export function RegisterSummonsStateHandler(room: Room<State>): void {
     }
   });
 
-  room.onMessage("summonDamage", (client, data) => {
+  room.onMessage("summonDamage", (client: Client, data: any): void => {
     try {
       const inputList: ValidationInputType[] = [
         { name: "id", type: "number", PostProcess: undefined },
@@ -268,7 +267,7 @@ export function RegisterSummonsStateHandler(room: Room<State>): void {
       console.error(error);
     }
   });
-  room.onMessage("summonDeathAdd", (client, data) => {
+  room.onMessage("summonDeathAdd", (client: Client, data: any): void => {
     try {
       const inputList: ValidationInputType[] = [
         { name: "id", type: "number", PostProcess: undefined },
@@ -291,7 +290,7 @@ export function RegisterSummonsStateHandler(room: Room<State>): void {
       console.error(error);
     }
   });
-  room.onMessage("summonDeathRemove", (client, data) => {
+  room.onMessage("summonDeathRemove", (client: Client, data: any): void => {
     try {
       const inputList: ValidationInputType[] = [
         { name: "id", type: "number", PostProcess: undefined },
@@ -313,7 +312,7 @@ export function RegisterSummonsStateHandler(room: Room<State>): void {
       console.error(error);
     }
   });
-  room.onMessage("summonSaveAdd", (client, data) => {
+  room.onMessage("summonSaveAdd", (client: Client, data: any): void => {
     try {
       const inputList: ValidationInputType[] = [
         { name: "id", type: "number", PostProcess: undefined },
@@ -339,7 +338,7 @@ export function RegisterSummonsStateHandler(room: Room<State>): void {
       console.error(error);
     }
   });
-  room.onMessage("summonSaveRemove", (client, data) => {
+  room.onMessage("summonSaveRemove", (client: Client, data: any): void => {
     try {
       const inputList: ValidationInputType[] = [
         { name: "id", type: "number", PostProcess: undefined },
@@ -361,7 +360,7 @@ export function RegisterSummonsStateHandler(room: Room<State>): void {
       console.error(error);
     }
   });
-  room.onMessage("toggleSummonVisibility", (client, data) => {
+  room.onMessage("toggleSummonVisibility", (client: Client, data: any): void => {
     try {
       // Include player_id as room.action can be called by multiple users (host vs player).
       const inputList: ValidationInputType[] = [
@@ -383,7 +382,7 @@ export function RegisterSummonsStateHandler(room: Room<State>): void {
       console.error(error);
     }
   });
-  room.onMessage("setSummonsStatuses", (client, data) => {
+  room.onMessage("setSummonsStatuses", (client: Client, data: any): void => {
     try {
       const inputList: ValidationInputType[] = [
         { name: "statuses", type: "array", PostProcess: undefined },

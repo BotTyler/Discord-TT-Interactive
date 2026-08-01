@@ -34,6 +34,7 @@ export default function DisplayLines({ player }: { player: Player }) {
   }, []);
 
   const handleRemove = () => {
+    if (authContext.room === null) return;
     switch (toolContext.curTool) {
       case Tools.DELETE:
         authContext.room.send("removeDrawing", { playerId: player.userId });

@@ -6,24 +6,20 @@
   "scripts": {
     "dev": "vite --mode dev",
     "build": "tsc && vite build",
-    "preview": "vite preview",
-    "lint": "eslint . --ext .ts,.tsx"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@3d-dice/dice-box": "^1.1.3",
-    "@colyseus/schema": "^2.0.3",
-    "@discord/embedded-app-sdk": "^1.4.0",
+    "@colyseus/schema": "^4.0.26",
+    "@colyseus/sdk": "^0.17.43",
+    "@discord/embedded-app-sdk": "^2.5.0",
     "@lexical/react": "^0.23.1",
     "@popperjs/core": "^2.11.8",
     "bootstrap": "^5.3.3",
     "bootstrap-icons": "^1.11.3",
-    "colyseus.js": "^0.15.18",
-    "eslint": "^8.57.1",
-    "eslint-plugin-react": "^7.37.5",
-    "eslint-plugin-react-hooks": "^4.6.0",
     "leaflet": "^1.9.4",
     "lexical": "^0.23.1",
-    "lodash": "^4.17.21",
+    "lodash": "^4.18.0",
     "react": "^18.2.0",
     "react-bootstrap": "^2.10.9",
     "react-dom": "^18.2.0",
@@ -33,23 +29,18 @@
     "typescript": "^5.6.3"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.4",
     "@types/leaflet": "^1.9.12",
     "@types/node": "^20.14.10",
     "@types/react": "^18.2.64",
     "@types/react-dom": "^18.2.7",
-    "@typescript-eslint/parser": "^8.42.0",
-    "@vitejs/plugin-react": "^4.0.0",
-    "sass": "^1.77.8",
-    "vite": "^7.3.1"
-  },
-  "eslintConfig": {
-    "parser": "@typescript-eslint/parser",
-    "parserOptions": {
-      "ecmaVersion": "latest",
-      "sourceType": "module",
-      "ecmaFeatures": {
-        "jsx": true
-      }
-    }
+    "@vitejs/plugin-react": "^6.0.2",
+    "eslint": "^9.39.4",
+    "eslint-plugin-react": "^7.37.5",
+    "globals": "^17.6.0",
+    "jiti": "^2.7.0",
+    "sass": "^1.101.0",
+    "typescript-eslint": "^8.61.1",
+    "vite": "^8.0.16"
   }
 }

@@ -9,6 +9,7 @@ export default function InitiativeTrackerPanel() {
           type="button"
           className="btn btn-primary"
           onClick={() => {
+            if (authContext.room === null) return;
             authContext.room.send("resetInitiativeIndex");
           }}
         >
@@ -18,6 +19,7 @@ export default function InitiativeTrackerPanel() {
           type="button"
           className="btn btn-primary"
           onClick={() => {
+            if (authContext.room === null) return;
             authContext.room.send("nextInitiativeIndex");
           }}
         >

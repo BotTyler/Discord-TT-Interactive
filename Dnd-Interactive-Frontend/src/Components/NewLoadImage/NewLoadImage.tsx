@@ -77,6 +77,7 @@ export const NewLoadImage = forwardRef(function NewLoadImage({
         // This will need to handle all image uploads to the server and send back the proper access URL.
         async getMinioFileUrl(): Promise<string | undefined> {
 
+          if (authContext.client === null) return undefined;
           if (imageFile !== null) {
             // Either a load or a new file was uploaded.
             if (imageFile.file !== null) {
@@ -122,6 +123,7 @@ export const NewLoadImage = forwardRef(function NewLoadImage({
   }, []);
 
   useEffect(() => {
+    if (authContext.room === null) return;
     authContext.room.send("getImageList");
     const result = authContext.room.onMessage("getImageListResult", (data: LoadImage[]) => {
       setKnownImageList(data);
@@ -160,6 +162,7 @@ export const NewLoadImage = forwardRef(function NewLoadImage({
   };
 
   const startCapturingImageList = () => {
+    if (authContext.room === null) return;
     authContext.room.send("getImageList");
   };
 

@@ -42,10 +42,12 @@ export default function PlayerMarkerList() {
   }, []);
 
   const debouncePositionChange = useDebounced((player: Player, toPosition: LatLng) => {
+    if (authContext.room === null) return;
     authContext.room.send("updatePosition", { pos: toPosition, clientToChange: player.userId });
   }, 100)
 
   const debounceGhostPositionChange = useDebounced((player: Player, toPosition: LatLng[]) => {
+    if (authContext.room === null) return;
     authContext.room.send("updatePlayerGhostPosition", { pos: toPosition, clientToChange: player.userId });
   }, 100)
 
@@ -117,10 +119,12 @@ function SummonsControllerListElement({ _player }: { _player: Player }) {
   }, [player]);
 
   const debouncePositionChange = useDebounced((summons: Summons, toPosition: LatLng) => {
+    if (authContext.room === null) return;
     authContext.room.send("updateSummonsPosition", { pos: toPosition, id: summons.id, player_id: player.userId });
   }, 100)
 
   const debounceGhostPositionChange = useDebounced((summons: Summons, toPosition: LatLng[]) => {
+    if (authContext.room === null) return;
     authContext.room.send("updateSummonsGhostPosition", { pos: toPosition, id: summons.id, player_id: player.userId });
   }, 100)
 

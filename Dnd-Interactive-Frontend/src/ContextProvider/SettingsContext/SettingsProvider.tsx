@@ -114,6 +114,7 @@ function AssetManager() {
   const [imgList, setImgList] = useState<string[] | undefined>(undefined);
 
   useEffect(() => {
+    if (authContext.room === null) return;
     const handleImageListResponse = (val: any) => {
       setImgList(val.map((obj: any) => {
         return obj.image_name;

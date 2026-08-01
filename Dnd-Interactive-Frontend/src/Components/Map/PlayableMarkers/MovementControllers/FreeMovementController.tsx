@@ -300,6 +300,7 @@ export default function FreeMovementController({ controllableUser, userType, onP
 
   const handleToolEvent = (): void => {
     const handleVisibilityRequest = () => {
+      if (authContext.room === null) return;
       switch (userType) {
         case "player":
           break;
@@ -313,6 +314,7 @@ export default function FreeMovementController({ controllableUser, userType, onP
     }
 
     const handleDeleteRequest = (): void => {
+      if (authContext.room === null) return;
       switch (userType) {
         case "player":
           break;

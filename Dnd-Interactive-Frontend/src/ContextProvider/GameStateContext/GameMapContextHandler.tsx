@@ -4,20 +4,21 @@ import React, { useImperativeHandle } from "react";
 import { useAuthenticatedContext } from "../useAuthenticatedContext";
 import EnemyContextElement from "./EnemyContextElement";
 import { MapData } from "../../shared/Map";
+import { Callbacks } from "@colyseus/sdk";
 
-export const GameMapContextHandler = React.forwardRef(function GameMapContextHandler({ }: {}, ref: any) {
+export const GameMapContextHandler = React.forwardRef(function GameMapContextHandler(_params: any, ref: any) {
   const authenticatedContext = useAuthenticatedContext();
   const [currentGameState, setGameState] = React.useState<GameStateEnum>(GameStateEnum.MAINMENU);
 
   // Even if the state is null the below map might return undefined for some unknown reason.
   const [map, setMap] = React.useState<MapData | null>(
-    ((authenticatedContext.room.state.map ?? null) === null || (authenticatedContext.room.state.map?.mapBase64 == null))
+    (authenticatedContext.room === null || (authenticatedContext.room.state.map ?? null) === null || (authenticatedContext.room.state.map?.mapBase64 == null))
       ? null
       : authenticatedContext.room.state.map
 
   );
   const [mapMovement, setMapMovement] = React.useState<MapMovementType>("free");
-  const [curHostId, setCurHostId] = React.useState<string | undefined>(authenticatedContext.room.state.currentHostUserId);
+  const [curHostId, setCurHostId] = React.useState<string | undefined>(authenticatedContext.room !== null ? authenticatedContext.room.state.currentHostUserId : undefined);
 
   // Following variables are held within the map class. These variables are the only ones that have the possibility of changing within the data.
   // They are separated from the object for ease of use.
@@ -71,6 +72,7 @@ export const GameMapContextHandler = React.forwardRef(function GameMapContextHan
   );
 
   const emitFieldChangeEvent = (field: string, value: any) => {
+    if (authenticatedContext.room === null) return;
     const event = new CustomEvent(`${field}`, {
       detail: { val: value },
     });
@@ -110,11 +112,14 @@ export const GameMapContextHandler = React.forwardRef(function GameMapContextHan
   }, [gridColor]);
 
   React.useEffect(() => {
-    const GameStateCallback = authenticatedContext.room.state.listen("gameState", (value: any) => {
+    if (authenticatedContext.room === null) return;
+    const roomCallback = Callbacks.get(authenticatedContext.room);
+
+    const GameStateCallback = roomCallback.listen("gameState", (value: any) => {
       setGameState(value);
     });
 
-    const mapCallback = authenticatedContext.room.state.listen("map", (value: any) => {
+    const mapCallback = roomCallback.listen("map", (value: any) => {
       if (value === null || value.mapBase64 == null) {
         setMap(null);
       } else {
@@ -122,7 +127,7 @@ export const GameMapContextHandler = React.forwardRef(function GameMapContextHan
       }
     });
 
-    const hostIdListener = authenticatedContext.room.state.listen("currentHostUserId", (value: any) => {
+    const hostIdListener = roomCallback.listen("currentHostUserId", (value: any) => {
       if (value == undefined) {
         setCurHostId(undefined);
         return;
@@ -130,13 +135,13 @@ export const GameMapContextHandler = React.forwardRef(function GameMapContextHan
       setCurHostId(value);
     });
 
-    const mapMovementListener = authenticatedContext.room.state.listen("mapMovement", (value: MapMovementType) => {
+    const mapMovementListener = roomCallback.listen("mapMovement", (value: MapMovementType) => {
       setMapMovement(value);
     })
-    const gridColorListener = authenticatedContext.room.state.listen("gridColor", (value: string) => {
+    const gridColorListener = roomCallback.listen("gridColor", (value: string) => {
       setGridColor(value);
     })
-    const gridShowingListener = authenticatedContext.room.state.listen("gridShowing", (value: boolean) => {
+    const gridShowingListener = roomCallback.listen("gridShowing", (value: boolean) => {
       setGridShowing(value);
     })
 
@@ -153,9 +158,11 @@ export const GameMapContextHandler = React.forwardRef(function GameMapContextHan
   // all listeners for the enemies list only (No Enemy Properties)
   React.useEffect(() => {
     if (map === null) return;
+    if (authenticatedContext.room === null) return;
+    const roomCallback = Callbacks.get(authenticatedContext.room);
 
     // set the listeners for enemy
-    const enemyAdd = authenticatedContext.room.state.enemies.onAdd((item: Enemy, key: string) => {
+    const enemyAdd = roomCallback.onAdd("enemies", (item: any, key: any): void => {
       setEnemies((prev) => {
         return { ...prev, [key]: item };
       });
@@ -164,8 +171,7 @@ export const GameMapContextHandler = React.forwardRef(function GameMapContextHan
       });
     });
     // delete enemies
-
-    const enemyRemove = authenticatedContext.room.state.enemies.onRemove((item: Enemy, key: string) => {
+    const enemyRemove = roomCallback.onRemove("enemies", (item: any, key: any) => {
       setEnemies((prev) => {
         const { [key]: _, ...temp } = prev;
         return temp;
@@ -193,7 +199,8 @@ export const GameMapContextHandler = React.forwardRef(function GameMapContextHan
         return connectedEnemyObject;
       });
     };
-    const enemyListen = authenticatedContext.room.state.listen("enemies", (val) => handleEnemyChange(val));
+
+    const enemyListen = roomCallback.listen("enemies", (val: any): void => handleEnemyChange(val));
 
     return () => {
       enemyListen();
@@ -204,11 +211,14 @@ export const GameMapContextHandler = React.forwardRef(function GameMapContextHan
 
   React.useEffect(() => {
     if (map === null) return;
-    const iconHeightListener = map.listen("iconHeight", (val) => {
+    if (authenticatedContext.room === null) return;
+    const roomCallback = Callbacks.get(authenticatedContext.room);
+
+    const iconHeightListener = roomCallback.listen(map, "iconHeight", (val: number): void => {
       setIconHeight(val);
     });
 
-    const initiativeIndexListener = map.listen("initiativeIndex", (val) => {
+    const initiativeIndexListener = roomCallback.listen(map, "initiativeIndex", (val: number): void => {
       setInitiative(val);
     });
 
@@ -220,7 +230,7 @@ export const GameMapContextHandler = React.forwardRef(function GameMapContextHan
 
   return (
     <>
-      {Object.keys(connectedEnemies).map((key) => {
+      {Object.keys(connectedEnemies).map((key: string) => {
         return (
           <EnemyContextElement
             key={`EnemyContextElement-${key}`}
@@ -229,7 +239,7 @@ export const GameMapContextHandler = React.forwardRef(function GameMapContextHan
               setEnemies((prev) => {
                 const newEnemies = { ...prev };
                 if (newEnemies[key]) {
-                  // @ts-expect-error
+                  // @ts-expect-error Ignore this
                   newEnemies[key][field] = value;
                 }
 

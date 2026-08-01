@@ -41,6 +41,7 @@ export default function EnemyMarkerList() {
 
   // Debounce needs to be defined outside the class.
   const debouncePositionChange = useDebounced((enemy: Enemy, toPosition: LatLng) => {
+    if (authContext.room === null) return;
     authContext.room.send("updateEnemyPosition", { pos: toPosition, clientToChange: enemy.id + "" });
   }, 100)
 
@@ -56,6 +57,7 @@ export default function EnemyMarkerList() {
     //     authContext.room.send("updateEnemyGhostPosition", {pos: toPosition, clientToChange: enemy.id + ""});
     //   break;
     // }
+    if (authContext.room === null) return;
     authContext.room.send("updateEnemyGhostPosition", { pos: toPosition, clientToChange: enemy.id + "" });
   }, 100)
 

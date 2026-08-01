@@ -3,6 +3,8 @@ import { Summons } from "../../shared/Summons";
 import { mLatLng } from "../../shared/PositionInterface";
 import { CharacterStatus } from "../../shared/StatusTypes";
 import { MARKER_SIZE_CATEGORIES } from "../../shared/MarkerOptions";
+import { useAuthenticatedContext } from "../useAuthenticatedContext";
+import { Callbacks } from "@colyseus/schema";
 
 // this class def can be simpler
 export default function SummonsElementHandler({ summon }: { summon: Summons; }) {
@@ -20,6 +22,8 @@ export default function SummonsElementHandler({ summon }: { summon: Summons; }) 
   const [deathSaves, setDeathSaves] = React.useState<number>(summon.deathSaves);
   const [isVisible, setIsVisible] = React.useState<boolean>(summon.isVisible);
   const [statuses, setStatuses] = React.useState<CharacterStatus[]>(summon.statuses);
+
+  const authContext = useAuthenticatedContext();
 
 
   // below effects are used to emit events when the value is finalized
@@ -74,47 +78,50 @@ export default function SummonsElementHandler({ summon }: { summon: Summons; }) 
   }, [statuses]);
 
   React.useEffect(() => {
+    if (authContext.room === null) return;
+    const roomCallbacks = Callbacks.get(authContext.room);
+    console.info("Setting up summons listener", summon);
     // set all listeners with the colyseus backend
-    const idListener = summon.listen("id", (value: number) => {
+    const idListener = roomCallbacks.listen(summon, "id", (value: number) => {
       setId(value);
     });
-    const playerIdListener = summon.listen("player_id", (value: string) => {
+    const playerIdListener = roomCallbacks.listen(summon, "player_id", (value: string) => {
       setPlayerId(value);
     });
-    const avatarUriListener = summon.listen("avatarUri", (value: string) => {
+    const avatarUriListener = roomCallbacks.listen(summon, "avatarUri", (value: string) => {
       setAvatarUri(value);
     });
-    const nameListener = summon.listen("name", (value: string) => {
+    const nameListener = roomCallbacks.listen(summon, "name", (value: string) => {
       setName(value);
     });
-    const positionListener = summon.listen("position", (value: mLatLng) => {
+    const positionListener = roomCallbacks.listen(summon, "position", (value: mLatLng) => {
       setPosition(value);
     });
-    const toPositionListener = summon.listen("toPosition", (value: mLatLng[]) => {
+    const toPositionListener = roomCallbacks.listen(summon, "toPosition", (value: mLatLng[]) => {
       setToPosition(value);
     });
-    const sizeListener = summon.listen("size_category", (value: MARKER_SIZE_CATEGORIES) => {
+    const sizeListener = roomCallbacks.listen(summon, "size_category", (value: MARKER_SIZE_CATEGORIES) => {
       setSizeCategory(value);
     });
-    const colorListener = summon.listen("color", (value: string) => {
+    const colorListener = roomCallbacks.listen(summon, "color", (value: string) => {
       setColor(value);
     });
-    const healthListener = summon.listen("health", (value: number) => {
+    const healthListener = roomCallbacks.listen(summon, "health", (value: number) => {
       setHealth(value);
     });
-    const totalHealthListener = summon.listen("totalHealth", (value: number) => {
+    const totalHealthListener = roomCallbacks.listen(summon, "totalHealth", (value: number) => {
       setTotalHealth(value);
     });
-    const lifeSavesListener = summon.listen("lifeSaves", (value: number) => {
+    const lifeSavesListener = roomCallbacks.listen(summon, "lifeSaves", (value: number) => {
       setLifeSaves(value);
     });
-    const deathSavesListener = summon.listen("deathSaves", (value: number) => {
+    const deathSavesListener = roomCallbacks.listen(summon, "deathSaves", (value: number) => {
       setDeathSaves(value);
     });
-    const isVisibleListener = summon.listen("isVisible", (value: boolean) => {
+    const isVisibleListener = roomCallbacks.listen(summon, "isVisible", (value: boolean) => {
       setIsVisible(value);
     });
-    const statusesListener = summon.listen("statuses", (value: CharacterStatus[]) => {
+    const statusesListener = roomCallbacks.listen(summon, "statuses", (value: CharacterStatus[]) => {
       setStatuses([...value]);
     });
 

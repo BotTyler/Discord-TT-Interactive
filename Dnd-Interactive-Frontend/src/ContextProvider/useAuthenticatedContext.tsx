@@ -1,37 +1,53 @@
-import { Client, Room } from "colyseus.js";
 import * as React from "react";
 
 import { GAME_NAME } from "../../src/shared/Constants";
 import { State } from "../../src/shared/State";
 
 import Loading from "../Components/Loading";
-import { getUserAvatarUrl } from "../Util/getUserAvatarUrl";
 import { discordSdk } from "./discordSdk";
 
-import type { IGuildsMembersRead, TAuthenticatedContext } from "../Types/types";
-import { getUserDisplayName } from "../Util/getUserDisplayName";
+import { AuthenticationDetail } from "../shared/UserDetails";
+import { Client, Room } from "@colyseus/sdk";
 
-const AuthenticatedContext = React.createContext<TAuthenticatedContext>({
+// const AuthenticatedContext = React.createContext<TAuthenticatedContext>({
+//   user: {
+//     id: "",
+//     username: "",
+//     discriminator: "",
+//     avatar: null,
+//     public_flags: 0,
+//   },
+//   access_token: "",
+//   scopes: [],
+//   expires: "",
+//   application: {
+//     rpc_origins: undefined,
+//     id: "",
+//     name: "",
+//     icon: null,
+//     description: "",
+//   },
+//   guildMember: null,
+//   client: undefined as unknown as Client,
+//   room: undefined as unknown as Room,
+// });
+
+type ColyseusAuthenticationDetail = {
+  client: Client | null;
+  room: Room | null;
+} & AuthenticationDetail;
+
+const AuthenticatedContext = React.createContext<ColyseusAuthenticationDetail>({
+  jwt: "",
+  access_token: "",
   user: {
     id: "",
-    username: "",
-    discriminator: "",
-    avatar: null,
-    public_flags: 0,
-  },
-  access_token: "",
-  scopes: [],
-  expires: "",
-  application: {
-    rpc_origins: undefined,
-    id: "",
     name: "",
-    icon: null,
-    description: "",
+    avartar_uri: "",
+    discriminator: ""
   },
-  guildMember: null,
-  client: undefined as unknown as Client,
-  room: undefined as unknown as Room,
+  client: null,
+  room: null,
 });
 
 export function AuthenticatedContextProvider({ children }: { children: React.ReactNode }) {
@@ -39,7 +55,7 @@ export function AuthenticatedContextProvider({ children }: { children: React.Rea
 
   const authenticatedContext = useAuthenticatedContextSetup();
 
-  if (authenticatedContext === null) {
+  if (authenticatedContext === null || authenticatedContext.room === null || authenticatedContext.client === null) {
     return <Loading></Loading>;
   }
   const isDevToolsActive = authenticatedContext.user.id === "740743332338073701";
@@ -64,7 +80,7 @@ export function AuthenticatedContextProvider({ children }: { children: React.Rea
                   className="btn btn-primary"
                   type="button"
                   onClick={() => {
-                    authenticatedContext.room.leave(false);
+                    authenticatedContext.room!.leave(false);
                   }}
                 >
                   DC
@@ -88,20 +104,27 @@ export function useAuthenticatedContext() {
 /**
  * This is a helper hook which is used to connect your embedded app with Discord and Colyseus
  */
-function useAuthenticatedContextSetup() {
-  const [auth, setAuth] = React.useState<TAuthenticatedContext | null>(null);
+function useAuthenticatedContextSetup(): ColyseusAuthenticationDetail | null {
+
+
+  const [auth, setAuth] = React.useState<ColyseusAuthenticationDetail | null>(null);
   const settingUp = React.useRef(false);
 
   React.useEffect(() => {
     const setUpDiscordSdk = async () => {
-      await discordSdk.ready();
+      console.info("Setting up discord sdk")
       // Now we create a colyseus client
       // const wsUrl = `wss://${location.host}/.proxy/colyseus`;
       // const wsUrl = "https://brook-remain-narrow-hosts.trycloudflare.com/";
       const wsUrl = `/.proxy/colyseus`;
       const colyseusClientSdk = new Client(wsUrl); // this will be used to connect to express endpoints
 
+      console.info("calling discordSdk.ready()")
+      await discordSdk.ready();
+
       // Authorize with Discord Client
+      // Required on the frontend to interface with the active discord session.
+      console.info("Authorizing with Discord...")
       const { code } = await discordSdk.commands.authorize({
         client_id: import.meta.env.VITE_CLIENT_ID,
         response_type: "code",
@@ -109,65 +132,43 @@ function useAuthenticatedContextSetup() {
         prompt: "none",
         // More info on scopes here: https://discord.com/developers/docs/topics/oauth2#shared-resources-oauth2-scopes
         scope: [
-          // Activities will launch through app commands and interactions of user-installable apps.
           // https://discord.com/developers/docs/tutorials/developing-a-user-installable-app#configuring-default-install-settings-adding-default-install-settings
           "applications.commands",
-
-          // "applications.builds.upload",
-          // "applications.builds.read",
-          // "applications.store.update",
-          // "applications.entitlements",
-          // "bot",
           "identify",
-          // "connections",
-          // "email",
-          // "gdm.join",
           "guilds",
-          // "guilds.join",
           "guilds.members.read",
-          // "messages.read",
-          // "relationships.read",
-          // 'rpc.activities.write',
-          // "rpc.notifications.read",
-          // "rpc.voice.write",
           "rpc.voice.read",
-          // "webhook.incoming",
         ],
       });
+      console.info("Discord authorization success")
 
-      // Retrieve an access_token from your embedded app's server
-      const { data } = await colyseusClientSdk.http.post("/token", {
+      // Retrieve a JWT for authentication with colyseus
+      console.info("Retrieving JWT for colyseus auth")
+      const authDetail: AuthenticationDetail | null = await colyseusClientSdk.http.post("/token", {
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          code,
+          code: code,
+          guildId: discordSdk.guildId
         }),
-      });
+      })
+        .then(response => response.data)
+        .catch(err => console.error("Exception thrown gathering JWT token", err));
+      console.info("Token received")
 
-      if (!data.access_token) {
-        throw new Error('Check if your "Discord Client ID" and "Secret" are correct in your server-side.');
+      if (authDetail === null || authDetail.access_token === null) {
+        throw new Error('Authentication Failed!');
       }
 
       // Authenticate with Discord client (using the access_token)
       const newAuth = await discordSdk.commands.authenticate({
-        access_token: data.access_token,
+        access_token: authDetail.access_token,
       });
 
-      // Get guild specific nickname and avatar, and fallback to user name and avatar
-      const guildMember: IGuildsMembersRead | null = await fetch(`https://discord.com/api/users/@me/guilds/${discordSdk.guildId}/member`, {
-        method: "get",
-        headers: { Authorization: `Bearer ${data.access_token}` },
-      })
-        .then(async (j) => j.json())
-        .catch((e) => {
-          console.log(e);
-          return null;
-        });
 
       // Done with discord-specific setup
-
-      let roomName = "Channel";
+      let roomName = "Dnd-Interactive-dev";
 
       // Requesting the channel in GDMs (when the guild ID is null) requires
       // the dm_channels.read scope which requires Discord approval.
@@ -179,24 +180,15 @@ function useAuthenticatedContextSetup() {
         }
       }
 
-      // Get the user's guild-specific avatar uri
-      // If none, fall back to the user profile avatar
-      // If no main avatar, use a default avatar
-      const avatarUri = getUserAvatarUrl({
-        guildMember: guildMember,
-        user: newAuth.user,
-      });
-
-      // Get the user's guild nickname. If none set, fall back to global_name, or username
-      // Note - this name is note guaranteed to be unique
-      const name = getUserDisplayName({
-        guildMember: guildMember,
-        user: newAuth.user,
-      });
-
-      const newRoom = joinRoom(colyseusClientSdk, roomName, newAuth, avatarUri, name ?? "NAN");
       // Finally, we construct our authenticatedContext object to be consumed throughout the app
-      setAuth({ ...newAuth, guildMember: guildMember, client: colyseusClientSdk, room: await newRoom });
+      const newRoom = joinRoom(colyseusClientSdk, roomName, newAuth, authDetail.user.avartar_uri, authDetail.user.name);
+      // setAuth({ ...newAuth, guildMember: guildMember, client: colyseusClientSdk, room: await newRoom });
+      setAuth({
+        ...newAuth,
+        ...authDetail,
+        client: colyseusClientSdk,
+        room: await newRoom
+      });
     };
 
     async function joinRoom(colyseusClient: Client, roomName: string, newAuth: any, avatarUri: string, name: string): Promise<Room<State>> {
@@ -212,9 +204,15 @@ function useAuthenticatedContextSetup() {
             avatarUri,
           });
 
+          // Unexpected leave.
+          newRoom.onDrop((code: number, _reason?: string): void => {
+            attemptReconnect(colyseusClient, newRoom!.reconnectionToken);
+          });
+
+          // Intentional Leave
           newRoom.onLeave((code) => {
             console.warn(`Client Leaving!\n${code.toString()}`);
-            attemptReconnect(colyseusClient, newRoom!.reconnectionToken);
+            // attemptReconnect(colyseusClient, newRoom!.reconnectionToken);
           });
 
           newRoom.onError((err) => {
@@ -230,6 +228,7 @@ function useAuthenticatedContextSetup() {
 
       return newRoom;
     }
+
     function attemptReconnect(colyseusClient: Client, reconnectionToken: string) {
       let attempt = 0;
       const maxAttempts = 200;
@@ -244,9 +243,16 @@ function useAuthenticatedContextSetup() {
         try {
           console.log("Reconnecting...");
           const nRoom = await colyseusClient.reconnect(reconnectionToken);
+
+          // Unexpected leave.
+          nRoom.onDrop((code: number, _reason?: string): void => {
+            attemptReconnect(colyseusClient, nRoom!.reconnectionToken);
+          });
+
+          // Intentional leave.
           nRoom.onLeave((code) => {
             console.warn(`Client Leaving!\n${code.toString()}`);
-            attemptReconnect(colyseusClient, nRoom!.reconnectionToken);
+            // attemptReconnect(colyseusClient, nRoom!.reconnectionToken);
           });
 
           nRoom.onError((err) => {

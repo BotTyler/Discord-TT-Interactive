@@ -25,15 +25,18 @@ export function MessageContextProvider({ children }: { children: React.ReactNode
       toastListRef.current.addToast(title, message, level);
     },
     [toastListRef]
-  ); // Use useCallback to avoid unnecessary re-renders
+  );
 
   const sendPlayerMessage = (message: string) => {
+    if (authContext.room === null) return;
     authContext.room.send("BroadcastMessage", { message: message, type: "player" });
   };
   const sendHostMessage = (message: string) => {
+    if (authContext.room === null) return;
     authContext.room.send("BroadcastMessage", { message: message, type: "host" });
   };
   const sendAllMessage = (message: string) => {
+    if (authContext.room === null) return;
     authContext.room.send("BroadcastMessage", { message: message, type: "all" });
   };
   const getAllMessage = () => {

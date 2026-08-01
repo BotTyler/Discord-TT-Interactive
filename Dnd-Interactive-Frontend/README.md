@@ -24,15 +24,6 @@ $ nvm install V22.20.0
 $ nvm ls
 ```
 
-### Environment
-
-Make sure to fill out anything surrounded by \<\>. These can be setup by configuring each of the persistent storages.
-
-```Environment
-# Discord Auth Tokens
-VITE_CLIENT_ID=<Discord_Client_id>
-```
-
 ## Post Setup
 
 Install the dependencies.

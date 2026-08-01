@@ -1,20 +1,21 @@
-import { Room } from "colyseus";
+import { Client } from "colyseus";
 import { ImageCatalogDAO, ImageCatalogDB } from "../../Database/Tables/ImageCatalogDB";
 import { MapDAO, MapDB } from "../../Database/Tables/MapDB";
 import { CampaignsDao } from "../../shared/LoadDataInterfaces";
 import { MapData } from "../../shared/Map";
 import { Player } from "../../shared/Player";
 import { mLatLng } from "../../shared/PositionInterface";
-import { GameStateEnum, State } from "../../shared/State";
+import { GameStateEnum } from "../../shared/State";
 import {
   authenticateHostAction,
   saveState,
   ValidateAllInputs,
   ValidationInputType,
 } from "../../Util/Utils";
+import { StateHandlerRoom } from "../StateHandlerRoom";
 
-export function RegisterMapStateHandler(room: Room<State>): void {
-  room.onMessage("setPlayerSize", (client, data) => {
+export function RegisterMapStateHandler(room: StateHandlerRoom): void {
+  room.onMessage("setPlayerSize", (client: Client, data: any): void => {
     if (!authenticateHostAction(client.sessionId, room)) return;
     try {
       const inputList: ValidationInputType[] = [
@@ -33,7 +34,7 @@ export function RegisterMapStateHandler(room: Room<State>): void {
     }
   });
 
-  room.onMessage("setGameMap", async (client, data) => {
+  room.onMessage("setGameMap", async (client: Client, data: any): Promise<void> => {
     if (!authenticateHostAction(client.sessionId, room)) return;
     try {
       const inputList: ValidationInputType[] = [
@@ -86,7 +87,7 @@ export function RegisterMapStateHandler(room: Room<State>): void {
     }
   });
 
-  room.onMessage("deleteMap", async (client, data) => {
+  room.onMessage("deleteMap", async (client: Client, data: any): Promise<void> => {
     if (!authenticateHostAction(client.sessionId, room)) return;
     try {
       const inputList: ValidationInputType[] = [
@@ -111,20 +112,20 @@ export function RegisterMapStateHandler(room: Room<State>): void {
     }
   });
 
-  room.onMessage("clearMap", (client, _data) => {
+  room.onMessage("clearMap", (client: Client, _data: any): void => {
     if (!authenticateHostAction(client.sessionId, room)) return;
     saveState(room);
     room.state.RESET_GAME();
   });
 
-  room.onMessage("nextInitiativeIndex", (client, _data) => {
+  room.onMessage("nextInitiativeIndex", (client: Client, _data: any): void => {
     if (!authenticateHostAction(client.sessionId, room)) return;
     if (room.state.map === null) return;
     const nInit: number = room.state.map.initiativeIndex + 1;
     const initSize: number = room.state.players.size + room.state.enemies.size;
     room.state.map.initiativeIndex = nInit % initSize;
   });
-  room.onMessage("resetInitiativeIndex", (client, _data) => {
+  room.onMessage("resetInitiativeIndex", (client: Client, _data: any): void => {
     if (!authenticateHostAction(client.sessionId, room)) return;
     if (room.state.map === null) return;
     room.state.map.initiativeIndex = 0;

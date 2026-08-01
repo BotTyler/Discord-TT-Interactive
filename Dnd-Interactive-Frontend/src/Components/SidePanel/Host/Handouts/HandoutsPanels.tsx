@@ -51,6 +51,7 @@ export default function HandoutsPanel() {
               setHandoutShowing(false);
               return;
             }
+            if (authContext.room === null) return;
             // everything is ready, lets send the request to the server
             authContext.room.send("BroadcastHandout", { playerIds: playerIds, imageUrl: imageSrc });
             setHandoutShowing(false);

@@ -9,7 +9,15 @@
     "forceConsistentCasingInFileNames": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
+    "alwaysStrict": false
   },
-  "include": ["src/**/*.ts", "./environment.d.ts", "./src/shared/LoadDataInterfaces.ts", "./src/shared/PositionInterface.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    "src/**/*.ts",
+    "./environment.d.ts",
+    "./src/shared/LoadDataInterfaces.ts",
+    "./src/shared/PositionInterface.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

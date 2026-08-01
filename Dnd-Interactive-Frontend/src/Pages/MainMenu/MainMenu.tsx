@@ -6,7 +6,6 @@ import Background from "../../Components/Background/Background";
 import Loading from "../../Components/Loading";
 import { useGameState } from "../../ContextProvider/GameStateContext/GameStateProvider";
 import { useAuthenticatedContext } from "../../ContextProvider/useAuthenticatedContext";
-import { TAuthenticatedContext } from "../../Types/types";
 import HostMM from "./HostMM";
 import PlayerMM from "./PlayerMM";
 
@@ -15,7 +14,7 @@ import PlayerMM from "./PlayerMM";
  */
 export default function MainMenu() {
   const playerContext = usePlayers();
-  const authContext: TAuthenticatedContext = useAuthenticatedContext();
+  const authContext = useAuthenticatedContext();
   const mapContext = useGameState();
   const [currentPlayer, setCurrentPlayer] = React.useState<Player | undefined>(undefined);
   const [otherPlayers, setOtherPlayers] = React.useState<Player[]>([]);

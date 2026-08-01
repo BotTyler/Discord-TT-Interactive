@@ -1,7 +1,5 @@
 import config from "@colyseus/tools";
 import { StateHandlerRoom } from "./rooms/StateHandlerRoom";
-// import multer from "multer";
-// import * as Minio from "minio";
 import { JWT } from "@colyseus/auth";
 import { WebSocketTransport } from "@colyseus/ws-transport";
 import MinioClient from "./Minio/MinioClient";
@@ -9,6 +7,15 @@ import multer from "multer";
 import sharp from "sharp";
 import { ImageCatalogDAO, ImageCatalogDB } from "./Database/Tables/ImageCatalogDB";
 import { GAME_NAME } from "./shared/Constants";
+import {
+  AuthenticationDetail,
+  IDiscordGuildsMembersResource,
+  IDiscordUserResource,
+  UserDetail,
+} from "./shared/UserDetails";
+import { sanitize } from "./Util/Utils";
+import { getUserAvatarUrl, getUserDisplayName } from "./Util/DiscordAuthenticationUtils";
+import express from "express";
 
 export default config({
   options: {
@@ -34,31 +41,35 @@ export default config({
   },
 
   initializeExpress: (app) => {
-    /**
-     * Bind your custom express routes here:
-     */
+    app.use(express.json()); // Required for serialization of endpoints
 
     //setup the minio storage
     const storage = multer.memoryStorage(); // Store files in memory
     const upload = multer({ storage: storage });
 
-    // const minioClient = new Minio.Client({
-    //   endPoint: process.env.MINIO_ENDPOINT!,
-    //   port: +process.env.MINIO_PORT!,
-    //   useSSL: false,
-    //   accessKey: process.env.MINIO_ACCESS_KEY!,
-    //   secretKey: process.env.MINIO_SECRET_KEY!,
-    // });
-
-    // custom express methods
-
-    // If you don't want people accessing your server stats, comment this line.
-    //router.use("/colyseus", monitor(server as Partial<MonitorOptions>));
-
     // Fetch token from developer portal and return to the embedded app
     app.post("/token", async (req, res) => {
+      const body: any = req.body ?? null;
+      if (body === null) {
+        console.warn("Token request with no body");
+        res.status(400).send({ data: null, message: "Incorrect parameters" });
+        return;
+      }
+      const code: string | null = sanitize(body.code) ?? null;
+      const guildId: string | null = sanitize(body.guildId) ?? null;
+      if (code === null || guildId === null || code.length === 0 || guildId.length === 0) {
+        console.warn("User access code not provided");
+        res.status(400).send({ data: null, message: "Incorrect parameters" });
+        return;
+      }
+
       try {
-        const response = await fetch(`https://discord.com/api/oauth2/token`, {
+        /*
+          ======================================
+          Get oauth2 token for discord
+          ======================================
+        */
+        const access_token: string = await fetch(`https://discord.com/api/oauth2/token`, {
           method: "POST",
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
@@ -67,19 +78,19 @@ export default config({
             client_id: process.env.VITE_CLIENT_ID,
             client_secret: process.env.CLIENT_SECRET,
             grant_type: "authorization_code",
-            code: req.body.code,
+            code: code,
           }),
-        });
+        })
+          .then((value: Response): Promise<{ access_token: string }> => value.json())
+          .then((json: { access_token: string }): string => json.access_token);
 
-        const { access_token } = (await response.json()) as {
-          access_token: string;
-        };
-
-        //
-        // Retrieve user data from Discord API
-        // https://discord.com/developers/docs/resources/user#user-object
-        //
-        const profile = await (
+        /*
+        ====================================================================
+        Retrieve user data from Discord API
+        https://discord.com/developers/docs/resources/user#user-object
+        ====================================================================
+        */
+        const discordUserProfile: IDiscordUserResource = await (
           await fetch(`https://discord.com/api/users/@me`, {
             method: "GET",
             headers: {
@@ -87,23 +98,53 @@ export default config({
               Authorization: `Bearer ${access_token}`,
             },
           })
-        ).json();
+        )
+          .json()
+          .then((value: any): IDiscordUserResource => {
+            return value as IDiscordUserResource;
+          });
 
-        // TODO: store user profile into a database
-        const user = profile;
+        /*
+        ====================================================================
+        Retrieve current guild data from Discord API
+        ====================================================================
+        */
+        const discordGuild: IDiscordGuildsMembersResource = await fetch(
+          `https://discord.com/api/users/@me/guilds/${guildId}/member`,
+          {
+            method: "get",
+            headers: { Authorization: `Bearer ${access_token}` },
+          },
+        )
+          .then(async (j) => j.json())
+          .catch((e) => {
+            console.error("Fail to gether guild information", e);
+            return null;
+          });
 
-        res.send({
-          access_token: access_token, // Discord Access Token
-          token: await JWT.sign(user), // Colyseus JWT token
-          user: user, // User data
-        });
+        /*
+          =================================================================
+          Construct User Details
+          =================================================================
+        */
+        const userDeatil: UserDetail = {
+          id: discordUserProfile.id,
+          name: getUserDisplayName(discordGuild, discordUserProfile),
+          avartar_uri: getUserAvatarUrl(discordGuild, discordUserProfile),
+          discriminator: discordUserProfile.discriminator,
+        };
+
+        const authDetail: AuthenticationDetail = {
+          user: userDeatil,
+          jwt: await JWT.sign(userDeatil),
+          access_token: access_token,
+        };
+        res.send(authDetail);
       } catch (e: any) {
         console.error(e);
-        res.status(400).send({ error: e.message });
+        res.status(400).send(null);
       }
     });
-
-    // app.get("/getImage/:bucket/:imageName", async (req, res) => {
 
     // TODO: All endpoints need to use JWT authentication to secure it from outside use. Only members inside of colyseus rooms should access this endpoint
     app.get("/getImage/:userId/images/:imageName", async (req, res) => {
@@ -132,7 +173,7 @@ export default config({
 
       try {
         const bucket = process.env.MINIO_BUCKET!;
-        const userId = req.params.userId;
+        const userId: string = req.params.userId[0];
         if (!req.file) return res.status(400).send("No file uploaded.");
         if (!(await MinioClient.getInstance().bucketExists(bucket)))
           return res.status(400).json({ error: "BUCKET DOES NOT EXIST" });
@@ -157,27 +198,16 @@ export default config({
       }
     });
 
-    /**
-     * Use @colyseus/playground
-     * (It is not recommended to expose this route in a production environment)
-     */
-    // if (process.env.NODE_ENV !== "production") {
-    //   app.use("/", playground);
-    // }
-
-    /**
-     * Use @colyseus/monitor
-     * It is recommended to protect this route with a password
-     * Read more: https://docs.colyseus.io/tools/monitor/#restrict-access-to-the-panel-using-a-password
-     */
-    //app.use("/colyseus", monitor());
-
-    //
-    // See more about the Authentication Module:
-    // https://docs.colyseus.io/authentication/
-    //
-    // app.use(auth.prefix, auth.routes())
-    //
+    // If all else fails go here.
+    app.use((req, res) => {
+      console.warn(
+        `Cannot ${req.method} ${req.originalUrl}. Verify the url of the request is going to the correct destination.`,
+      );
+      res.status(404).json({
+        error: "NOT FOUND",
+        message: `Cannot ${req.method} ${req.originalUrl}`,
+      });
+    });
   },
 
   beforeListen: () => {

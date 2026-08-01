@@ -59,6 +59,7 @@ export default function HealthDeathTrackerPanel() {
       {isAddingEnemy ? (
         <EditCharacterModal
           callback={(data) => {
+            if (authContext.room === null) return;
             if (data !== undefined) {
               authContext.room.send("addEnemy", {
                 avatarUri: data.avatarUri,

@@ -37,15 +37,18 @@ export default function SettingsPanel() {
   }, [])
 
   const ChangeMovementType = (movementType: MapMovementType) => {
+    if (authContext.room === null) return;
     authContext.room.send("SetMapMovementType", { mapMovement: movementType });
   }
 
   const sendGridColorChange = useCallback(throttle((value: any) => {
+    if (authContext.room === null) return;
     authContext.room.send("ChangeGridColor", { gridColor: hexToRgba(value, 0.8) });
   }, 100), []);
 
   const sendGridShowingChange = useCallback(throttle((value: any) => {
     const newChecked: boolean = value.target.checked;
+    if (authContext.room === null) return;
     authContext.room.send("GridDisplay", { gridShowing: newChecked });
   }, 100), []);
 

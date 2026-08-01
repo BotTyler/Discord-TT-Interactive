@@ -11,6 +11,7 @@ export default function HandoutHandler() {
   const authContext = useAuthenticatedContext();
   const [handouts, setHandouts] = useState<HandoutInterface[]>([]);
   useEffect(() => {
+    if (authContext.room === null) return;
     const HandoutListener = authContext.room.onMessage("HandoutAdd", (data: { id: string; imageUrl: string }) => {
       setHandouts((prev) => {
         return [...prev, { id: data.id, imageUrl: data.imageUrl }];

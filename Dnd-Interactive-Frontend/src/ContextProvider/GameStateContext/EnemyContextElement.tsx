@@ -4,6 +4,7 @@ import React from "react";
 import { useAuthenticatedContext } from "../useAuthenticatedContext";
 import { CharacterStatus } from "../../shared/StatusTypes";
 import { MARKER_SIZE_CATEGORIES } from "../../shared/MarkerOptions";
+import { Callbacks } from "@colyseus/schema";
 
 export default function EnemyContextElement({ enemy, onValueChanged }: { enemy: Enemy; onValueChanged: (field: string, value: unknown) => void }) {
   const [id, setId] = React.useState<number>(enemy.id);
@@ -79,44 +80,47 @@ export default function EnemyContextElement({ enemy, onValueChanged }: { enemy: 
   }, [statuses]);
 
   React.useEffect(() => {
+    if (authContext.room === null) return;
+    const roomCallback = Callbacks.get(authContext.room);
+
     // set the listeners to sync with the server
-    const idListener = enemy.listen("id", (value: number) => {
+    const idListener = roomCallback.listen(enemy, "id", (value: number) => {
       setId(value);
     });
-    const avatarListener = enemy.listen("avatarUri", (value: string) => {
+    const avatarListener = roomCallback.listen(enemy, "avatarUri", (value: string) => {
       setAvatarUri(value);
     });
-    const nameListener = enemy.listen("name", (value: string) => {
+    const nameListener = roomCallback.listen(enemy, "name", (value: string) => {
       setName(value);
     });
-    const sizeListener = enemy.listen("size_category", (value: MARKER_SIZE_CATEGORIES) => {
+    const sizeListener = roomCallback.listen(enemy, "size_category", (value: MARKER_SIZE_CATEGORIES) => {
       setSizeCategory(value);
     });
-    const positionListener = enemy.listen("position", (value: mLatLng) => {
+    const positionListener = roomCallback.listen(enemy, "position", (value: mLatLng) => {
       setPosition(value);
     });
-    const toPositionListener = enemy.listen("toPosition", (value: mLatLng[]) => {
+    const toPositionListener = roomCallback.listen(enemy, "toPosition", (value: mLatLng[]) => {
       setToPosition(value);
     });
-    const healthListener = enemy.listen("health", (value: number) => {
+    const healthListener = roomCallback.listen(enemy, "health", (value: number) => {
       setHealth(value);
     });
-    const totalHealthListener = enemy.listen("totalHealth", (value: number) => {
+    const totalHealthListener = roomCallback.listen(enemy, "totalHealth", (value: number) => {
       setTotalHealth(value);
     });
-    const deathSavesListener = enemy.listen("deathSaves", (value: number) => {
+    const deathSavesListener = roomCallback.listen(enemy, "deathSaves", (value: number) => {
       setDeathSaves(value);
     });
-    const lifeSavesListener = enemy.listen("lifeSaves", (value: number) => {
+    const lifeSavesListener = roomCallback.listen(enemy, "lifeSaves", (value: number) => {
       setLifeSaves(value);
     });
-    const initiativeListener = enemy.listen("initiative", (value: number) => {
+    const initiativeListener = roomCallback.listen(enemy, "initiative", (value: number) => {
       setInitiative(value);
     });
-    const isVisibleListener = enemy.listen("isVisible", (value: boolean): void => {
+    const isVisibleListener = roomCallback.listen(enemy, "isVisible", (value: boolean): void => {
       setVisible(value);
     });
-    const statusesListener = enemy.listen("statuses", (value: CharacterStatus[]): void => {
+    const statusesListener = roomCallback.listen(enemy, "statuses", (value: CharacterStatus[]): void => {
       setStatuses([...value]);
     });
 

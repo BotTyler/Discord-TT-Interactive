@@ -354,6 +354,7 @@ export default function GridMovementController({ controllableUser, userType, onP
 
   const handleToolEvent = (): void => {
     const handleVisibibilityTool = (): void => {
+      if (authContext.room === null) return;
       switch (userType) {
         case "player":
           break;
@@ -367,6 +368,7 @@ export default function GridMovementController({ controllableUser, userType, onP
     }
 
     const handleDeleteTool = (): void => {
+      if (authContext.room === null) return;
       switch (userType) {
         case "player":
           break;
