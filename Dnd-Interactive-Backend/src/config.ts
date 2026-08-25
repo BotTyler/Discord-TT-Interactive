@@ -118,7 +118,7 @@ export default config({
         )
           .then(async (j) => j.json())
           .catch((e) => {
-            console.error("Fail to gether guild information", e);
+            console.error("Failed to gather guild information", e);
             return null;
           });
 
@@ -173,7 +173,7 @@ export default config({
 
       try {
         const bucket = process.env.MINIO_BUCKET!;
-        const userId: string = req.params.userId[0];
+        const userId: string = req.params.userId as string;
         if (!req.file) return res.status(400).send("No file uploaded.");
         if (!(await MinioClient.getInstance().bucketExists(bucket)))
           return res.status(400).json({ error: "BUCKET DOES NOT EXIST" });

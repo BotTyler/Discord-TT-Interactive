@@ -22,7 +22,6 @@ export function getUserDisplayName(
   user: IDiscordUserResource,
 ): string {
   if (guildMember.nick != null && guildMember.nick !== "") return guildMember.nick;
-  console.log("failed guild check");
 
   if (user.discriminator !== "0") return `${user.username}#${user.discriminator}`;
 
