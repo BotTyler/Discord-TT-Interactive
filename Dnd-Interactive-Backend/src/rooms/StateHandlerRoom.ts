@@ -48,7 +48,7 @@ export class StateHandlerRoom extends Room {
     });
   }
 
-  onAuth(_client: any, _options: any, _req: any) {
+  onAuth(client: any, options: any, req: any) {
     return true;
   }
 

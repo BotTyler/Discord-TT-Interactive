@@ -9,6 +9,7 @@ export default class MinioClient {
         useSSL: false,
         accessKey: process.env.MINIO_ACCESS_KEY!,
         secretKey: process.env.MINIO_SECRET_KEY!,
+        pathStyle: true,
       });
     }
 

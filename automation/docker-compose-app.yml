@@ -1,3 +1,6 @@
+networks:
+  dnd-network:
+    external: true
 services:
   frontend:
     build: 
@@ -12,6 +15,8 @@ services:
       VITE_CLIENT_ID: ${VITE_CLIENT_ID}
     expose:
       - "3000"
+    networks:
+      - dnd-network
   backend:
     build: 
       context: ../Dnd-Interactive-Backend/
@@ -34,6 +39,8 @@ services:
       JWT_SECRET: ${JWT_SECRET}
     expose:
       - "2567"
+    networks:
+      - dnd-network
   nginx:
     image: nginx:alpine
     container_name: dnd-nginx
@@ -45,7 +52,8 @@ services:
     depends_on:
       - frontend
       - backend
-
+    networks:
+      - dnd-network
   cloudflared:
     image: cloudflare/cloudflared:latest
     container_name: cloudflared-dev
@@ -53,3 +61,5 @@ services:
     restart: unless-stopped
     depends_on:
       - nginx
+    networks:
+      - dnd-network

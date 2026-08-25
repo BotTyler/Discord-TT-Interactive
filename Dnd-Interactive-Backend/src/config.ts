@@ -1,6 +1,6 @@
 import config from "@colyseus/tools";
 import { StateHandlerRoom } from "./rooms/StateHandlerRoom";
-import { JWT } from "@colyseus/auth";
+import { JWT, auth } from "@colyseus/auth";
 import { WebSocketTransport } from "@colyseus/ws-transport";
 import MinioClient from "./Minio/MinioClient";
 import multer from "multer";
@@ -146,57 +146,79 @@ export default config({
       }
     });
 
-    // TODO: All endpoints need to use JWT authentication to secure it from outside use. Only members inside of colyseus rooms should access this endpoint
-    app.get("/getImage/:userId/images/:imageName", async (req, res) => {
-      try {
-        const fileName = req.params.imageName;
-        const userId = req.params.userId;
-        const bucket = process.env.MINIO_BUCKET!;
+    app.get(
+      "/getImage/:userId/images/:imageName",
+      auth.middleware(),
+      async (req: any, res: any) => {
+        console.log("getImage", req.auth);
+        try {
+          const fileName: string | null = req.params.imageName ?? null;
+          const userId: string | null = req.params.userId ?? null;
+          const bucket = process.env.MINIO_BUCKET!;
 
-        if (!fileName) return res.status(400).json({ error: "File name is required" });
-        if (!MinioClient.getInstance().bucketExists(bucket))
-          return res.status(400).json({ error: "BUCKET DOES NOT EXIST" });
+          if (!fileName) return res.status(400).json({ error: "File name is required" });
+          if (!userId) return res.status(400).json({ error: "UserId not provided is required" });
+          if (!MinioClient.getInstance().bucketExists(bucket))
+            return res.status(400).json({ error: "BUCKET DOES NOT EXIST" });
 
-        // call out to minio to grab the image
-        const stream = await MinioClient.getInstance().getObject(
-          `${bucket}`,
-          `${userId}/images/${fileName}`,
-        );
-        stream.pipe(res);
-      } catch (e: any) {
-        console.error(e);
-        res.destroy(e);
-      }
-    });
-    app.post("/uploadImage/:userId", upload.single("image"), async (req, res) => {
-      // TODO: Add some authentication and limits to prevent image spam.
+          // call out to minio to grab the image
+          // const stream = await MinioClient.getInstance().getObject(
+          //   `${bucket}`,
+          //   `${userId}/images/${fileName}`,
+          // );
+          // stream.pipe(res);
 
-      try {
-        const bucket = process.env.MINIO_BUCKET!;
-        const userId: string = req.params.userId[0];
-        if (!req.file) return res.status(400).send("No file uploaded.");
-        if (!(await MinioClient.getInstance().bucketExists(bucket)))
-          return res.status(400).json({ error: "BUCKET DOES NOT EXIST" });
+          // Create a minio URL the user can use to grab the resource directly.
+          const itemExpiration: number = 60 * 15; // 15 minutes
+          const itemUrl: string = await MinioClient.getInstance().presignedGetObject(
+            bucket,
+            fileName,
+            itemExpiration,
+          );
+          res.status(200).json({ src: itemUrl, name: fileName });
+        } catch (e: any) {
+          console.error(e);
+          res.destroy(e);
+        }
+      },
+    );
 
-        const file = req.file;
-        const fileName = `${userId}/images/${Date.now()}-${file.originalname}`;
-        const fileStream = file.buffer;
-        const { width, height } = await sharp(fileStream).metadata();
+    app.post(
+      "/uploadImage",
+      upload.single("image"),
+      auth.middleware(),
+      async (req: any, res: any) => {
+        console.log("upload image", req.auth);
+        try {
+          const bucket: string = process.env.MINIO_BUCKET!;
+          const userId: string = req.auth.userId;
 
-        await ImageCatalogDB.getInstance().create(
-          new ImageCatalogDAO(userId, fileName, width!, height!),
-        );
-        await MinioClient.getInstance().putObject(bucket, `${fileName}`, fileStream, file.size);
+          if (!req.file) return res.status(400).send("No file uploaded.");
+          if (!(await MinioClient.getInstance().bucketExists(bucket))) {
+            console.error("S3 Bucket does not exist");
+            return res.status(400).json({ error: "Unable to upload image" });
+          }
 
-        const response = {
-          fileName: fileName,
-        };
-        res.status(200).send(response);
-      } catch (e: any) {
-        console.error(e);
-        res.destroy(e);
-      }
-    });
+          const file = req.file;
+          const fileName = `${userId}/images/${Date.now()}-${file.originalname}`;
+          const fileStream = file.buffer;
+          const { width, height } = await sharp(fileStream).metadata();
+
+          await ImageCatalogDB.getInstance().create(
+            new ImageCatalogDAO(userId, fileName, width!, height!),
+          );
+          await MinioClient.getInstance().putObject(bucket, `${fileName}`, fileStream, file.size);
+
+          const response = {
+            fileName: fileName,
+          };
+          res.status(200).send(response);
+        } catch (e: any) {
+          console.error(e);
+          res.destroy(e);
+        }
+      },
+    );
 
     // If all else fails go here.
     app.use((req, res) => {

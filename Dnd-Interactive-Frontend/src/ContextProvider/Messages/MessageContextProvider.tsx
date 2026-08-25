@@ -65,7 +65,7 @@ export function MessageContextProvider({ children }: { children: React.ReactNode
     </ToastContext.Provider>
   );
 }
-interface ToastContextInterface {
+export interface ToastContextInterface {
   addToast: (title: string, message: any, level: TOAST_LEVEL) => void;
   getAllMessage: () => MessageInterface[];
   sendPlayerMessage: (message: string) => void;

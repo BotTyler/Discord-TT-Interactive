@@ -4,6 +4,7 @@ import { getFileNameFromMinioString, removeColyseusPath } from "../../Util/Util"
 import { useMessageContext } from "../../ContextProvider/Messages/MessageContextProvider";
 import { TOAST_LEVEL } from "../../ContextProvider/Messages/Toast";
 import { LoadImage } from "../../shared/LoadDataInterfaces";
+import { UploadImage } from "../../Util/ImageUtils";
 
 // Although the onChange method can be used to get the image url. This will not be linked with pg or minio. When the image should be used, we should use the forward ref method (getMinioFileUrl) to ensure the file is properly placed.
 // onChange will provide the full url to get the image within a src tag. But this should not be used for creating or updating players **************************************
@@ -82,20 +83,7 @@ export const NewLoadImage = forwardRef(function NewLoadImage({
             // Either a load or a new file was uploaded.
             if (imageFile.file !== null) {
               // This is a new file lets upload it to minio.
-              const formData = new FormData();
-              formData.append("image", imageFile.file);
-              const response = await authContext.client.http
-                .post(`/uploadImage/${authContext.user.id}`, {
-                  body: formData,
-                })
-                .catch((e) => {
-                  toastContext.addToast("[ERROR]", "Failed to upload image", TOAST_LEVEL.ERROR);
-                  throw new Error(e);
-                });
-              toastContext.addToast("[SUCCESS]", "Image Uploaded!!", TOAST_LEVEL.SUCCES);
-              const data = response.data;
-              return data.fileName;
-
+              return await UploadImage(imageFile.file) ?? undefined;
             } else {
               // A preselected image was used. Lets use the imgSrc.
               return removeColyseusPath(imageFile.imgsrc);
@@ -145,6 +133,7 @@ export const NewLoadImage = forwardRef(function NewLoadImage({
         return imageFile.imgsrc;
       } else {
         return `/colyseus/getImage/${imageFile.imgsrc}`;
+
       }
     }
 

@@ -32,7 +32,7 @@ import { Client, Room } from "@colyseus/sdk";
 //   room: undefined as unknown as Room,
 // });
 
-type ColyseusAuthenticationDetail = {
+export type ColyseusAuthenticationDetail = {
   client: Client | null;
   room: Room | null;
 } & AuthenticationDetail;
