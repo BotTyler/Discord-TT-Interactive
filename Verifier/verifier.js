@@ -1,98 +1,123 @@
 "use strict";
 
 /**
- * Discord proxy header verifier for nginx auth_request.
+ * Discord Activity session verifier for nginx auth_request.
  *
- * nginx forwards each incoming request's headers to this service.
- *   204 -> request is authentic, nginx serves it
- *   401 -> anything else, nginx rejects it
+ * nginx asks this service about every request before it reaches the backend.
+ *   204 -> the request belongs to a real, active instance of the Activity
+ *   401 -> anything else
  *
- * Fails closed: any error, missing header, or malformed value results in 401.
- * No dependencies; uses only Node's built-in crypto and http modules.
+ * How it decides: it reads the Activity's instance_id from the request, then
+ * asks Discord's Activity Instance API whether that instance exists
+ * (GET /applications/<app id>/activity-instances/<instance id>, bot token).
+ *
+ * Fails closed: a missing id, a 404, a timeout, or any other error means 401.
+ * No dependencies; uses Node's built-in http and fetch.
  */
 
 const http = require("http");
-const crypto = require("crypto");
 
 const PORT = Number(process.env.PORT || 3001);
-const PUBLIC_KEY_HEX = (process.env.DISCORD_PUBLIC_KEY || "").trim();
+const APP_ID = (process.env.DISCORD_APPLICATION_ID || "").trim();
+const BOT_TOKEN = (process.env.DISCORD_BOT_TOKEN || "").trim();
+const API_BASE = (process.env.DISCORD_API_BASE || "https://discord.com/api").replace(/\/+$/, "");
+const CACHE_TTL_MS = Number(process.env.CACHE_TTL_SECONDS || 60) * 1000;
+const API_TIMEOUT_MS = 3000;
+const MAX_CACHE_ENTRIES = 1000;
 
-// Developer Portal -> your app -> General Information -> Public Key (64 hex chars)
-if (!/^[0-9a-fA-F]{64}$/.test(PUBLIC_KEY_HEX)) {
-  console.error("DISCORD_PUBLIC_KEY is missing or is not a 64-character hex string");
+if (!/^\d{15,25}$/.test(APP_ID)) {
+  console.error("DISCORD_APPLICATION_ID is missing or is not a numeric id");
+  process.exit(1);
+}
+if (!BOT_TOKEN) {
+  console.error("DISCORD_BOT_TOKEN is missing");
   process.exit(1);
 }
 
-// Wrap the raw 32-byte Ed25519 key in the standard SPKI DER header Node expects
-const SPKI_PREFIX = Buffer.from("302a300506032b6570032100", "hex");
-const publicKey = crypto.createPublicKey({
-  key: Buffer.concat([SPKI_PREFIX, Buffer.from(PUBLIC_KEY_HEX, "hex")]),
-  format: "der",
-  type: "spki",
-});
+// Instance ids look like i-<launch>-gc-<guild>-<channel>. Only allow a safe
+// character set so the value can never alter the API path we call.
+const INSTANCE_ID_RE = /^[A-Za-z0-9_-]{1,128}$/;
 
-const MAX_HEADER_LEN = 8192;
-
-// Discord's own docs show the signature decoded as hex in the Python example
-// and as base64 in the JavaScript example. An Ed25519 signature is 64 bytes,
-// so we accept either encoding and tell them apart by length and alphabet.
-function decodeSignature(value) {
-  let buf;
-  if (/^[0-9a-fA-F]{128}$/.test(value)) {
-    buf = Buffer.from(value, "hex");
-  } else if (/^[A-Za-z0-9+/]{86}==$/.test(value) || /^[A-Za-z0-9_-]{86}(==)?$/.test(value)) {
-    buf = Buffer.from(value, "base64");
-  } else {
+function instanceIdFrom(urlLike) {
+  if (!urlLike) return null;
+  try {
+    const id = new URL(urlLike, "http://placeholder").searchParams.get("instance_id");
+    return id && INSTANCE_ID_RE.test(id) ? id : null;
+  } catch {
     return null;
   }
-  return buf.length === 64 ? buf : null;
 }
 
-function verify(headers) {
-  const signature = headers["x-signature-ed25519"];
-  const timestamp = headers["x-signature-timestamp"];
-  const payloadB64 = headers["x-discord-proxy-payload"];
-
-  if (!signature || !timestamp || !payloadB64) return "missing proxy headers";
-  if (payloadB64.length > MAX_HEADER_LEN || signature.length > 256 || timestamp.length > 32) {
-    return "header too large";
-  }
-
-  const sigBytes = decodeSignature(signature);
-  if (!sigBytes) return "malformed signature";
-
-  const payloadBytes = Buffer.from(payloadB64, "base64");
-  if (payloadBytes.length === 0) return "empty payload";
-
-  // Signature is over the decoded payload bytes
-  if (!crypto.verify(null, payloadBytes, publicKey, sigBytes)) return "invalid signature";
-
-  // Only trust the payload contents after the signature has been verified
-  const payload = JSON.parse(payloadBytes.toString("utf8"));
-
-  if (String(payload.created_at) !== timestamp) return "timestamp mismatch";
-  if (
-    typeof payload.expires_at !== "number" ||
-    payload.expires_at < Math.floor(Date.now() / 1000)
-  ) {
-    return "expired proxy token";
-  }
-
-  return null; // valid
+// nginx passes the original request URL in X-Original-URI (page loads carry
+// instance_id in their query string). Requests for assets and API calls may not,
+// so the Referer, which is also forwarded to this service, is checked as a fallback.
+function extractInstanceId(headers) {
+  return instanceIdFrom(headers["x-original-uri"]) || instanceIdFrom(headers["referer"]);
 }
 
-const server = http.createServer((req, res) => {
+async function instanceIsActive(id) {
+  const res = await fetch(
+    `${API_BASE}/applications/${APP_ID}/activity-instances/${encodeURIComponent(id)}`,
+    {
+      headers: { Authorization: `Bot ${BOT_TOKEN}` },
+      signal: AbortSignal.timeout(API_TIMEOUT_MS),
+    },
+  );
+  if (res.status === 404) return false;
+  if (res.status !== 200) throw new Error(`discord api returned ${res.status}`);
+
+  const body = await res.json();
+  return body.instance_id === id && body.application_id === APP_ID;
+}
+
+// Short-lived cache of validated instances so each asset request does not
+// trigger a call to Discord. In-flight lookups are shared between requests.
+const validUntil = new Map(); // instance id -> expiry (ms)
+const inFlight = new Map(); // instance id -> Promise<boolean>
+
+async function isValid(id) {
+  const expiry = validUntil.get(id);
+  if (expiry && expiry > Date.now()) return true;
+  validUntil.delete(id);
+
+  if (inFlight.has(id)) return inFlight.get(id);
+
+  const lookup = instanceIsActive(id)
+    .then((ok) => {
+      if (ok) {
+        if (validUntil.size >= MAX_CACHE_ENTRIES) {
+          const now = Date.now();
+          for (const [k, v] of validUntil) if (v <= now) validUntil.delete(k);
+          if (validUntil.size >= MAX_CACHE_ENTRIES) validUntil.clear();
+        }
+        validUntil.set(id, Date.now() + CACHE_TTL_MS);
+      }
+      return ok;
+    })
+    .finally(() => inFlight.delete(id));
+
+  inFlight.set(id, lookup);
+  return lookup;
+}
+
+const server = http.createServer(async (req, res) => {
   // Used by the Docker healthcheck only; nginx never routes outside traffic here
+  console.info("Received request for verification");
   if (req.url === "/healthz") {
     res.writeHead(200).end("ok");
     return;
   }
 
-  let failure;
+  let failure = null;
   try {
-    failure = verify(req.headers);
+    const id = extractInstanceId(req.headers);
+    if (!id) {
+      failure = "no instance_id in request";
+    } else if (!(await isValid(id))) {
+      failure = `instance not found: ${id}`;
+    }
   } catch (err) {
-    failure = "verification error";
+    failure = `lookup failed: ${err.message}`;
   }
 
   if (failure) {
