@@ -12,6 +12,9 @@ services:
       VITE_CLIENT_ID: ${VITE_CLIENT_ID}
     expose:
       - "3000"
+    networks:
+      - dnd-network
+
   backend:
     build: 
       context: ../Dnd-Interactive-Backend/
@@ -34,6 +37,21 @@ services:
       JWT_SECRET: ${JWT_SECRET}
     expose:
       - "2567"
+    networks:
+      - dnd-network
+
+  verifier:
+    build:
+      context: ../Verifier/
+      dockerfile: Dockerfile
+    container_name: dnd-verifier
+    restart: unless-stopped
+    environment:
+      DISCORD_PUBLIC_KEY: ${DISCORD_PUBLIC_KEY:?DISCORD_PUBLIC_KEY is required}
+    read_only: true
+    networks:
+      - dnd-network
+      
   nginx:
     image: nginx:alpine
     container_name: dnd-nginx
@@ -45,6 +63,9 @@ services:
     depends_on:
       - frontend
       - backend
+      - verifier
+    networks:
+      - dnd-network
 
   cloudflared:
     image: cloudflare/cloudflared:latest
@@ -53,3 +74,9 @@ services:
     restart: unless-stopped
     depends_on:
       - nginx
+    networks:
+      - dnd-network
+
+networks:
+  dnd-network:
+    external: true

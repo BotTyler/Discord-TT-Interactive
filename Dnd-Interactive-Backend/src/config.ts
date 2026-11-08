@@ -1,11 +1,12 @@
-import config from "@colyseus/tools";
-import { StateHandlerRoom } from "./rooms/StateHandlerRoom";
 import { JWT } from "@colyseus/auth";
+import config from "@colyseus/tools";
 import { WebSocketTransport } from "@colyseus/ws-transport";
-import MinioClient from "./Minio/MinioClient";
+import { randomUUID } from "crypto";
+import express from "express";
 import multer from "multer";
-import sharp from "sharp";
 import { ImageCatalogDAO, ImageCatalogDB } from "./Database/Tables/ImageCatalogDB";
+import { StateHandlerRoom } from "./rooms/StateHandlerRoom";
+import { s3Storage } from "./S3/DndS3Client";
 import { GAME_NAME } from "./shared/Constants";
 import {
   AuthenticationDetail,
@@ -13,9 +14,12 @@ import {
   IDiscordUserResource,
   UserDetail,
 } from "./shared/UserDetails";
-import { sanitize } from "./Util/Utils";
 import { getUserAvatarUrl, getUserDisplayName } from "./Util/DiscordAuthenticationUtils";
-import express from "express";
+import { sanitize } from "./Util/Utils";
+import { SanitizeImage } from "./Util/ImageUtil";
+import { Metadata } from "sharp";
+
+const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
 
 export default config({
   options: {
@@ -41,11 +45,17 @@ export default config({
   },
 
   initializeExpress: (app) => {
+    s3Storage.ensureBucket();
     app.use(express.json()); // Required for serialization of endpoints
 
-    //setup the minio storage
     const storage = multer.memoryStorage(); // Store files in memory
-    const upload = multer({ storage: storage });
+    const upload = multer({
+      storage: storage,
+      limits: {
+        fileSize: MAX_UPLOAD_BYTES,
+        files: 1,
+      },
+    });
 
     // Fetch token from developer portal and return to the embedded app
     app.post("/token", async (req, res) => {
@@ -146,47 +156,55 @@ export default config({
       }
     });
 
-    // TODO: All endpoints need to use JWT authentication to secure it from outside use. Only members inside of colyseus rooms should access this endpoint
     app.get("/getImage/:userId/images/:imageName", async (req, res) => {
       try {
         const fileName = req.params.imageName;
         const userId = req.params.userId;
-        const bucket = process.env.MINIO_BUCKET!;
 
         if (!fileName) return res.status(400).json({ error: "File name is required" });
-        if (!MinioClient.getInstance().bucketExists(bucket))
-          return res.status(400).json({ error: "BUCKET DOES NOT EXIST" });
 
-        // call out to minio to grab the image
-        const stream = await MinioClient.getInstance().getObject(
-          `${bucket}`,
-          `${userId}/images/${fileName}`,
-        );
-        stream.pipe(res);
+        const key: string = `${userId}/images/${fileName}`;
+        if (!(await s3Storage.exists(key))) {
+          return res.status(404).json({ error: "Asset does not exist" });
+        }
+
+        const expiresIn: number = 3600;
+        const url = await s3Storage.getDownloadUrl(key, expiresIn);
+
+        res.setHeader("Cache-Control", "private, max-age=300");
+        res.redirect(302, url);
+        // res.json({ url, expiresIn });
       } catch (e: any) {
         console.error(e);
         res.destroy(e);
       }
     });
+
     app.post("/uploadImage/:userId", upload.single("image"), async (req, res) => {
-      // TODO: Add some authentication and limits to prevent image spam.
+      if (!req.file) return res.status(400).send("No file uploaded.");
 
       try {
-        const bucket = process.env.MINIO_BUCKET!;
+        // const bucket = process.env.MINIO_BUCKET!;
+        const cleanedImage: { buffer: Buffer; metadata: Metadata } = await SanitizeImage(
+          req.file.buffer,
+        );
+        const id: string = randomUUID();
         const userId: string = req.params.userId as string;
-        if (!req.file) return res.status(400).send("No file uploaded.");
-        if (!(await MinioClient.getInstance().bucketExists(bucket)))
-          return res.status(400).json({ error: "BUCKET DOES NOT EXIST" });
 
-        const file = req.file;
-        const fileName = `${userId}/images/${Date.now()}-${file.originalname}`;
-        const fileStream = file.buffer;
-        const { width, height } = await sharp(fileStream).metadata();
+        // const fileName = `${userId}/images/${Date.now()}-${file.originalname}`;
+        const fileName = `${userId}/images/${id}`;
 
         await ImageCatalogDB.getInstance().create(
-          new ImageCatalogDAO(userId, fileName, width!, height!),
+          new ImageCatalogDAO(
+            userId,
+            fileName,
+            cleanedImage.metadata.width,
+            cleanedImage.metadata.height!,
+          ),
         );
-        await MinioClient.getInstance().putObject(bucket, `${fileName}`, fileStream, file.size);
+
+        // await MinioClient.getInstance().putObject(bucket, `${fileName}`, fileStream, file.size);
+        await s3Storage.upload(fileName, cleanedImage.buffer, "image/webp", { owner: userId });
 
         const response = {
           fileName: fileName,
