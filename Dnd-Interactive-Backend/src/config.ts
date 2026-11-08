@@ -45,7 +45,6 @@ export default config({
   },
 
   initializeExpress: (app) => {
-    s3Storage.ensureBucket();
     app.use(express.json()); // Required for serialization of endpoints
 
     const storage = multer.memoryStorage(); // Store files in memory
@@ -169,11 +168,16 @@ export default config({
         }
 
         const expiresIn: number = 3600;
-        const url = await s3Storage.getDownloadUrl(key, expiresIn);
+        const localSignedUrl: string = await s3Storage.getDownloadUrl(key, expiresIn);
+        const nginxCompatibleUrl: URL = new URL(localSignedUrl);
+
+        // Prefix the path with /s3/ so nginx knows how to route the request.
+        // This s3 will be removed by nginx to make sure the signature of the signed url stays intact.
+        nginxCompatibleUrl.pathname = `/s3${nginxCompatibleUrl.pathname}`;
 
         res.setHeader("Cache-Control", "private, max-age=300");
-        res.redirect(302, url);
-        // res.json({ url, expiresIn });
+        console.log(`REDIRECT IMAGE: ${nginxCompatibleUrl.toString()}`);
+        res.redirect(302, nginxCompatibleUrl.toString());
       } catch (e: any) {
         console.error(e);
         res.destroy(e);

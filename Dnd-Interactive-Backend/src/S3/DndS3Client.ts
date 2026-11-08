@@ -12,35 +12,6 @@ import { Upload } from "@aws-sdk/lib-storage";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { Readable } from "stream";
 
-export const s3Storage: DndS3Client = createS3Client();
-
-function createS3Client(): DndS3Client {
-  const endpoint: string | null = process.env.RUSTFS_ENDPOINT ?? null;
-  const publicEndpoint: string | null = process.env.RUSTFS_PUBLIC_ENDPOINT ?? null;
-  const accessKey: string | null = process.env.RUSTFS_ACCESS_KEY ?? null;
-  const secretKey: string | null = process.env.RUSTFS_SECRET_KEY ?? null;
-  const bucket: string | null = process.env.RUSTFS_BUCKET ?? null;
-  const region: string = process.env.RUSTFS_REGION ?? "us-east-1";
-
-  if (
-    endpoint === null ||
-    publicEndpoint === null ||
-    accessKey === null ||
-    secretKey === null ||
-    bucket === null
-  ) {
-    throw new Error("RUSTFS properties are missing");
-  }
-  return new DndS3Client({
-    accessKey: accessKey,
-    secretKey: secretKey,
-    endpoint: endpoint,
-    bucket: bucket,
-    region: region,
-    publicEndpoint: publicEndpoint,
-  });
-}
-
 interface S3ServiceConfig {
   endpoint: string;
   accessKey: string;
@@ -264,4 +235,33 @@ class DndS3Client {
       e?.$metadata?.httpStatusCode === 404
     );
   }
+}
+
+export const s3Storage: DndS3Client = createS3Client();
+
+function createS3Client(): DndS3Client {
+  const endpoint: string | null = process.env.RUSTFS_ENDPOINT ?? null;
+  const publicEndpoint: string | null = process.env.RUSTFS_PUBLIC_ENDPOINT ?? null;
+  const accessKey: string | null = process.env.RUSTFS_ACCESS_KEY ?? null;
+  const secretKey: string | null = process.env.RUSTFS_SECRET_KEY ?? null;
+  const bucket: string | null = process.env.RUSTFS_BUCKET ?? null;
+  const region: string = process.env.RUSTFS_REGION ?? "us-east-1";
+
+  if (
+    endpoint === null ||
+    publicEndpoint === null ||
+    accessKey === null ||
+    secretKey === null ||
+    bucket === null
+  ) {
+    throw new Error("RUSTFS properties are missing");
+  }
+  return new DndS3Client({
+    accessKey: accessKey,
+    secretKey: secretKey,
+    endpoint: endpoint,
+    bucket: bucket,
+    region: region,
+    publicEndpoint: publicEndpoint,
+  });
 }

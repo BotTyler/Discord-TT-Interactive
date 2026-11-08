@@ -50,6 +50,8 @@ services:
     environment:
       DISCORD_APPLICATION_ID: ${VITE_CLIENT_ID}
       DISCORD_BOT_TOKEN: ${DISCORD_BOT_TOKEN}
+      # openssl rand -hex 32
+      COOKIE_SECRET: ${COOKIE_SECRET}
     read_only: true
     networks:
       - dnd-network
