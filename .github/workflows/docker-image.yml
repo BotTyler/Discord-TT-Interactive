@@ -10,6 +10,7 @@ on:
         options:
           - Frontend
           - Backend
+          - Verifier
           - All
         default: All
 jobs:
@@ -60,3 +61,14 @@ jobs:
         if: ${{ github.event.inputs.project == 'Backend' || github.event.inputs.project == 'All' }}
         run: |
           docker push ghcr.io/${{ steps.vars.outputs.owner_lc }}/dnd-backend:latest
+
+      - name: Build Verifier
+        if: ${{ github.event.inputs.project == 'Verifier' || github.event.inputs.project == 'All' }}
+        working-directory: ./Verifier
+        run: |
+          docker build \
+            -t ghcr.io/${{ steps.vars.outputs.owner_lc }}/dnd-verifier:latest .
+      - name: Push Verifier Image
+        if: ${{ github.event.inputs.project == 'Verifier' || github.event.inputs.project == 'All' }}
+        run: |
+          docker push ghcr.io/${{ steps.vars.outputs.owner_lc }}/dnd-verifier:latest
