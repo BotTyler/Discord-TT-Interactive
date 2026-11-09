@@ -13,8 +13,7 @@ export function getFileNameFromMinioString(minioFileName: string): string {
     // 0 -> first match
     // 2 -> second group in that match (0=initial string) (1=either audio or images) (2=name of the file)
   } catch (_err: any) {
-    console.error("Found the broken image this is due to the image name changes. Definietly part of that damn fucking list.");
-    return "DAMN BROKEN IMAGE NAME";
+    return "Blank";
   }
 }
 
