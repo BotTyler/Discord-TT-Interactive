@@ -175,7 +175,6 @@ export default config({
         nginxCompatibleUrl.pathname = `/s3${nginxCompatibleUrl.pathname}`;
 
         res.setHeader("Cache-Control", "private, max-age=300");
-        console.log(`REDIRECT IMAGE: ${nginxCompatibleUrl.toString()}`);
         res.redirect(302, nginxCompatibleUrl.toString());
       } catch (e: any) {
         console.error(e);
