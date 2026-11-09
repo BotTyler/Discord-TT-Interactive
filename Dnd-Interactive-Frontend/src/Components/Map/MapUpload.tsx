@@ -56,7 +56,6 @@ export default function MapUpload({ callback }: { callback: (data: ClientMapData
     </div>
   );
 
-  {/* children={uploadBody} */ }
   return (
     <Modal
       Title="Map Upload"
