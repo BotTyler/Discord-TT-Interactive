@@ -1,5 +1,5 @@
+import { throttle } from "lodash";
 import { useEffect, useMemo } from "react";
-import { debounce, throttle } from "lodash";
 
 export default function useDebounced(callback: (...args: any[]) => void, delay: number) {
   const debounced = useMemo(

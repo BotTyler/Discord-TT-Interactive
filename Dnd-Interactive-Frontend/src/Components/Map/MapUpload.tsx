@@ -59,7 +59,6 @@ export default function MapUpload({ callback }: { callback: (data: ClientMapData
   return (
     <Modal
       Title="Map Upload"
-      children={uploadBody}
       closeCallback={() => {
         // setFile(undefined);
         // setPlayerHeight(25);
@@ -68,9 +67,14 @@ export default function MapUpload({ callback }: { callback: (data: ClientMapData
       submitCallback={async () => {
         if (!newloadImageRef.current) return;
         const imageSrc = await newloadImageRef.current.getMinioFileUrl();
-        if (!imageSrc) callback(undefined);
+        if (!imageSrc) {
+          callback(undefined);
+          return;
+        }
         callback({ mapBase64: imageSrc, iconHeight: size, name: name });
       }}
-    />
+    >
+      {uploadBody}
+    </Modal>
   );
 }

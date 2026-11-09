@@ -20,6 +20,7 @@ import {
 } from "../Database/Tables/EnemyMovementHistoryDB";
 import { InitiativeHistoryDAO, InitiativeHistoryDB } from "../Database/Tables/InitiativeHistoryDB";
 import { StateHandlerRoom } from "../rooms/StateHandlerRoom";
+import ValidationException from "../Exception/ValidationException";
 
 export const jsdomWindow = new JSDOM("").window;
 export const purify = DOMPurify(jsdomWindow);
@@ -48,13 +49,7 @@ export function sanitize(message: string): string {
  * Some of the more complicated types are "object", "array", these will need to be handled separately.
  */
 export type ExpectedTypes =
-  | "string"
-  | "number"
-  | "boolean"
-  | "bigint"
-  | "object"
-  | "array"
-  | "NOVERIFY";
+  "string" | "number" | "boolean" | "bigint" | "object" | "array" | "NOVERIFY";
 export type ValidationInputType = {
   name: string;
   type: ExpectedTypes;
@@ -82,15 +77,11 @@ export function ValidateAllInputs(
 
       // Check to make sure the value is there and of the right type
       if (reqValue == null) {
-        console.error(`Value ${field.name} was found to be undefined!!`);
-        throw new Error(`Value ${field.name} was found to be undefined!!`);
+        throw new ValidationException(`Value ${field.name} was found to be undefined!!`);
       }
 
       if (!ValidateTypes(reqValue, field.type)) {
-        console.error(
-          `Value is not of the right type. Value: ${reqValue} Type: ${typeof reqValue} Expected: ${field.type}`,
-        );
-        throw new Error(
+        throw new ValidationException(
           `Value is not of the right type. Value: ${reqValue} Type: ${typeof reqValue} Expected: ${field.type}`,
         );
       }
@@ -100,7 +91,7 @@ export function ValidateAllInputs(
     }
     return validatedRecord;
   } catch (ex: any) {
-    throw new Error("Internal Service Exception", ex);
+    throw new ValidationException("Input validation failed", ex);
   }
 }
 
