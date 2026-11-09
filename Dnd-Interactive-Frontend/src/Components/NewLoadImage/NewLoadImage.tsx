@@ -75,26 +75,34 @@ export const NewLoadImage = forwardRef(function NewLoadImage({
       return {
         // This function will be the main call for submitting objects.
         // This will need to handle all image uploads to the server and send back the proper access URL.
-        async getMinioFileUrl(): Promise<string | undefined> {
+        async getMinioFileUrl(): Promise<string | null> {
 
-          if (authContext.client === null) return undefined;
+          if (authContext.client === null) return null;
           if (imageFile !== null) {
             // Either a load or a new file was uploaded.
             if (imageFile.file !== null) {
               // This is a new file lets upload it to minio.
               const formData = new FormData();
               formData.append("image", imageFile.file);
-              const response = await authContext.client.http
+
+              const response: { fileName: string } | null = await authContext.client.http
                 .post(`/uploadImage/${authContext.user.id}`, {
                   body: formData,
+                }).then((value) => {
+                  return { fileName: value.data.fileName }
                 })
                 .catch((e) => {
-                  toastContext.addToast("[ERROR]", "Failed to upload image", TOAST_LEVEL.ERROR);
-                  throw new Error(e);
+                  console.error(e);
+                  return null;
                 });
-              toastContext.addToast("[SUCCESS]", "Image Uploaded!!", TOAST_LEVEL.SUCCES);
-              const data = response.data;
-              return data.fileName;
+
+              if (response === null) {
+                toastContext.addToast("[ERROR]", "Failed to upload image", TOAST_LEVEL.ERROR);
+                return null;
+              } else {
+                toastContext.addToast("[SUCCESS]", "Image Uploaded!!", TOAST_LEVEL.SUCCES);
+                return response.fileName;
+              }
 
             } else {
               // A preselected image was used. Lets use the imgSrc.
@@ -108,7 +116,7 @@ export const NewLoadImage = forwardRef(function NewLoadImage({
 
 
           toastContext.addToast("[ERROR]", "No Image available to use.", TOAST_LEVEL.ERROR);
-          return undefined;
+          return null;
 
         },
       };

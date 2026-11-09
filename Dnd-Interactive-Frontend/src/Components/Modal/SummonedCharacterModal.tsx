@@ -134,16 +134,20 @@ export default function EditCharacterModal(
   return (
     <Modal
       Title={title}
-      children={uploadBody}
       closeCallback={() => {
         callback(undefined);
       }}
       submitCallback={async () => {
         if (!newloadImageRef.current) return;
         const imageSrc = await newloadImageRef.current.getMinioFileUrl();
-        if (!imageSrc) callback(undefined);
+        if (!imageSrc) {
+          callback(undefined);
+          return;
+        }
         callback({ name: _name, size_category: _sizeCategory, avatarUri: imageSrc });
       }}
-    />
+    >
+      {uploadBody}
+    </Modal>
   );
 }

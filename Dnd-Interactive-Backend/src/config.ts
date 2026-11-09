@@ -1,9 +1,9 @@
 import { JWT } from "@colyseus/auth";
 import config from "@colyseus/tools";
 import { WebSocketTransport } from "@colyseus/ws-transport";
-import { randomUUID } from "crypto";
 import express from "express";
 import multer from "multer";
+import { Metadata } from "sharp";
 import { ImageCatalogDAO, ImageCatalogDB } from "./Database/Tables/ImageCatalogDB";
 import { StateHandlerRoom } from "./rooms/StateHandlerRoom";
 import { s3Storage } from "./S3/DndS3Client";
@@ -15,11 +15,10 @@ import {
   UserDetail,
 } from "./shared/UserDetails";
 import { getUserAvatarUrl, getUserDisplayName } from "./Util/DiscordAuthenticationUtils";
-import { sanitize } from "./Util/Utils";
 import { SanitizeImage } from "./Util/ImageUtil";
-import { Metadata } from "sharp";
+import { sanitize } from "./Util/Utils";
 
-const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
+const MAX_UPLOAD_BYTES = 100 * 1024 * 1024;
 
 export default config({
   options: {
@@ -192,11 +191,11 @@ export default config({
         const cleanedImage: { buffer: Buffer; metadata: Metadata } = await SanitizeImage(
           req.file.buffer,
         );
-        const id: string = randomUUID();
+        // const id: string = randomUUID();
         const userId: string = req.params.userId as string;
 
-        // const fileName = `${userId}/images/${Date.now()}-${file.originalname}`;
-        const fileName = `${userId}/images/${id}`;
+        const fileName = `${userId}/images/${Date.now()}-${sanitize(req.file!.originalname)}`;
+        // const fileName = `${userId}/images/${id}`;
 
         await ImageCatalogDB.getInstance().create(
           new ImageCatalogDAO(
@@ -214,9 +213,9 @@ export default config({
           fileName: fileName,
         };
         res.status(200).send(response);
-      } catch (e: any) {
-        console.error(e);
-        res.destroy(e);
+      } catch (err: any) {
+        console.error(err);
+        res.destroy(err);
       }
     });
 
@@ -236,5 +235,6 @@ export default config({
     /**
      * Before before gameServer.listen() is called.
      */
+    s3Storage.ensureBucket();
   },
 });
