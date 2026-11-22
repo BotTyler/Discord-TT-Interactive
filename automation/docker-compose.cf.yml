@@ -1,0 +1,11 @@
+services:
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared-dev
+    command: tunnel --url http://nginx:80
+    restart: unless-stopped
+    networks:
+      - dnd-network
+networks:
+  dnd-network:
+    external: true
