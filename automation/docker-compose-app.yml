@@ -71,16 +71,6 @@ services:
     networks:
       - dnd-network
 
-  cloudflared:
-    image: cloudflare/cloudflared:latest
-    container_name: cloudflared-dev
-    command: tunnel --url http://nginx:80
-    restart: unless-stopped
-    depends_on:
-      - nginx
-    networks:
-      - dnd-network
-
 networks:
   dnd-network:
     external: true
