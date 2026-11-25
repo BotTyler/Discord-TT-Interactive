@@ -5,31 +5,34 @@ import { DAO, DatabaseBase } from "../Interface/DatabaseObjectInterface";
 export class ImageCatalogDAO extends DAO {
   public readonly img_catalog_id?: number;
   public readonly player_id: string;
-  public readonly image_name: string;
+  public readonly image_location: string;
   public readonly width: number;
   public readonly height: number;
+  public readonly name: string;
 
   constructor(
     player_id: string,
-    image_name: string,
+    image_location: string,
     width: number,
     height: number,
+    name: string,
     img_catalog_id?: number,
   ) {
     super();
     this.img_catalog_id = img_catalog_id;
     this.player_id = player_id;
-    this.image_name = image_name;
+    this.image_location = image_location;
     this.width = width;
     this.height = height;
+    this.name = name;
   }
 
   getKeys(): string[] {
-    return ["player_id", "image_name", "width", "height"];
+    return ["player_id", "image_location", "width", "height", "name"];
     // return ["enemy_id", "image", "name"];
   }
   getValues(): any[] {
-    return [this.player_id, this.image_name, this.width, this.height];
+    return [this.player_id, this.image_location, this.width, this.height, this.name];
     // return [this.enemy_id, this.image, this.name];
   }
   getIdName(): string {
@@ -60,9 +63,10 @@ export class ImageCatalogDB extends DatabaseBase<ImageCatalogDAO> {
     return rows.map((val: ImageCatalogDAO): ImageCatalogDAO => {
       return new ImageCatalogDAO(
         val.player_id,
-        val.image_name,
+        val.image_location,
         +val.width,
         +val.height,
+        val.name,
         +val.img_catalog_id!,
       );
     });
@@ -82,9 +86,10 @@ export class ImageCatalogDB extends DatabaseBase<ImageCatalogDAO> {
       const firstRow: ImageCatalogDAO = rows[0];
       return new ImageCatalogDAO(
         firstRow.player_id,
-        firstRow.image_name,
+        firstRow.image_location,
         +firstRow.width,
         +firstRow.height,
+        firstRow.name,
         +firstRow.img_catalog_id!,
       );
     }
@@ -99,7 +104,7 @@ export class ImageCatalogDB extends DatabaseBase<ImageCatalogDAO> {
       const query = `SELECT img_catalog_id as id from public."Image_Catalog" where image_name = $1;`;
 
       const result: QueryResult<{ id: number }> | null = await Database.getInstance()
-        .query(query, [data.image_name])
+        .query(query, [data.image_location])
         .catch((e) => {
           console.error(`Could not ***select*** (${this.tableName})\n\t${e}`);
           return null;

@@ -17,6 +17,7 @@ import {
 import { getUserAvatarUrl, getUserDisplayName } from "./Util/DiscordAuthenticationUtils";
 import { SanitizeImage } from "./Util/ImageUtil";
 import { sanitize } from "./Util/Utils";
+import { randomUUID } from "crypto";
 
 const MAX_UPLOAD_BYTES = 100 * 1024 * 1024;
 
@@ -193,23 +194,26 @@ export default config({
         // const id: string = randomUUID();
         const userId: string = req.params.userId as string;
 
-        const fileName = `${userId}/images/${Date.now()}-${sanitize(req.file!.originalname)}`;
+        const name: string = sanitize(req.file!.originalname);
+        const filePath = `${userId}/images/${randomUUID()}`;
         // const fileName = `${userId}/images/${id}`;
 
         await ImageCatalogDB.getInstance().create(
           new ImageCatalogDAO(
             userId,
-            fileName,
+            filePath,
             cleanedImage.metadata.width,
             cleanedImage.metadata.height!,
+            name,
           ),
         );
 
         // await MinioClient.getInstance().putObject(bucket, `${fileName}`, fileStream, file.size);
-        await s3Storage.upload(fileName, cleanedImage.buffer, "image/webp", { owner: userId });
+        await s3Storage.upload(filePath, cleanedImage.buffer, "image/webp", { owner: userId });
 
         const response = {
-          fileName: fileName,
+          path: filePath,
+          name: name,
         };
         res.status(200).send(response);
       } catch (err: any) {
