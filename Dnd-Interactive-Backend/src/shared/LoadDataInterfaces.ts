@@ -23,7 +23,7 @@ export interface ShJoinInterface {
   position_lat: number;
   position_lng: number;
   name: string;
-  image_name: string;
+  image_location: string;
   health: number;
   total_health: number;
   death_saves: number;
@@ -41,12 +41,14 @@ export interface LoadSaveHistory {
 }
 
 export interface LoadImage {
-  image_name: string;
+  name: string;
+  path: string;
 }
 
 export interface CampaignsDao {
   id: number;
   image_name: string;
+  image_location: string;
   width: number;
   height: number;
   name: string;
@@ -60,5 +62,5 @@ export interface LoadCampaign {
   name: string;
   width: number;
   height: number;
-  image_name: string;
+  image_location: string;
 }

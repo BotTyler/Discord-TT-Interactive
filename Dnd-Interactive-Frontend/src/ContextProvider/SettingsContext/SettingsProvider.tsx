@@ -1,6 +1,5 @@
 import { createContext, forwardRef, useContext, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { Accordion, Col, Image, Offcanvas, Row } from "react-bootstrap";
-import { getFileNameFromMinioString } from "../../Util/Util";
 import { useAuthenticatedContext } from "../useAuthenticatedContext";
 
 export interface SettingsProviderInterface {
@@ -135,7 +134,8 @@ function AssetManager() {
       {imgList ? imgList.map((imgUrl) => {
         return <Col key={`Image-${imgUrl}`} bsPrefix="col-4" className="my-1 border-bottom">
           <Image src={`/colyseus/getImage/${imgUrl}`} loading="lazy" fluid />
-          <p className="p-0 m-0 mb-1 text-center">{getFileNameFromMinioString(imgUrl)}</p>
+          {/* <p className="p-0 m-0 mb-1 text-center">{getFileNameFromMinioString(imgUrl)}</p> */}
+          <p className="p-0 m-0 mb-1 text-center">Placeholder file name</p>
         </Col>
       }) : <p>loading</p>}
     </Row>

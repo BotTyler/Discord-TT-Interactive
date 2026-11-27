@@ -126,7 +126,7 @@ export function RegisterSaveAndLoadStateHandler(room: StateHandlerRoom): void {
       // Load the map first.
       const map: MapData = new MapData(
         {
-          mapBase64: mapInterface.image_name,
+          mapBase64: mapInterface.image_location,
           width: mapInterface.width,
           height: mapInterface.height,
           iconHeight: mapInterface.player_size,
@@ -164,7 +164,7 @@ export function RegisterSaveAndLoadStateHandler(room: StateHandlerRoom): void {
         const summon: Summons = new Summons({
           id: summonState.summons_id,
           player_id: player.userId,
-          avatarUri: summonState.image_name,
+          avatarUri: summonState.image_location,
           name: summonState.name,
           size_category: summonState.size_category,
           color: player.color,
@@ -185,7 +185,7 @@ export function RegisterSaveAndLoadStateHandler(room: StateHandlerRoom): void {
       enemyStates.forEach((enemyState: EmhJoinInterface): void => {
         const insertEnemy: Enemy = new Enemy({
           id: enemyState.enemy_id,
-          avatarUri: enemyState.image_name,
+          avatarUri: enemyState.image_location,
           name: enemyState.name,
           size_category: enemyState.size_category,
         });

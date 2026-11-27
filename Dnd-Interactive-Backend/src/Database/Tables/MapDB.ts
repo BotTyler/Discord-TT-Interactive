@@ -45,34 +45,41 @@ export class MapDB extends DatabaseBase<MapDAO> {
     super("Map");
   }
 
-  async selectMapById(id: number): Promise<CampaignsDao[]> {
-    const query = `SELECT * FROM public."Map" as mm JOIN public."Image_Catalog" as IC on IC.img_catalog_id = mm.image_id where id = $1 ORDER BY id DESC;`;
-    console.log(query);
-
-    const result: QueryResult<CampaignsDao> | null = await Database.getInstance()
-      .query(query, [id])
-      .catch((e) => {
-        console.error(`Could not ***select*** State history (${this.tableName})\n\t${e}`);
-        return null;
-      });
-    const rows: CampaignsDao[] = result === null ? [] : result.rows;
-    return rows.map((ele: CampaignsDao): CampaignsDao => {
-      return {
-        id: +ele.id,
-        player_id: ele.player_id,
-        name: ele.name,
-        image_name: ele.image_name,
-        height: +ele.height,
-        width: +ele.width,
-      };
-    });
-  }
+  // async selectMapById(id: number): Promise<CampaignsDao[]> {
+  //   const query = `SELECT * FROM public."Map" as mm JOIN public."Image_Catalog" as IC on IC.img_catalog_id = mm.image_id where id = $1 ORDER BY id DESC;`;
+  //   console.log(query);
+  //
+  //   const result: QueryResult<CampaignsDao> | null = await Database.getInstance()
+  //     .query(query, [id])
+  //     .catch((e) => {
+  //       console.error(`Could not ***select*** State history (${this.tableName})\n\t${e}`);
+  //       return null;
+  //     });
+  //   const rows: CampaignsDao[] = result === null ? [] : result.rows;
+  //   return rows.map((ele: CampaignsDao): CampaignsDao => {
+  //     return {
+  //       id: +ele.id,
+  //       player_id: ele.player_id,
+  //       name: ele.name,
+  //       image_name: ele.image_name,
+  //       height: +ele.height,
+  //       width: +ele.width,
+  //     };
+  //   });
+  // }
 
   async selectMapByUserId(userId: string): Promise<CampaignsDao[]> {
     const query = `
-    SELECT MP.id, IC.image_name, IC.height, IC.width, MP."name", MP.player_id
+    SELECT 
+      MP.id,
+      IC.image_location as image_location,
+      IC.name as image_name,
+      IC.height,
+      IC.width,
+      MP."name" as name,
+      MP.player_id
     FROM Public."Map" AS MP 
-    JOIN Public."Image_Catalog" AS IC on IC.img_catalog_id = MP.image_id 
+      JOIN Public."Image_Catalog" AS IC on IC.img_catalog_id = MP.image_id 
     WHERE MP.player_id = $1
       AND MP.is_deleted = false;`;
     console.log(query);
@@ -90,6 +97,7 @@ export class MapDB extends DatabaseBase<MapDAO> {
         id: +val.id,
         name: val.name,
         image_name: val.image_name,
+        image_location: val.image_location,
         width: +val.width,
         height: +val.height,
         player_id: val.player_id,

@@ -122,7 +122,7 @@ export class StateHandlerRoom extends Room {
         const savedSummon: Summons = new Summons({
           id: ele.summons_id,
           player_id: createdPlayer.userId,
-          avatarUri: ele.image_name,
+          avatarUri: ele.image_location,
           color: createdPlayer.color,
           name: ele.name,
           size_category: ele.size_category,

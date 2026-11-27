@@ -61,7 +61,7 @@ export default function HostMM({ otherPlayers }: { otherPlayers: Player[] }) {
                       }}>
                         <i className="bi bi-x-lg"></i>
                       </button>
-                      <CampaignComponent imageUrl={val.image_name} name={val.name} />
+                      <CampaignComponent imageUrl={val.image_location} name={val.name} />
                     </div>
                   </li>
                 );

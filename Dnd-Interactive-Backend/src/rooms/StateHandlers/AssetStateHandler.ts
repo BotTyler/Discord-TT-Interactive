@@ -14,7 +14,7 @@ export function RegisterAssetStateHandler(room: StateHandlerRoom): void {
     const imageCatalog: ImageCatalogDAO[] =
       await ImageCatalogDB.getInstance().selectAllImagesByPlayerId(player.userId);
     const mappedImages: LoadImage[] = imageCatalog.map((image: ImageCatalogDAO): LoadImage => {
-      return { image_name: image.image_name };
+      return { name: image.name, path: image.image_location };
     });
 
     client.send("getImageListResult", mappedImages);

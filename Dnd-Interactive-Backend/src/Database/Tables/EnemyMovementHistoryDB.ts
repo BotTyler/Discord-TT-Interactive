@@ -101,7 +101,27 @@ export class EnemyMovementHistoryDB extends DatabaseBase<EnemyMovementHistoryDAO
   }
 
   async getEnemyMovementAtHistoryId(history_id: number): Promise<EmhJoinInterface[]> {
-    const query = `SELECT * FROM public."Enemy_Movement_History" as EMH join public."Enemy" as E on EMH.enemy_id = E.enemy_id join public."Image_Catalog" as IC on E.image_id = IC.img_catalog_id where EMH.history_id = $1;`;
+    const query = `
+        SELECT 
+          EMH.id as id,
+          E.enemy_id as enemy_id,
+          EMH.history_id as history_id,
+          E.name as name,
+          IC.image_location as image_location,
+          EMH.size_category as size_category,
+          EMH.is_visible as is_visible,
+          EMH.position_lat as position_lat,
+          EMH.position_lng as position_lng,
+          EMH.health as health,
+          EMH.total_health as total_health,
+          EMH.death_saves as death_saves,
+          EMH.life_saves as life_saves,
+          EMH.initiative as initiative,
+          EMH.statuses as statuses
+        FROM public."Enemy_Movement_History" as EMH 
+            join public."Enemy" as E on EMH.enemy_id = E.enemy_id 
+            join public."Image_Catalog" as IC on E.image_id = IC.img_catalog_id 
+            where EMH.history_id = $1;`;
     console.log(query);
 
     const result: QueryResult<EmhJoinInterface> | null = await Database.getInstance()
@@ -118,7 +138,7 @@ export class EnemyMovementHistoryDB extends DatabaseBase<EnemyMovementHistoryDAO
         enemy_id: +val.enemy_id,
         history_id: +val.history_id,
         name: val.name,
-        image_name: val.image_name,
+        image_location: val.image_location,
         size_category: val.size_category,
         is_visible: val.is_visible,
         position_lat: +val.position_lat,
@@ -142,7 +162,7 @@ export interface EmhJoinInterface {
   position_lat: number;
   position_lng: number;
   name: string;
-  image_name: string;
+  image_location: string;
   initiative: number;
   health: number;
   total_health: number;

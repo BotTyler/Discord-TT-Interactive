@@ -1,9 +1,9 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useState } from "react";
 import { useAuthenticatedContext } from "../../ContextProvider/useAuthenticatedContext";
-import { getFileNameFromMinioString, removeColyseusPath } from "../../Util/Util";
 import { useMessageContext } from "../../ContextProvider/Messages/MessageContextProvider";
 import { TOAST_LEVEL } from "../../ContextProvider/Messages/Toast";
 import { LoadImage } from "../../shared/LoadDataInterfaces";
+import { removeColyseusPath } from "../../Util/Util";
 
 // Although the onChange method can be used to get the image url. This will not be linked with pg or minio. When the image should be used, we should use the forward ref method (getMinioFileUrl) to ensure the file is properly placed.
 // onChange will provide the full url to get the image within a src tag. But this should not be used for creating or updating players **************************************
@@ -25,7 +25,7 @@ export const NewLoadImage = forwardRef(function NewLoadImage({
   // This object will hold values that are either loaded from a new file or selected from an existing object.
   // The file will be loaded from an existing object if file is null.
   // If file exist then the file will need to by streamed to MINIO first before usage.
-  const [imageFile, setImageFile] = useState<{ file: File | null; imgsrc: string } | null>(null);
+  const [imageFile, setImageFile] = useState<{ file: File | null; imgsrc: string; imgname: string } | null>(null);
 
   const [presetImage, setPreset] = useState<string | null>(startingImage ?? null);
   const [knownImageList, setKnownImageList] = useState<LoadImage[]>([]);
@@ -75,7 +75,7 @@ export const NewLoadImage = forwardRef(function NewLoadImage({
       return {
         // This function will be the main call for submitting objects.
         // This will need to handle all image uploads to the server and send back the proper access URL.
-        async getMinioFileUrl(): Promise<string | null> {
+        async getMinioFileUrl(): Promise<{ name: string, path: string } | null> {
 
           if (authContext.client === null) return null;
           if (imageFile !== null) {
@@ -85,11 +85,11 @@ export const NewLoadImage = forwardRef(function NewLoadImage({
               const formData = new FormData();
               formData.append("image", imageFile.file);
 
-              const response: { fileName: string } | null = await authContext.client.http
+              const response: { name: string, path: string; } | null = await authContext.client.http
                 .post(`/uploadImage/${authContext.user.id}`, {
                   body: formData,
                 }).then((value) => {
-                  return { fileName: value.data.fileName }
+                  return { name: value.data.name, path: value.data.path };
                 })
                 .catch((e) => {
                   console.error(e);
@@ -101,17 +101,19 @@ export const NewLoadImage = forwardRef(function NewLoadImage({
                 return null;
               } else {
                 toastContext.addToast("[SUCCESS]", "Image Uploaded!!", TOAST_LEVEL.SUCCES);
-                return response.fileName;
+                return response;
               }
 
             } else {
               // A preselected image was used. Lets use the imgSrc.
-              return removeColyseusPath(imageFile.imgsrc);
+              // return imageFile.imgsrc;
+              return { name: imageFile.imgname, path: imageFile.imgsrc };
             }
           }
 
           if (presetImage !== null) {
-            return removeColyseusPath(presetImage);
+            // return removeColyseusPath(presetImage);
+            return { name: "preset", path: removeColyseusPath(presetImage) };
           }
 
 
@@ -127,7 +129,7 @@ export const NewLoadImage = forwardRef(function NewLoadImage({
   const handleFileChange = useCallback((e: any) => {
     const file: File | null = e.target.files[0] ?? null;
     if (file === null) return;
-    setImageFile({ file: file, imgsrc: URL.createObjectURL(file) });
+    setImageFile({ file: file, imgsrc: URL.createObjectURL(file), imgname: file.name });
   }, []);
 
   useEffect(() => {
@@ -234,15 +236,15 @@ export const NewLoadImage = forwardRef(function NewLoadImage({
               } else {
                 // Another load image was used.
                 const ImageObject = knownImageList[index];
-                setImageFile({ file: null, imgsrc: ImageObject.image_name });
+                setImageFile({ file: null, imgsrc: ImageObject.path, imgname: ImageObject.name });
               }
             }}
           >
             <option value={-1}>Select Image</option>
             {knownImageList.map((val: LoadImage, i: number) => {
               return (
-                <option value={i} key={`KnownImageList-${val.image_name}-${i}`}>
-                  {getFileNameFromMinioString(val.image_name)}
+                <option value={i} key={`KnownImageList-${val.path}-${i}`}>
+                  {val.name}
                 </option>
               );
             })}

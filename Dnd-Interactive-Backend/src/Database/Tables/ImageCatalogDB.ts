@@ -51,7 +51,16 @@ export class ImageCatalogDB extends DatabaseBase<ImageCatalogDAO> {
   }
 
   async selectAllImagesByPlayerId(player_id: string): Promise<ImageCatalogDAO[]> {
-    const query = `SELECT * FROM public."Image_Catalog" where player_id = $1;`;
+    const query = `
+        SELECT 
+          IC.player_id as player_ID,
+          IC.image_location as image_location,
+          IC.width as width,
+          IC.height as height,
+          IC.name as name,
+          IC.img_catalog_id as img_catalog_id
+        FROM public."Image_Catalog" IC
+        where player_id = $1;`;
 
     const result: QueryResult<ImageCatalogDAO> | null = await Database.getInstance()
       .query(query, [player_id])
@@ -72,11 +81,20 @@ export class ImageCatalogDB extends DatabaseBase<ImageCatalogDAO> {
     });
   }
 
-  async selectByImageName(image_name: string): Promise<ImageCatalogDAO | null> {
-    const query = `SELECT * FROM public."Image_Catalog" where image_name = $1;`;
+  async selectByImageSrc(image_src: string): Promise<ImageCatalogDAO | null> {
+    const query = `
+        SELECT 
+          IC.player_id as player_ID,
+          IC.image_location as image_location,
+          IC.width as width,
+          IC.height as height,
+          IC.name as name,
+          IC.img_catalog_id as img_catalog_id
+        FROM public."Image_Catalog" IC
+        where image_location = $1;`;
 
     const result: QueryResult<ImageCatalogDAO> | null = await Database.getInstance()
-      .query(query, [image_name])
+      .query(query, [image_src])
       .catch((e) => {
         console.error(`Could not ***select*** (${this.tableName})\n\t${e}`);
         return null;
@@ -100,8 +118,12 @@ export class ImageCatalogDB extends DatabaseBase<ImageCatalogDAO> {
     return await super.create(data).then(async (id: number | null): Promise<number | null> => {
       if (id !== null) return id;
 
-      // if the id is null I need to query the database to get the original ID
-      const query = `SELECT img_catalog_id as id from public."Image_Catalog" where image_name = $1;`;
+      // if the id is null, query the database to get the original ID
+      const query = `
+        SELECT
+          img_catalog_id as id 
+        FROM public."Image_Catalog" 
+        WHERE image_name = $1;`;
 
       const result: QueryResult<{ id: number }> | null = await Database.getInstance()
         .query(query, [data.image_location])

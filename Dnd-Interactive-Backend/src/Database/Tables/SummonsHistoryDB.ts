@@ -101,10 +101,27 @@ export class SummonsHistoryDB extends DatabaseBase<SummonsHistoryDao> {
   }
 
   async selectByHistoryId(history_id: number) {
-    const query = `SELECT * FROM public."Summons_History" as SH 
-      join public."Summons" as S on SH.summons_id = S.summons_id 
-      join public."Image_Catalog" as IC on S.image_id = IC.img_catalog_id 
-        where SH.history_id = $1;`;
+    const query = `
+      SELECT 
+        SH.id as id,
+        S.summons_id as summons_id,
+        S.player_id,
+        SH.history_id as history_id,
+        S.name as name,
+        IC.image_location as image_location,
+        SH.position_lat as position_lat,
+        SH.position_lng as position_lng,
+        SH.health as health,
+        SH.total_health as total_health,
+        SH.life_saves as life_saves,
+        SH.death_saves as death_saves,
+        SH.size_category as size_category,
+        SH.is_visible as is_visible,
+        SH.statuses as statuses
+      FROM public."Summons_History" as SH 
+        join public."Summons" as S on SH.summons_id = S.summons_id 
+        join public."Image_Catalog" as IC on S.image_id = IC.img_catalog_id 
+      where SH.history_id = $1;`;
     console.log(query);
 
     const result: QueryResult<ShJoinInterface> | null = await Database.getInstance()
@@ -121,7 +138,7 @@ export class SummonsHistoryDB extends DatabaseBase<SummonsHistoryDao> {
         player_id: val.player_id,
         history_id: +val.history_id,
         name: val.name,
-        image_name: val.image_name,
+        image_location: val.image_location,
         position_lat: +val.position_lat,
         position_lng: +val.position_lng,
         health: +val.health,

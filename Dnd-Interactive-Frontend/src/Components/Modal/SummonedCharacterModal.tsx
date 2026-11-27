@@ -25,7 +25,7 @@ export default function EditCharacterModal(
 
   const [_name, setName] = useState<string>(name);
   const [_sizeCategory, setSizeCategory] = useState<MARKER_SIZE_CATEGORIES>(size_category ?? "MEDIUM");
-  const [_defaultAvatar, setAvatar] = useState<string | null>(avatarUri ?? null);
+  const [_defaultAvatar, _setAvatar] = useState<string | null>(avatarUri ?? null);
 
   const newloadImageRef = useRef<any>(null);
 
@@ -139,12 +139,12 @@ export default function EditCharacterModal(
       }}
       submitCallback={async () => {
         if (!newloadImageRef.current) return;
-        const imageSrc = await newloadImageRef.current.getMinioFileUrl();
-        if (!imageSrc) {
+        const image: { name: string, path: string } = await newloadImageRef.current.getMinioFileUrl();
+        if (!image) {
           callback(undefined);
           return;
         }
-        callback({ name: _name, size_category: _sizeCategory, avatarUri: imageSrc });
+        callback({ name: _name, size_category: _sizeCategory, avatarUri: image.path });
       }}
     >
       {uploadBody}

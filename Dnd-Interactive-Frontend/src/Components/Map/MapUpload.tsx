@@ -66,12 +66,12 @@ export default function MapUpload({ callback }: { callback: (data: ClientMapData
       }}
       submitCallback={async () => {
         if (!newloadImageRef.current) return;
-        const imageSrc = await newloadImageRef.current.getMinioFileUrl();
-        if (!imageSrc) {
+        const image: { name: string, path: string } = await newloadImageRef.current.getMinioFileUrl();
+        if (!image) {
           callback(undefined);
           return;
         }
-        callback({ mapBase64: imageSrc, iconHeight: size, name: name });
+        callback({ mapBase64: image.path, iconHeight: size, name: name });
       }}
     >
       {uploadBody}

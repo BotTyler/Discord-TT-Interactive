@@ -94,7 +94,7 @@ export function RegisterEnemyStateHandler(room: StateHandlerRoom): void {
 
       // insert enemy into the database after inserting then add the enemy to the list. If the insert faild do not add the enemy.
       const imageCatalog: ImageCatalogDAO | null =
-        await ImageCatalogDB.getInstance().selectByImageName(validateParams.avatarUri);
+        await ImageCatalogDB.getInstance().selectByImageSrc(validateParams.avatarUri);
       if (imageCatalog === null) return;
 
       const enemyId: number | null = await EnemyDB.getInstance().create(
@@ -104,7 +104,7 @@ export function RegisterEnemyStateHandler(room: StateHandlerRoom): void {
 
       const enemy: Enemy = new Enemy({
         id: enemyId,
-        avatarUri: imageCatalog.image_name,
+        avatarUri: imageCatalog.image_location,
         name: validateParams.name,
         size_category: validateParams.size,
       });
@@ -177,7 +177,7 @@ export function RegisterEnemyStateHandler(room: StateHandlerRoom): void {
 
       // insert enemy into the database after inserting then add the enemy to the list. If the insert faild do not add the enemy.
       const imageCatalog: ImageCatalogDAO | null =
-        await ImageCatalogDB.getInstance().selectByImageName(validateParams.avatarUri);
+        await ImageCatalogDB.getInstance().selectByImageSrc(validateParams.avatarUri);
       if (imageCatalog === null) return;
 
       const enemyDao: EnemyDAO | null = await EnemyDB.getInstance().selectById(+validateParams.id);

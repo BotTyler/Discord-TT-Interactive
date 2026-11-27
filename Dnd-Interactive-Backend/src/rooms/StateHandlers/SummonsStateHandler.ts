@@ -98,7 +98,7 @@ export function RegisterSummonsStateHandler(room: StateHandlerRoom): void {
 
       // insert enemy into the database after inserting then add the enemy to the list. If the insert faild do not add the enemy.
       const imageCatalog: ImageCatalogDAO | null =
-        await ImageCatalogDB.getInstance().selectByImageName(validateParams.avatarUri);
+        await ImageCatalogDB.getInstance().selectByImageSrc(validateParams.avatarUri);
       if (imageCatalog === null) return;
       const summonId: number | null = await SummonsDB.getInstance().create(
         new SummonsDao(imageCatalog.img_catalog_id!, validateParams.name, player.userId),
@@ -166,7 +166,7 @@ export function RegisterSummonsStateHandler(room: StateHandlerRoom): void {
 
       // insert enemy into the database after inserting then add the enemy to the list. If the insert faild do not add the enemy.
       const imageCatalog: ImageCatalogDAO | null =
-        await ImageCatalogDB.getInstance().selectByImageName(validateParams.avatarUri);
+        await ImageCatalogDB.getInstance().selectByImageSrc(validateParams.avatarUri);
       if (imageCatalog === null) return;
 
       const summonDao: SummonsDao | null = await SummonsDB.getInstance().selectById(
@@ -183,7 +183,7 @@ export function RegisterSummonsStateHandler(room: StateHandlerRoom): void {
       if (summon === null) return;
 
       summon.name = validateParams.name;
-      summon.avatarUri = imageCatalog.image_name;
+      summon.avatarUri = imageCatalog.image_location;
       summon.size_category = validateParams.size;
     } catch (error) {
       console.error(error);

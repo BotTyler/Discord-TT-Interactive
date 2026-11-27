@@ -15,31 +15,14 @@ services:
         - "5432:5432"
     networks:
       - dnd-network
-  pgadmin-dev:
-    image: dpage/pgadmin4
-    container_name: pgadmin-dev
-    restart: always
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
-
-      PGADMIN_LISTEN_PORT: 80
-    volumes:
-      - pgadmin-data:/var/lib/pgadmin
-    ports:
-      - "5050:80"
-    depends_on:
-      - postgres-dev
-    networks:
-      - dnd-network
   rustfs:
     # Pin a specific GA tag for production instead of :latest
     image: rustfs/rustfs:latest
     container_name: rustfs
     restart: unless-stopped
     environment:
-      RUSTFS_ACCESS_KEY: ${RUSTFS_ACCESS_KEY}
-      RUSTFS_SECRET_KEY: ${RUSTFS_SECRET_KEY}
+      RUSTFS_ACCESS_KEY: ${RUSTFS_ADMIN_ACCESS_KEY}
+      RUSTFS_SECRET_KEY: ${RUSTFS_ADMIN_SECRET_KEY}
       RUSTFS_VOLUMES: /data
       RUSTFS_ADDRESS: ":9000"
       RUSTFS_CONSOLE_ADDRESS: ":9001"

@@ -53,7 +53,7 @@ export function RegisterMapStateHandler(room: StateHandlerRoom): void {
       if (player === null) return;
 
       const imageCatalog: ImageCatalogDAO | null =
-        await ImageCatalogDB.getInstance().selectByImageName(validateParams.mapBase64);
+        await ImageCatalogDB.getInstance().selectByImageSrc(validateParams.mapBase64);
       if (imageCatalog === null) return;
 
       const mapId: number | null = await MapDB.getInstance().create(
@@ -64,7 +64,7 @@ export function RegisterMapStateHandler(room: StateHandlerRoom): void {
       room.state.RESET_GAME();
       room.state.map = new MapData(
         {
-          mapBase64: imageCatalog.image_name,
+          mapBase64: imageCatalog.image_location,
           width: imageCatalog.width,
           height: imageCatalog.height,
           iconHeight: validateParams.iconHeight,

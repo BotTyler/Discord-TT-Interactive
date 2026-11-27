@@ -13,7 +13,7 @@ const ALLOWED_FORMATS = new Set(["png", "jpeg", "webp", "gif"]);
 const MAX_OUTPUT_BYTES = 10 * 1024 * 1024; // 10 MB after re-encoding
 const MAX_DIMENSION = 2048; // max width/height of each frame
 const MAX_FRAMES = 100; // animation length cap
-const MAX_TOTAL_PIXELS = 4096 * 4096; // frames x width x height
+const MAX_TOTAL_PIXELS = 1000 * 4096 * 4096; // frames x width x height
 
 export async function SanitizeImage(
   input: Buffer,
@@ -33,10 +33,13 @@ export async function SanitizeImage(
     const frameHeight = meta.pageHeight ?? meta.height ?? 0;
 
     if (frames > MAX_FRAMES) {
-      throw new ImageRejectedError(413, `Too many frames (max ${MAX_FRAMES})`);
+      throw new ImageRejectedError(413, `Too many frames (frame: ${frames}, max ${MAX_FRAMES})`);
     }
     if (frameWidth * frameHeight * frames > MAX_TOTAL_PIXELS) {
-      throw new ImageRejectedError(413, "Image is too large");
+      throw new ImageRejectedError(
+        413,
+        `Image is too large: width: ${frameWidth}, height: ${frameHeight}, frames: ${frames} = ${frameWidth * frameHeight * frames}`,
+      );
     }
 
     const animated = frames > 1;

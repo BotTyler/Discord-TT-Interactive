@@ -46,14 +46,14 @@ export default function HandoutsPanel() {
         <HandoutListModal
           onSubmit={async (playerIds: string[]) => {
             if (!newloadImageRef.current) return;
-            const imageSrc = await newloadImageRef.current.getMinioFileUrl();
-            if (!imageSrc) {
+            const image: { name: string, path: string } = await newloadImageRef.current.getMinioFileUrl();
+            if (!image) {
               setHandoutShowing(false);
               return;
             }
             if (authContext.room === null) return;
             // everything is ready, lets send the request to the server
-            authContext.room.send("BroadcastHandout", { playerIds: playerIds, imageUrl: imageSrc });
+            authContext.room.send("BroadcastHandout", { playerIds: playerIds, imageUrl: image.path });
             setHandoutShowing(false);
           }}
           onCancel={() => {
