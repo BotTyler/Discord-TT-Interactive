@@ -16,6 +16,7 @@ import { RegisterSummonsStateHandler } from "./StateHandlers/SummonsStateHandler
 import { PlayerSaveState, ShJoinInterface } from "../shared/LoadDataInterfaces";
 import { RegisterSaveAndLoadStateHandler } from "./StateHandlers/SaveAndLoadStateHandler";
 import { RegisterMessageStateHandler } from "./StateHandlers/MessageStateHandler";
+import { logger } from "../logger/logger";
 
 export class StateHandlerRoom extends Room {
   maxClients = 1000;
@@ -28,32 +29,69 @@ export class StateHandlerRoom extends Room {
     this.state.roomName = options.roomName;
     this.state.channelId = options.channelId;
 
+    logger.info(
+      { room: options.roomName, channelId: options.channelId },
+      "Registering Player Handler",
+    );
     RegisterPlayerStateHandler(this);
+    logger.info(
+      { room: options.roomName, channelId: options.channelId },
+      "Registering Summons Handler",
+    );
     RegisterSummonsStateHandler(this);
+    logger.info(
+      { room: options.roomName, channelId: options.channelId },
+      "Registering Drawing Handler",
+    );
     RegisterDrawingStateHandler(this);
 
+    logger.info(
+      { room: options.roomName, channelId: options.channelId },
+      "Registering GameState Handler",
+    );
     RegisterGameStateHandler(this);
+    logger.info(
+      { room: options.roomName, channelId: options.channelId },
+      "Registering Enemy Handler",
+    );
     RegisterEnemyStateHandler(this);
 
+    logger.info(
+      { room: options.roomName, channelId: options.channelId },
+      "Registering Map Handler",
+    );
     RegisterMapStateHandler(this);
 
+    logger.info(
+      { room: options.roomName, channelId: options.channelId },
+      "Registering Asset Handler",
+    );
     RegisterAssetStateHandler(this);
+    logger.info(
+      { room: options.roomName, channelId: options.channelId },
+      "Registering SaveAndLoad Handler",
+    );
     RegisterSaveAndLoadStateHandler(this);
+    logger.info(
+      { room: options.roomName, channelId: options.channelId },
+      "Registering Message Handler",
+    );
     RegisterMessageStateHandler(this);
 
     //EXTRA
-    this.onMessage("*", (_client, data) => {
-      console.log(data);
-      console.log("No message with that type found");
+    this.onMessage("*", (client, data) => {
+      logger.error({ client: client.sessionId, data: data }, "No endpoint found for request");
     });
   }
 
-  onAuth(_client: any, _options: any, _req: any) {
+  onAuth(client: any, _options: any, _req: any) {
+    logger.info({ client: client.sessionid }, "Client authenticating");
     return true;
   }
 
   onJoin(client: Client, options: any) {
     // input validation
+    logger.info({ client: client.sessionId, options: options }, "Client Joining Room");
     try {
       const inputList: ValidationInputType[] = [
         { name: "userId", PostProcess: undefined, type: "string" },
@@ -73,6 +111,10 @@ export class StateHandlerRoom extends Room {
       this.state.sessionToUserId[`${client.sessionId}`] = validateParams.userId;
 
       if (player !== null) {
+        logger.info(
+          { client: client.sessionId },
+          "Client was already present in the room. Removing existing record for new connection.",
+        );
         player.isConnected = true;
 
         // Remove the OLD sessionid information from the corresponding arrays;
@@ -87,6 +129,7 @@ export class StateHandlerRoom extends Room {
 
       // A whole new player is being introduced.
       // See if the current save has some information we can utilize.
+      logger.info("Player not present. Determining if player was present on previous save");
       const playerSaveData: PlayerSaveState | null =
         this.state.lastSavedPlayerContext.find(
           (element: PlayerSaveState): boolean => element.player_id === validateParams.userId,
@@ -143,45 +186,61 @@ export class StateHandlerRoom extends Room {
 
       this.state.players.set(validateParams.userId, createdPlayer);
     } catch (error) {
-      console.error(error);
+      logger.error({ err: error }, "Unexpected Error");
       client.error(404, `${error}`);
     }
   }
 
   // Unconsented Leave
   onDrop(client: Client<any>): void {
-    console.log(`Client Unconsented Disconnect: ${client.sessionId}`);
+    logger.info(`Client Unconsented Disconnect: ${client.sessionId}`);
     // The client has around 30 seconds to reconnect.
     this.allowReconnection(client, 30);
 
     const player: Player | null = this.state.getPlayerBySessionId(client.sessionId);
-    if (player === null) return;
+    if (player === null) {
+      logger.warn({ client: client.sessionId }, "Client was not in Room");
+      return;
+    }
     player.isConnected = false;
   }
 
   onReconnect(client: Client): void | Promise<any> {
-    console.log(`Client Reconnected: ${client.sessionId}`);
+    logger.info({ client: client.sessionId }, "Client Reconnected");
     const player: Player | null = this.state.getPlayerBySessionId(client.sessionId);
-    if (player === null) return;
+    if (player === null) {
+      logger.warn({ client: client.sessionId }, "Client Reconnected, but not found in Room");
+      return;
+    }
     player.isConnected = true;
   }
 
   // Player is leaving
   onLeave(client: Client): void {
-    console.log(`Client Leaving: ${client.sessionId}`);
+    logger.info({ client: client.sessionId }, "Client Leavining");
     const player: Player | null = this.state.getPlayerBySessionId(client.sessionId);
-    if (player === null) return;
+    if (player === null) {
+      logger.warn(
+        { client: client.sessionId },
+        "Client leaving, but they are not part of the Room",
+      );
+      return;
+    }
     player.isConnected = false;
 
     // If this is the host. Make sure to reset the state.
-    if (!player.isHost) return;
+    if (!player.isHost) {
+      logger.info({ player: player }, "Player is not host, throw away the ticket");
+      return;
+    }
     saveState(this);
     player.isHost = false;
+    logger.info("State of the game has become soft locked! Panic to save the Players XD");
     this.state.PANIC();
   }
 
   onDispose() {
-    console.log("Dispose StateHandlerRoom");
+    logger.info("Disposing of session");
     this.state.RESET_GAME();
   }
 

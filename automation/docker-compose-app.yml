@@ -36,6 +36,11 @@ services:
       RUSTFS_BUCKET: ${RUSTFS_BUCKET}
       RUSTFS_REGION: ${RUSTFS_REGION}
       JWT_SECRET: ${JWT_SECRET}
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     expose:
       - "2567"
     networks:

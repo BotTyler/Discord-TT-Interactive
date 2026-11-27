@@ -3,6 +3,7 @@ import { QueryResult } from "pg";
 import Database from "../Database";
 import { DAO, DatabaseBase } from "../Interface/DatabaseObjectInterface";
 import { MARKER_SIZE_CATEGORIES } from "../../shared/MarkerOptions";
+import { logger } from "../../logger/logger";
 
 export class EnemyMovementHistoryDAO extends DAO {
   private id?: number;
@@ -122,12 +123,12 @@ export class EnemyMovementHistoryDB extends DatabaseBase<EnemyMovementHistoryDAO
             join public."Enemy" as E on EMH.enemy_id = E.enemy_id 
             join public."Image_Catalog" as IC on E.image_id = IC.img_catalog_id 
             where EMH.history_id = $1;`;
-    console.log(query);
+    logger.debug(query);
 
     const result: QueryResult<EmhJoinInterface> | null = await Database.getInstance()
       .query(query, [history_id])
       .catch((e: any): null => {
-        console.error(`Could not ***select*** player movement history (${this.tableName})\n\t${e}`);
+        logger.error({ table: this.tableName, query: query, err: e }, "Could not ***select***");
         return null;
       });
 

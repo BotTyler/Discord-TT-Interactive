@@ -18,6 +18,7 @@ import { getUserAvatarUrl, getUserDisplayName } from "./Util/DiscordAuthenticati
 import { SanitizeImage } from "./Util/ImageUtil";
 import { sanitize } from "./Util/Utils";
 import { randomUUID } from "crypto";
+import { logger } from "./logger/logger";
 
 const MAX_UPLOAD_BYTES = 100 * 1024 * 1024;
 
@@ -60,14 +61,14 @@ export default config({
     app.post("/token", async (req, res) => {
       const body: any = req.body ?? null;
       if (body === null) {
-        console.warn("Token request with no body");
+        logger.warn("Token request with no body");
         res.status(400).send({ data: null, message: "Incorrect parameters" });
         return;
       }
       const code: string | null = sanitize(body.code) ?? null;
       const guildId: string | null = sanitize(body.guildId) ?? null;
       if (code === null || guildId === null || code.length === 0 || guildId.length === 0) {
-        console.warn("User access code not provided");
+        logger.warn("User access code not provided");
         res.status(400).send({ data: null, message: "Incorrect parameters" });
         return;
       }
@@ -127,7 +128,7 @@ export default config({
         )
           .then(async (j) => j.json())
           .catch((e) => {
-            console.error("Failed to gather guild information", e);
+            logger.error({ err: e }, "Failed to gather guild information");
             return null;
           });
 
@@ -150,7 +151,7 @@ export default config({
         };
         res.send(authDetail);
       } catch (e: any) {
-        console.error(e);
+        logger.error({ err: e }, "Unexpected Error");
         res.status(400).send(null);
       }
     });
@@ -178,7 +179,7 @@ export default config({
         res.setHeader("Cache-Control", "private, max-age=300");
         res.redirect(302, nginxCompatibleUrl.toString());
       } catch (e: any) {
-        console.error(e);
+        logger.error({ err: e }, "Unexpected Error");
         res.destroy(e);
       }
     });
@@ -217,14 +218,14 @@ export default config({
         };
         res.status(200).send(response);
       } catch (err: any) {
-        console.error(err);
+        logger.error({ err: err }, "Unexpected Error");
         res.destroy(err);
       }
     });
 
     // If all else fails go here.
     app.use((req, res) => {
-      console.warn(
+      logger.warn(
         `Cannot ${req.method} ${req.originalUrl}. Verify the url of the request is going to the correct destination.`,
       );
       res.status(404).json({

@@ -2,9 +2,11 @@ import { Client } from "colyseus";
 import { sanitize, ValidateAllInputs, ValidationInputType } from "../../Util/Utils";
 import { Player } from "../../shared/Player";
 import { StateHandlerRoom } from "../StateHandlerRoom";
+import { logger } from "../../logger/logger";
 
 export function RegisterMessageStateHandler(room: StateHandlerRoom): void {
   room.onMessage("BroadcastMessage", (client: Client, data: any): void => {
+    logger.info({ client: client.sessionId, data: data }, "Started BroadcastMessage");
     // input validation
     try {
       const checkMessageType = (val: string) => {
@@ -21,7 +23,10 @@ export function RegisterMessageStateHandler(room: StateHandlerRoom): void {
 
       // validation complete lets send the message to all the clients
       const player: Player | null = room.state.getPlayerBySessionId(client.sessionId);
-      if (player === null) return;
+      if (player === null) {
+        logger.warn({ client: client.sessionId }, "Sending Player does not exist in Room");
+        return;
+      }
 
       const sendData = {
         created: new Date(),
@@ -43,11 +48,12 @@ export function RegisterMessageStateHandler(room: StateHandlerRoom): void {
           break;
       }
     } catch (error) {
-      console.error(error);
+      logger.error({ err: error }, "Unexpected Error");
     }
   });
 
-  room.onMessage("BroadcastHandout", (_client: Client, data: any): void => {
+  room.onMessage("BroadcastHandout", (client: Client, data: any): void => {
+    logger.info({ client: client.sessionId, data: data }, "Started BroadcastHandout");
     try {
       const inputList: ValidationInputType[] = [
         { name: "playerIds", PostProcess: undefined, type: "array" },
@@ -59,21 +65,20 @@ export function RegisterMessageStateHandler(room: StateHandlerRoom): void {
         // we need to grab the player
         const player: Player | null = room.state.getPlayerByUserId(x);
         if (player === null) {
-          console.error("Player not found");
+          logger.warn({ player: x }, "Player not found for Broadcast");
           return;
         }
         const client = room.clients.getById(player.sessionId);
         if (!client) {
-          console.error("Client Not Found");
+          logger.warn({ playerClient: client }, "Player client not found for Broadcast");
           return;
         }
 
-        console.log("BroadCasting Handout");
         // client is ready to receive request
         client.send("HandoutAdd", { id: crypto.randomUUID(), imageUrl: validateParams.imageUrl });
       });
     } catch (error) {
-      console.error(error);
+      logger.error({ err: error }, "Unexpected Error");
     }
   });
 }

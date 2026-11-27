@@ -1,6 +1,7 @@
 import { QueryResult } from "pg";
 import { DAO, DatabaseBase } from "../Interface/DatabaseObjectInterface";
 import Database from "../Database";
+import { logger } from "../../logger/logger";
 
 export class SummonsDao extends DAO {
   public summons_id?: number;
@@ -40,12 +41,12 @@ export class SummonsDB extends DatabaseBase<SummonsDao> {
 
   async selectById(id: any): Promise<SummonsDao | null> {
     const query = `SELECT * FROM public."${this.tableName}" where summons_id = $1;`;
-    console.log(query);
+    logger.debug(query);
 
     const result: QueryResult<SummonsDao> | undefined = await Database.getInstance()
       .query(query, [id])
       .catch((e) => {
-        console.error(`Could not ***select*** by ID (${this.tableName})\n\t${e}`);
+        logger.error({ table: this.tableName, query: query, err: e }, "Could not ***select***");
         return undefined;
       });
     const rowResult: SummonsDao | null = result?.rows[0] ?? null;

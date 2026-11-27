@@ -1,5 +1,6 @@
 import { QueryResult } from "pg";
 import Database from "../Database";
+import { logger } from "../../logger/logger";
 
 const ALLOWED_TABLES = new Set([
   "Enemy",
@@ -28,12 +29,12 @@ export abstract class DatabaseBase<T extends DAO> {
     const placeholders = data.getPlaceHolders();
 
     const query = `INSERT INTO public."${this.tableName}" (${keys.join(", ")}) VALUES (${placeholders.join(", ")}) RETURNING ${data.getIdName()} as id`;
-    console.log(query);
+    logger.debug(query);
 
     const result: QueryResult<{ id: number }> | null = await Database.getInstance()
       .query(query, values)
       .catch((e) => {
-        console.error(`Could not ***insert*** (${this.tableName})\n\t${e}`);
+        logger.error({ table: this.tableName, query: query, err: e }, "Could not ***insert***");
         return null;
       });
 
@@ -43,12 +44,12 @@ export abstract class DatabaseBase<T extends DAO> {
 
   async delete(id: number): Promise<void> {
     const query = `DELETE FROM public."${this.tableName}" WHERE id = $1`;
-    console.log(query);
+    logger.debug(query);
 
     await Database.getInstance()
       .query(query, [id])
       .catch((e) => {
-        console.error(`Could not ***delete*** (${this.tableName})\n\t${e}`);
+        logger.error({ table: this.tableName, query: query, err: e }, "Could not ***delete***");
         return undefined;
       });
   }
@@ -59,12 +60,12 @@ export abstract class DatabaseBase<T extends DAO> {
     const setString = keys.map((key, i) => `${key} = $${i + 1}`).join(", ");
 
     const query = `UPDATE public."${this.tableName}" SET ${setString} WHERE ${data.getIdName()} = $${keys.length + 1} RETURNING ${data.getIdName()} as id`;
-    console.log(query);
+    logger.debug(query);
 
     const result: QueryResult<{ id: number }> | null = await Database.getInstance()
       .query(query, [...values, data.getIdValue()])
       .catch((e) => {
-        console.error(`Could not ***update*** (${this.tableName})\n\t${e}`);
+        logger.error({ table: this.tableName, query: query, err: e }, "Could not ***update***");
         return null;
       });
 

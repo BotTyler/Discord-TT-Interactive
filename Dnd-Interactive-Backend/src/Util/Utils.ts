@@ -21,6 +21,7 @@ import {
 import { InitiativeHistoryDAO, InitiativeHistoryDB } from "../Database/Tables/InitiativeHistoryDB";
 import { StateHandlerRoom } from "../rooms/StateHandlerRoom";
 import ValidationException from "../Exception/ValidationException";
+import { logger } from "../logger/logger";
 
 export const jsdomWindow = new JSDOM("").window;
 export const purify = DOMPurify(jsdomWindow);
@@ -69,7 +70,10 @@ export function ValidateAllInputs(
   reqInputs: Record<string, any>,
   validInputs: ValidationInputType[],
 ): any {
-  // console.log(reqInputs);
+  logger.info(
+    { reqInputs: reqInputs, validInputs: validInputs },
+    "Starting Endpoint Request Validation",
+  );
   try {
     const validatedRecord: Record<string, any> = {};
     for (const field of validInputs) {
@@ -91,6 +95,10 @@ export function ValidateAllInputs(
     }
     return validatedRecord;
   } catch (ex: any) {
+    logger.warn(
+      { reqInputs: reqInputs, validInputs: validInputs, err: ex },
+      "Input validation failed",
+    );
     throw new ValidationException("Input validation failed", ex);
   }
 }
@@ -173,7 +181,7 @@ export function saveState(room: StateHandlerRoom, client?: Client): void {
   const data: ExportDataInterface | null = room.state.exportCurrentMapData() ?? null;
 
   if (data === null) {
-    console.log("data not saved!!");
+    logger.error({ mapData: data }, "No Map present to save!");
     // client.send("exportData", new Error("Data was not saved!!"));
     return;
   }
@@ -181,11 +189,12 @@ export function saveState(room: StateHandlerRoom, client?: Client): void {
   // if (player_id === undefined) return; // this data cannot be inserted into the table
   const host_id: string | undefined = room.state.currentHostUserId;
   if (host_id === undefined) {
-    console.log("Host not defined");
+    logger.error({ mapData: data }, "No Host present to save against!");
     return;
   }
 
   // TODO: This should be transformed into a transaction on the database side for now this is ok for test purposes.
+  logger.info({ mapData: data }, "Starting to save map");
   SaveHistoryDB.getInstance()
     .create(new SaveHistoryDAO(new Date(), data.map.id!, host_id, data.map.iconHeight))
     .then((history_id: number | null) => {
@@ -321,15 +330,16 @@ export function saveState(room: StateHandlerRoom, client?: Client): void {
 
             client.send("SaveStatus", sendRes);
           })
-          .catch((_e: any): void => {
+          .catch((e: any): void => {
             // This should never happen.
-            console.error("Error in promise.settled of save function");
+            logger.error({ err: e }, "Error saving map data!");
           });
       }
     })
-    .catch((_e: any): void => {
+    .catch((e: any): void => {
       if (client !== undefined) {
         // Send back a compelte failure
+        logger.error({ err: e }, "Complete failure to save map");
         client.send("SaveStatus", { level: 2 });
       }
     });

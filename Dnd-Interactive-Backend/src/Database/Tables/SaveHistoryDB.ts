@@ -2,6 +2,7 @@ import { QueryResult } from "pg";
 import Database from "../Database";
 import { DAO, DatabaseBase } from "../Interface/DatabaseObjectInterface";
 import { LoadCampaign, LoadSaveHistory } from "../../shared/LoadDataInterfaces";
+import { logger } from "../../logger/logger";
 
 export class SaveHistoryDAO extends DAO {
   public readonly id?: number;
@@ -49,14 +50,12 @@ export class SaveHistoryDB extends DatabaseBase<SaveHistoryDAO> {
           AND player_id = $2
         ORDER BY date DESC
         LIMIT 20;`;
-    console.log(query);
+    logger.debug(query);
 
     const result: QueryResult<SaveHistoryDAO> | null = await Database.getInstance()
       .query(query, [campaign_id, player_id])
       .catch((e) => {
-        console.error(
-          `Could not ***select**** Campaign Id: ${campaign_id} from (${this.tableName})`,
-        );
+        logger.error({ table: this.tableName, query: query, err: e }, "Could not ***select***");
         return null;
       });
     const rows: SaveHistoryDAO[] = result === null ? [] : result.rows;
@@ -92,14 +91,12 @@ export class SaveHistoryDB extends DatabaseBase<SaveHistoryDAO> {
 	    WHERE SH.map = $1
         AND SH.player_id = $2
         AND SH.id = $3;`;
-    console.log(query);
+    logger.debug(query);
 
     const result: QueryResult<LoadCampaign> | null = await Database.getInstance()
       .query(query, [campaign_id, player_id, save_history_id])
       .catch((e) => {
-        console.error(
-          `Could not ***select**** Campaign Id: ${campaign_id} from (${this.tableName})`,
-        );
+        logger.error({ table: this.tableName, query: query, err: e }, "Could not ***select***");
         return null;
       });
     const rows: LoadCampaign[] = result === null ? [] : result.rows;

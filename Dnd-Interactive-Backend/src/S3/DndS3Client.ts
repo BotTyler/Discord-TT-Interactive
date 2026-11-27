@@ -11,6 +11,7 @@ import {
 import { Upload } from "@aws-sdk/lib-storage";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { Readable } from "stream";
+import { logger } from "../logger/logger";
 
 interface S3ServiceConfig {
   endpoint: string;
@@ -35,6 +36,7 @@ class DndS3Client {
   private readonly bucket: string;
 
   constructor(config: S3ServiceConfig) {
+    logger.info("Setting up S3 client");
     this.client = new S3Client({
       endpoint: config.endpoint,
       region: config.region,
@@ -77,6 +79,7 @@ class DndS3Client {
     contentType?: string,
     metadata?: Record<string, string>,
   ): Promise<void> {
+    logger.info({ key: key, meta: metadata }, "Uploading item to S3");
     await this.client.send(
       new PutObjectCommand({
         Bucket: this.bucket,
@@ -95,6 +98,7 @@ class DndS3Client {
     contentType?: string,
     metadata?: Record<string, string>,
   ): Promise<void> {
+    logger.info({ key: key, meta: metadata }, "Uploading item to S3");
     const upload = new Upload({
       client: this.client,
       params: {
@@ -114,6 +118,7 @@ class DndS3Client {
   async getStream(
     key: string,
   ): Promise<{ stream: Readable; contentType?: string; contentLength?: number } | null> {
+    logger.info({ key: key }, "Getting stream of item from S3");
     try {
       const res = await this.client.send(new GetObjectCommand({ Bucket: this.bucket, Key: key }));
       return {
@@ -181,11 +186,13 @@ class DndS3Client {
   // ---------- Modify ----------
 
   async delete(key: string): Promise<void> {
+    logger.info({ key: key }, "Deleting item");
     await this.client.send(new DeleteObjectCommand({ Bucket: this.bucket, Key: key }));
   }
 
   /** Deletes many keys, batching in groups of 1000 (the S3 limit). */
   async deleteMany(keys: string[]): Promise<void> {
+    logger.info({ key: keys }, "Deleting items");
     for (let i = 0; i < keys.length; i += 1000) {
       const batch = keys.slice(i, i + 1000);
       await this.client.send(
@@ -198,6 +205,7 @@ class DndS3Client {
   }
 
   async deletePrefix(prefix: string): Promise<void> {
+    logger.info({ prefix: prefix }, "Deleting by prefix");
     const objects = await this.list(prefix, Number.MAX_SAFE_INTEGER);
     await this.deleteMany(objects.map((o) => o.key));
   }
@@ -205,6 +213,7 @@ class DndS3Client {
   // ---------- Presigned URLs ----------
 
   getDownloadUrl(key: string, expiresInSeconds = 3600): Promise<string> {
+    logger.info({ key: key }, "Getting full downloadable path to resource");
     return getSignedUrl(
       this.signingClient,
       new GetObjectCommand({ Bucket: this.bucket, Key: key }),
@@ -213,6 +222,7 @@ class DndS3Client {
   }
 
   getUploadUrl(key: string, contentType: string, expiresInSeconds = 600): Promise<string> {
+    logger.info({ key: key }, "Getting full upload path for resource");
     return getSignedUrl(
       this.signingClient,
       new PutObjectCommand({

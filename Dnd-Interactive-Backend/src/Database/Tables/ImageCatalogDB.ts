@@ -1,6 +1,7 @@
 import { QueryResult } from "pg";
 import Database from "../Database";
 import { DAO, DatabaseBase } from "../Interface/DatabaseObjectInterface";
+import { logger } from "../../logger/logger";
 
 export class ImageCatalogDAO extends DAO {
   public readonly img_catalog_id?: number;
@@ -61,11 +62,12 @@ export class ImageCatalogDB extends DatabaseBase<ImageCatalogDAO> {
           IC.img_catalog_id as img_catalog_id
         FROM public."Image_Catalog" IC
         where player_id = $1;`;
+    logger.debug(query);
 
     const result: QueryResult<ImageCatalogDAO> | null = await Database.getInstance()
       .query(query, [player_id])
       .catch((e) => {
-        console.error(`Could not ***select*** (${this.tableName})\n\t${e}`);
+        logger.error({ table: this.tableName, query: query, err: e }, "Could not ***select***");
         return null;
       });
     const rows: ImageCatalogDAO[] = result === null ? [] : result.rows;
@@ -92,11 +94,12 @@ export class ImageCatalogDB extends DatabaseBase<ImageCatalogDAO> {
           IC.img_catalog_id as img_catalog_id
         FROM public."Image_Catalog" IC
         where image_location = $1;`;
+    logger.debug(query);
 
     const result: QueryResult<ImageCatalogDAO> | null = await Database.getInstance()
       .query(query, [image_src])
       .catch((e) => {
-        console.error(`Could not ***select*** (${this.tableName})\n\t${e}`);
+        logger.error({ table: this.tableName, query: query, err: e }, "Could not ***select***");
         return null;
       });
     const rows: ImageCatalogDAO[] = result === null ? [] : result.rows;
@@ -124,11 +127,12 @@ export class ImageCatalogDB extends DatabaseBase<ImageCatalogDAO> {
           img_catalog_id as id 
         FROM public."Image_Catalog" 
         WHERE image_name = $1;`;
+      logger.debug(query);
 
       const result: QueryResult<{ id: number }> | null = await Database.getInstance()
         .query(query, [data.image_location])
         .catch((e) => {
-          console.error(`Could not ***select*** (${this.tableName})\n\t${e}`);
+          logger.error({ table: this.tableName, query: query, err: e }, "Could not ***select***");
           return null;
         });
 

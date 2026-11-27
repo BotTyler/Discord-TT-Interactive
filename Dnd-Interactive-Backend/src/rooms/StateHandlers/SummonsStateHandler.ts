@@ -13,9 +13,11 @@ import {
   ValidationInputType,
 } from "../../Util/Utils";
 import { StateHandlerRoom } from "../StateHandlerRoom";
+import { logger } from "../../logger/logger";
 
 export function RegisterSummonsStateHandler(room: StateHandlerRoom): void {
   room.onMessage("updateSummonsPosition", (client: Client, data: any): void => {
+    logger.info({ client: client.sessionId, data: data }, "Started updateSummonsPosition");
     try {
       const inputList: ValidationInputType[] = [
         { name: "pos", type: "object", PostProcess: undefined },
@@ -33,20 +35,27 @@ export function RegisterSummonsStateHandler(room: StateHandlerRoom): void {
       }
 
       const player: Player | null = room.state.getPlayerByUserId(validateParams.player_id);
-      if (player === null) return;
+      if (player === null) {
+        logger.warn({ client: client.sessionId }, "Player is not in Room");
+        return;
+      }
       const summon: Summons | null =
         player.summons.find((val: Summons): boolean => val.id === validateParams.id) ?? null;
-      if (summon === null) return;
+      if (summon === null) {
+        logger.warn({ client: client.sessionId, summon: validateParams.id }, "Summon not found");
+        return;
+      }
 
       const position = new mLatLng(+validateParams.pos.lat, +validateParams.pos.lng);
       summon.position = position;
       summon.toPosition = [position];
     } catch (error) {
-      console.error(error);
+      logger.error({ err: error }, "Unexpected Error");
     }
   });
 
   room.onMessage("updateSummonsGhostPosition", (client: Client, data: any): void => {
+    logger.info({ client: client.sessionId, data: data }, "Started updateSummonsGhostPosition");
     try {
       const inputList: ValidationInputType[] = [
         { name: "pos", type: "array", PostProcess: undefined },
@@ -64,20 +73,27 @@ export function RegisterSummonsStateHandler(room: StateHandlerRoom): void {
       }
 
       const player: Player | null = room.state.getPlayerByUserId(validateParams.player_id);
-      if (player === null) return;
+      if (player === null) {
+        logger.warn({ client: client.sessionId }, "Player is not in Room");
+        return;
+      }
       const summon: Summons | null =
         player.summons.find((val: Summons): boolean => val.id === validateParams.id) ?? null;
-      if (summon === null) return;
+      if (summon === null) {
+        logger.warn({ client: client.sessionId, summon: validateParams.id }, "Summon not found");
+        return;
+      }
 
       summon.toPosition = validateParams.pos.map(
         (point: mLatLng): mLatLng => new mLatLng(point.lat, point.lng),
       );
     } catch (error) {
-      console.error(error);
+      logger.error({ err: error }, "Unexpected Error");
     }
   });
 
   room.onMessage("addSummons", async (client: Client, data: any): Promise<void> => {
+    logger.info({ client: client.sessionId, data: data }, "Started addSummons");
     try {
       const inputList: ValidationInputType[] = [
         { name: "avatarUri", type: "string", PostProcess: undefined },
@@ -94,16 +110,30 @@ export function RegisterSummonsStateHandler(room: StateHandlerRoom): void {
 
       // NOTE: utilizes the player so no authentication is required.
       const player: Player | null = room.state.getPlayerBySessionId(client.sessionId);
-      if (player === null) return;
+      if (player === null) {
+        logger.warn({ client: client.sessionId }, "Player is not in Room");
+        return;
+      }
 
       // insert enemy into the database after inserting then add the enemy to the list. If the insert faild do not add the enemy.
       const imageCatalog: ImageCatalogDAO | null =
         await ImageCatalogDB.getInstance().selectByImageSrc(validateParams.avatarUri);
-      if (imageCatalog === null) return;
+
+      if (imageCatalog === null) {
+        logger.warn(
+          { client: client.sessionId, avatar: validateParams.avatarUri },
+          "Image cannot be found in catalog",
+        );
+        return;
+      }
+
       const summonId: number | null = await SummonsDB.getInstance().create(
         new SummonsDao(imageCatalog.img_catalog_id!, validateParams.name, player.userId),
       );
-      if (summonId === null) return;
+      if (summonId === null) {
+        logger.warn({ client: client.sessionId }, "SummonId was null likely failure on database");
+        return;
+      }
 
       const insertSummon: Summons = new Summons({
         player_id: player.userId,
@@ -118,10 +148,11 @@ export function RegisterSummonsStateHandler(room: StateHandlerRoom): void {
 
       player.summons = [...player.summons, insertSummon];
     } catch (error) {
-      console.error(error);
+      logger.error({ err: error }, "Unexpected Error");
     }
   });
   room.onMessage("deleteSummons", (client: Client, data: any): void => {
+    logger.info({ client: client.sessionId, data: data }, "Started deleteSummons");
     try {
       // Player_id as room.action can be called on by different people. (host vs player)
       const inputList: ValidationInputType[] = [
@@ -135,15 +166,19 @@ export function RegisterSummonsStateHandler(room: StateHandlerRoom): void {
       // NOTE: No authentication is required as the sessionId is being used.
 
       const player: Player | null = room.state.getPlayerBySessionId(client.sessionId);
-      if (player === null) return;
+      if (player === null) {
+        logger.warn({ client: client.sessionId }, "Player is not in Room");
+        return;
+      }
       player.summons = player.summons.filter(
         (summon: Summons): boolean => summon.id !== validateParams.id,
       );
     } catch (error) {
-      console.error(error);
+      logger.error({ err: error }, "Unexpected Error");
     }
   });
   room.onMessage("updateSummons", async (client: Client, data: any): Promise<void> => {
+    logger.info({ client: client.sessionId, data: data }, "Started updateSummons");
     try {
       const inputList: ValidationInputType[] = [
         { name: "id", type: "number", PostProcess: undefined },
@@ -162,12 +197,21 @@ export function RegisterSummonsStateHandler(room: StateHandlerRoom): void {
       // NOTE: No authentication is required as the sessionId is being used.
 
       const player: Player | null = room.state.getPlayerBySessionId(client.sessionId);
-      if (player === null) return;
+      if (player === null) {
+        logger.warn({ client: client.sessionId }, "Player is not in Room");
+        return;
+      }
 
       // insert enemy into the database after inserting then add the enemy to the list. If the insert faild do not add the enemy.
       const imageCatalog: ImageCatalogDAO | null =
         await ImageCatalogDB.getInstance().selectByImageSrc(validateParams.avatarUri);
-      if (imageCatalog === null) return;
+      if (imageCatalog === null) {
+        logger.warn(
+          { client: client.sessionId, avatar: validateParams.avatarUri },
+          "Image cannot be found in the catalog",
+        );
+        return;
+      }
 
       const summonDao: SummonsDao | null = await SummonsDB.getInstance().selectById(
         validateParams.id,
@@ -180,17 +224,21 @@ export function RegisterSummonsStateHandler(room: StateHandlerRoom): void {
 
       const summon: Summons | null =
         player.summons.find((item: Summons): boolean => item.id == validateParams.id) ?? null;
-      if (summon === null) return;
+      if (summon === null) {
+        logger.warn({ client: client.sessionId, summon: validateParams.id }, "Summon not found");
+        return;
+      }
 
       summon.name = validateParams.name;
       summon.avatarUri = imageCatalog.image_location;
       summon.size_category = validateParams.size;
     } catch (error) {
-      console.error(error);
+      logger.error({ err: error }, "Unexpected Error");
     }
   });
 
   room.onMessage("SummonHealth", (client: Client, data: any): void => {
+    logger.info({ client: client.sessionId, data: data }, "Started SummonHealth");
     try {
       const inputList: ValidationInputType[] = [
         { name: "id", type: "number", PostProcess: undefined },
@@ -205,19 +253,26 @@ export function RegisterSummonsStateHandler(room: StateHandlerRoom): void {
       } = ValidateAllInputs(data, inputList);
 
       const player: Player | null = room.state.getPlayerBySessionId(client.sessionId);
-      if (player === null) return;
+      if (player === null) {
+        logger.warn({ client: client.sessionId }, "Player is not in Room");
+        return;
+      }
       const summon: Summons | null =
         player.summons.find((val: Summons): boolean => val.id === validateParams.id) ?? null;
-      if (summon === null) return;
+      if (summon === null) {
+        logger.warn({ client: client.sessionId, summon: validateParams.id }, "Summon not found");
+        return;
+      }
 
       summon.health = validateParams.health;
       summon.totalHealth = validateParams.total_health;
     } catch (error) {
-      console.error(error);
+      logger.error({ err: error }, "Unexpected Error");
     }
   });
 
   room.onMessage("summonHeal", (client: Client, data: any): void => {
+    logger.info({ client: client.sessionId, data: data }, "Started summonHeal");
     try {
       const inputList: ValidationInputType[] = [
         { name: "id", type: "number", PostProcess: undefined },
@@ -231,18 +286,25 @@ export function RegisterSummonsStateHandler(room: StateHandlerRoom): void {
 
       // NOTE: No Authentication is required as the sessionId is being used.
       const player: Player | null = room.state.getPlayerBySessionId(client.sessionId);
-      if (player === null) return;
+      if (player === null) {
+        logger.warn({ client: client.sessionId }, "Player is not in Room");
+        return;
+      }
       const summon: Summons | null =
         player.summons.find((val: Summons): boolean => val.id === validateParams.id) ?? null;
-      if (summon === null) return;
+      if (summon === null) {
+        logger.warn({ client: client.sessionId, summon: validateParams.id }, "Summon not found");
+        return;
+      }
 
       summon.health += Math.abs(validateParams.heal);
     } catch (error) {
-      console.error(error);
+      logger.error({ err: error }, "Unexpected Error");
     }
   });
 
   room.onMessage("summonDamage", (client: Client, data: any): void => {
+    logger.info({ client: client.sessionId, data: data }, "Started summonDamage");
     try {
       const inputList: ValidationInputType[] = [
         { name: "id", type: "number", PostProcess: undefined },
@@ -256,18 +318,25 @@ export function RegisterSummonsStateHandler(room: StateHandlerRoom): void {
 
       // NOTE: No Authentication is required as the sessionId is being used.
       const player: Player | null = room.state.getPlayerBySessionId(client.sessionId);
-      if (player === null) return;
+      if (player === null) {
+        logger.warn({ client: client.sessionId }, "Player is not in Room");
+        return;
+      }
       const summon: Summons | null =
         player.summons.find((val: Summons): boolean => val.id === validateParams.id) ?? null;
-      if (summon === null) return;
+      if (summon === null) {
+        logger.warn({ client: client.sessionId, summon: validateParams.id }, "Summon not found");
+        return;
+      }
 
       summon.health -= Math.abs(validateParams.damage);
       if (summon.health < 0) summon.health = 0;
     } catch (error) {
-      console.error(error);
+      logger.error({ err: error }, "Unexpected Error");
     }
   });
   room.onMessage("summonDeathAdd", (client: Client, data: any): void => {
+    logger.info({ client: client.sessionId, data: data }, "Started summonDeathAdd");
     try {
       const inputList: ValidationInputType[] = [
         { name: "id", type: "number", PostProcess: undefined },
@@ -279,18 +348,25 @@ export function RegisterSummonsStateHandler(room: StateHandlerRoom): void {
       } = ValidateAllInputs(data, inputList);
 
       const player: Player | null = room.state.getPlayerBySessionId(client.sessionId);
-      if (player === null) return;
+      if (player === null) {
+        logger.warn({ client: client.sessionId }, "Player is not in Room");
+        return;
+      }
       const summon: Summons | null =
         player.summons.find((val: Summons): boolean => val.id === validateParams.id) ?? null;
-      if (summon === null) return;
+      if (summon === null) {
+        logger.warn({ client: client.sessionId, summon: validateParams.id }, "Summon not found");
+        return;
+      }
 
       summon.deathSaves += 1;
       if (summon.deathSaves > 3) summon.deathSaves = 3;
     } catch (error) {
-      console.error(error);
+      logger.error({ err: error }, "Unexpected Error");
     }
   });
   room.onMessage("summonDeathRemove", (client: Client, data: any): void => {
+    logger.info({ client: client.sessionId, data: data }, "Started summonDeathRemove");
     try {
       const inputList: ValidationInputType[] = [
         { name: "id", type: "number", PostProcess: undefined },
@@ -301,18 +377,25 @@ export function RegisterSummonsStateHandler(room: StateHandlerRoom): void {
       } = ValidateAllInputs(data, inputList);
 
       const player: Player | null = room.state.getPlayerBySessionId(client.sessionId);
-      if (player === null) return;
+      if (player === null) {
+        logger.warn({ client: client.sessionId }, "Player is not in Room");
+        return;
+      }
       const summon: Summons | null =
         player.summons.find((val: Summons): boolean => val.id === validateParams.id) ?? null;
-      if (summon === null) return;
+      if (summon === null) {
+        logger.warn({ client: client.sessionId, summon: validateParams.id }, "Summon not found");
+        return;
+      }
 
       summon.deathSaves -= 1;
       if (summon.deathSaves < 0) summon.deathSaves = 0;
     } catch (error) {
-      console.error(error);
+      logger.error({ err: error }, "Unexpected Error");
     }
   });
   room.onMessage("summonSaveAdd", (client: Client, data: any): void => {
+    logger.info({ client: client.sessionId, data: data }, "Started summonSaveAdd");
     try {
       const inputList: ValidationInputType[] = [
         { name: "id", type: "number", PostProcess: undefined },
@@ -323,10 +406,16 @@ export function RegisterSummonsStateHandler(room: StateHandlerRoom): void {
       } = ValidateAllInputs(data, inputList);
 
       const player: Player | null = room.state.getPlayerBySessionId(client.sessionId);
-      if (player === null) return;
+      if (player === null) {
+        logger.warn({ client: client.sessionId }, "Player is not in Room");
+        return;
+      }
       const summon: Summons | null =
         player.summons.find((val: Summons): boolean => val.id === validateParams.id) ?? null;
-      if (summon === null) return;
+      if (summon === null) {
+        logger.warn({ client: client.sessionId, summon: validateParams.id }, "Summon not found");
+        return;
+      }
 
       summon.lifeSaves += 1;
       if (summon.lifeSaves >= 3) {
@@ -335,10 +424,11 @@ export function RegisterSummonsStateHandler(room: StateHandlerRoom): void {
         summon.health = 1;
       }
     } catch (error) {
-      console.error(error);
+      logger.error({ err: error }, "Unexpected Error");
     }
   });
   room.onMessage("summonSaveRemove", (client: Client, data: any): void => {
+    logger.info({ client: client.sessionId, data: data }, "Started summonSaveRemove");
     try {
       const inputList: ValidationInputType[] = [
         { name: "id", type: "number", PostProcess: undefined },
@@ -349,18 +439,25 @@ export function RegisterSummonsStateHandler(room: StateHandlerRoom): void {
       } = ValidateAllInputs(data, inputList);
 
       const player: Player | null = room.state.getPlayerBySessionId(client.sessionId);
-      if (player === null) return;
+      if (player === null) {
+        logger.warn({ client: client.sessionId }, "Player is not in Room");
+        return;
+      }
       const summon: Summons | null =
         player.summons.find((val: Summons): boolean => val.id === validateParams.id) ?? null;
-      if (summon === null) return;
+      if (summon === null) {
+        logger.warn({ client: client.sessionId, summon: validateParams.id }, "Summon not found");
+        return;
+      }
 
       summon.lifeSaves -= 1;
       if (summon.lifeSaves < 0) summon.lifeSaves = 0;
     } catch (error) {
-      console.error(error);
+      logger.error({ err: error }, "Unexpected Error");
     }
   });
   room.onMessage("toggleSummonVisibility", (client: Client, data: any): void => {
+    logger.info({ client: client.sessionId, data: data }, "Started toggleSummonVisibility");
     try {
       // Include player_id as room.action can be called by multiple users (host vs player).
       const inputList: ValidationInputType[] = [
@@ -372,17 +469,24 @@ export function RegisterSummonsStateHandler(room: StateHandlerRoom): void {
       } = ValidateAllInputs(data, inputList);
 
       const player: Player | null = room.state.getPlayerBySessionId(client.sessionId);
-      if (player === null) return;
+      if (player === null) {
+        logger.warn({ client: client.sessionId }, "Player is not in Room");
+        return;
+      }
       const summon: Summons | null =
         player.summons.find((val: Summons): boolean => val.id === validateParams.id) ?? null;
-      if (summon === null) return;
+      if (summon === null) {
+        logger.warn({ client: client.sessionId, summon: validateParams.id }, "Summon not found");
+        return;
+      }
 
       summon.isVisible = !summon.isVisible;
     } catch (error) {
-      console.error(error);
+      logger.error({ err: error }, "Unexpected Error");
     }
   });
   room.onMessage("setSummonsStatuses", (client: Client, data: any): void => {
+    logger.info({ client: client.sessionId, data: data }, "Started setSummonsStatuses");
     try {
       const inputList: ValidationInputType[] = [
         { name: "statuses", type: "array", PostProcess: undefined },
@@ -395,16 +499,22 @@ export function RegisterSummonsStateHandler(room: StateHandlerRoom): void {
       } = ValidateAllInputs(data, inputList);
 
       const player: Player | null = room.state.getPlayerBySessionId(client.sessionId);
-      if (player === null) return;
+      if (player === null) {
+        logger.warn({ client: client.sessionId }, "Player is not in Room");
+        return;
+      }
       const summon: Summons | null =
         player.summons.find((val: Summons): boolean => val.id === validateParams.id) ?? null;
-      if (summon === null) return;
+      if (summon === null) {
+        logger.warn({ client: client.sessionId, summon: validateParams.id }, "Summon not found");
+        return;
+      }
 
       summon.statuses = validateParams.statuses.map((status: string): CharacterStatus => {
         return new CharacterStatus(status);
       });
     } catch (error) {
-      console.error(error);
+      logger.error({ err: error }, "Unexpected Error");
     }
   });
 }

@@ -1,6 +1,7 @@
 import { QueryResult } from "pg";
 import Database from "../Database";
 import { DAO, DatabaseBase } from "../Interface/DatabaseObjectInterface";
+import { logger } from "../../logger/logger";
 
 export class PlayerDAO extends DAO {
   private id: string;
@@ -38,12 +39,12 @@ export class PlayerDB extends DatabaseBase<PlayerDAO> {
     const placeholders = data.getPlaceHolders();
 
     const query = `INSERT INTO public."Player" (${keys.join(", ")}) VALUES (${placeholders.join(", ")}) ON CONFLICT (user_id) DO UPDATE SET name = EXCLUDED.name RETURNING ${data.getIdName()} as id;`;
-    console.log(query);
+    logger.debug(query);
 
     const result: QueryResult<{ id: number }> | null = await Database.getInstance()
       .query(query, values)
       .catch((e) => {
-        console.error(`Could not ***insert*** (${this.tableName})\n\t${e}`);
+        logger.error({ table: this.tableName, query: query, err: e }, "Could not ***insert***");
         return null;
       });
 

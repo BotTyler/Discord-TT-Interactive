@@ -1,4 +1,5 @@
 import sharp, { Metadata } from "sharp";
+import { logger } from "../logger/logger";
 
 export class ImageRejectedError extends Error {
   constructor(
@@ -24,6 +25,7 @@ export async function SanitizeImage(
 
     // Check to make sure the sharp parsing header matches the file we expect.
     if (!meta.format || !ALLOWED_FORMATS.has(meta.format)) {
+      logger.warn({ meta }, "File is not supported!");
       throw new ImageRejectedError(415, "Unsupported file type");
     }
 
@@ -33,9 +35,14 @@ export async function SanitizeImage(
     const frameHeight = meta.pageHeight ?? meta.height ?? 0;
 
     if (frames > MAX_FRAMES) {
+      logger.warn({ meta }, `Too many frames (frame: ${frames}, max ${MAX_FRAMES})`);
       throw new ImageRejectedError(413, `Too many frames (frame: ${frames}, max ${MAX_FRAMES})`);
     }
     if (frameWidth * frameHeight * frames > MAX_TOTAL_PIXELS) {
+      logger.warn(
+        { meta },
+        `Image is too large: width: ${frameWidth}, height: ${frameHeight}, frames: ${frames} = ${frameWidth * frameHeight * frames}`,
+      );
       throw new ImageRejectedError(
         413,
         `Image is too large: width: ${frameWidth}, height: ${frameHeight}, frames: ${frames} = ${frameWidth * frameHeight * frames}`,
@@ -66,9 +73,10 @@ export async function SanitizeImage(
       .toBuffer();
 
     if (output.length > MAX_OUTPUT_BYTES) {
+      logger.warn({ meta }, "Image is too large");
       throw new ImageRejectedError(413, "Processed image is too large");
     }
-
+    logger.info({ meta }, "Image validation is complete");
     return { buffer: output, metadata: meta };
   } catch (err) {
     throw new ImageRejectedError(400, `Image sanitization failed: ${err}`);

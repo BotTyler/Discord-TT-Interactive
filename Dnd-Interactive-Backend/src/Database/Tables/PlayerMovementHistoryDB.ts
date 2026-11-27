@@ -3,6 +3,7 @@ import { QueryResult } from "pg";
 import Database from "../Database";
 import { DAO, DatabaseBase } from "../Interface/DatabaseObjectInterface";
 import { PlayerSaveState } from "../../shared/LoadDataInterfaces";
+import { logger } from "../../logger/logger";
 
 export class PlayerMovementHistoryDAO extends DAO {
   public readonly pmh_id?: number;
@@ -92,12 +93,12 @@ export class PlayerMovementHistoryDB extends DatabaseBase<PlayerMovementHistoryD
 
   async getPlayerMovementAtHistoryId(history_id: number): Promise<PlayerSaveState[]> {
     const query = `SELECT * FROM public."Player_Movement_History" where history_id = $1;`;
-    console.log(query);
+    logger.debug(query);
 
     const result: QueryResult<PlayerSaveState> | null = await Database.getInstance()
       .query(query, [history_id])
       .catch((e) => {
-        console.error(`Could not ***select*** player movement history (${this.tableName})\n\t${e}`);
+        logger.error({ table: this.tableName, query: query, err: e }, "Could not ***insert***");
         return null;
       });
 

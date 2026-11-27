@@ -13,9 +13,11 @@ import {
   ValidationInputType,
 } from "../../Util/Utils";
 import { StateHandlerRoom } from "../StateHandlerRoom";
+import { logger } from "../../logger/logger";
 
 export function RegisterEnemyStateHandler(room: StateHandlerRoom): void {
   room.onMessage("updateEnemyPosition", (client: Client, data: any): void => {
+    logger.info({ client: client.sessionId, data: data }, "Updating Enemy Position");
     try {
       const inputList: ValidationInputType[] = [
         { name: "pos", type: "object", PostProcess: undefined },
@@ -28,23 +30,31 @@ export function RegisterEnemyStateHandler(room: StateHandlerRoom): void {
       } = ValidateAllInputs(data, inputList);
 
       if (!authenticateHostAction(client.sessionId, room)) {
+        logger.warn({ client: client.sessionId }, "Client not authorized for this action");
         return;
       }
-      console.log("Authenticated Enemy Movement");
+
       const pos: mLatLng = new mLatLng(+validateParams.pos.lat, +validateParams.pos.lng);
       const enemyId: string = validateParams.clientToChange;
 
       const enemy: Enemy | null = room.state.enemies.get(enemyId) ?? null;
-      if (enemy === null) return;
+      if (enemy === null) {
+        logger.warn(
+          { client: client.sessionId, enemyId: enemyId },
+          "Enemy cannot be found in Room",
+        );
+        return;
+      }
 
       enemy.position = pos;
       enemy.toPosition = [pos];
     } catch (error) {
-      console.error(error);
+      logger.error({ err: error }, "Unexpected Error");
     }
   });
 
   room.onMessage("updateEnemyGhostPosition", (client: Client, data: any): void => {
+    logger.info({ client: client.sessionId, data: data }, "Updating Enemy Ghost position");
     try {
       const inputList: ValidationInputType[] = [
         { name: "pos", type: "object", PostProcess: undefined },
@@ -56,6 +66,7 @@ export function RegisterEnemyStateHandler(room: StateHandlerRoom): void {
         clientToChange: string;
       } = ValidateAllInputs(data, inputList);
       if (!authenticateHostAction(client.sessionId, room)) {
+        logger.warn({ client: client.sessionId }, "Client not authorized for this action");
         return;
       }
 
@@ -65,16 +76,23 @@ export function RegisterEnemyStateHandler(room: StateHandlerRoom): void {
       const enemyId: string = validateParams.clientToChange;
 
       const enemy: Enemy | null = room.state.enemies.get(enemyId) ?? null;
-      if (enemy === null) return;
+      if (enemy === null) {
+        logger.warn({ client: client.sessionId, enemy: enemyId }, "Enemy is not found within room");
+        return;
+      }
 
       enemy.toPosition = pos;
     } catch (error) {
-      console.error(error);
+      logger.error({ err: error }, "Unexpected Error");
     }
   });
 
   room.onMessage("addEnemy", async (client: Client, data: any): Promise<void> => {
-    if (!authenticateHostAction(client.sessionId, room)) return;
+    logger.info({ client: client.sessionId, data: data }, "Adding Enemy");
+    if (!authenticateHostAction(client.sessionId, room)) {
+      logger.warn({ client: client.sessionId }, "Client not authorized for this action");
+      return;
+    }
     try {
       const inputList: ValidationInputType[] = [
         { name: "name", type: "string", PostProcess: undefined },
@@ -90,17 +108,29 @@ export function RegisterEnemyStateHandler(room: StateHandlerRoom): void {
         size: MARKER_SIZE_CATEGORIES;
       } = ValidateAllInputs(data, inputList);
       const player: Player | null = room.state.getPlayerBySessionId(client.sessionId);
-      if (player === null) return;
+      if (player === null) {
+        logger.warn({ client: client.sessionId }, "Client not found within Room");
+        return;
+      }
 
       // insert enemy into the database after inserting then add the enemy to the list. If the insert faild do not add the enemy.
       const imageCatalog: ImageCatalogDAO | null =
         await ImageCatalogDB.getInstance().selectByImageSrc(validateParams.avatarUri);
-      if (imageCatalog === null) return;
+      if (imageCatalog === null) {
+        logger.warn(
+          { client: client.sessionId, avatar: validateParams.avatarUri },
+          "Image cannot be found in DB",
+        );
+        return;
+      }
 
       const enemyId: number | null = await EnemyDB.getInstance().create(
         new EnemyDAO(imageCatalog.img_catalog_id!, validateParams.name),
       );
-      if (enemyId === null) return;
+      if (enemyId === null) {
+        logger.warn({ client: client.sessionId, enemy: enemyId }, "Enemy cannot be saved");
+        return;
+      }
 
       const enemy: Enemy = new Enemy({
         id: enemyId,
@@ -112,12 +142,16 @@ export function RegisterEnemyStateHandler(room: StateHandlerRoom): void {
 
       room.state.enemies.set(`${enemyId}`, enemy);
     } catch (error) {
-      console.error(error);
+      logger.error({ err: error }, "Unexpected Error");
     }
   });
 
   room.onMessage("deleteEnemy", (client: Client, data: any): void => {
-    if (!authenticateHostAction(client.sessionId, room)) return;
+    logger.info({ client: client.sessionId, data: data }, "Starting Delete Enemy");
+    if (!authenticateHostAction(client.sessionId, room)) {
+      logger.warn({ client: client.sessionId }, "Client is not authorized to perform this action");
+      return;
+    }
     try {
       const inputList: ValidationInputType[] = [
         { name: "id", type: "string", PostProcess: undefined },
@@ -129,12 +163,16 @@ export function RegisterEnemyStateHandler(room: StateHandlerRoom): void {
 
       room.state.enemies.delete(validateParams.id);
     } catch (error) {
-      console.error(error);
+      logger.error({ err: error }, "Unexpected Error");
     }
   });
 
   room.onMessage("EnemyHealth", (client: Client, data: any): void => {
-    if (!authenticateHostAction(client.sessionId, room)) return;
+    logger.info({ client: client.sessionId, data: data }, "Updating Enemy Health");
+    if (!authenticateHostAction(client.sessionId, room)) {
+      logger.warn({ client: client.sessionId }, "Client is not authorized to perform this action");
+      return;
+    }
     try {
       const inputList: ValidationInputType[] = [
         { name: "id", type: "string", PostProcess: undefined },
@@ -149,17 +187,27 @@ export function RegisterEnemyStateHandler(room: StateHandlerRoom): void {
       } = ValidateAllInputs(data, inputList);
 
       const enemy: Enemy | null = room.state.enemies.get(validateParams.id) ?? null;
-      if (enemy === null) return;
+      if (enemy === null) {
+        logger.warn(
+          { client: client.sessionId, enemy: validateParams.id },
+          "Enemy cannot be found in Room",
+        );
+        return;
+      }
 
       enemy.health = validateParams.health;
       enemy.totalHealth = validateParams.total_health;
     } catch (error) {
-      console.error(error);
+      logger.error({ err: error }, "Unexpected Error");
     }
   });
 
   room.onMessage("updateEnemy", async (client: Client, data: any): Promise<void> => {
-    if (!authenticateHostAction(client.sessionId, room)) return;
+    logger.info({ client: client.sessionId, data: data }, "Update Enemy");
+    if (!authenticateHostAction(client.sessionId, room)) {
+      logger.warn({ client: client.sessionId }, "Client is not authorized to perform this action");
+      return;
+    }
     try {
       const inputList: ValidationInputType[] = [
         { name: "id", type: "string", PostProcess: undefined },
@@ -178,10 +226,22 @@ export function RegisterEnemyStateHandler(room: StateHandlerRoom): void {
       // insert enemy into the database after inserting then add the enemy to the list. If the insert faild do not add the enemy.
       const imageCatalog: ImageCatalogDAO | null =
         await ImageCatalogDB.getInstance().selectByImageSrc(validateParams.avatarUri);
-      if (imageCatalog === null) return;
+      if (imageCatalog === null) {
+        logger.warn(
+          { client: client.sessionId, avatar: validateParams.avatarUri },
+          "Avatar not found in DB",
+        );
+        return;
+      }
 
       const enemyDao: EnemyDAO | null = await EnemyDB.getInstance().selectById(+validateParams.id);
-      if (enemyDao === null) return;
+      if (enemyDao === null) {
+        logger.warn(
+          { client: client.sessionId, enemy: validateParams.id },
+          "Enemy not found in DB",
+        );
+        return;
+      }
 
       enemyDao.image_id = imageCatalog.img_catalog_id!;
       enemyDao.name = validateParams.name;
@@ -194,12 +254,17 @@ export function RegisterEnemyStateHandler(room: StateHandlerRoom): void {
       enemy.avatarUri = validateParams.avatarUri;
       enemy.size_category = validateParams.size;
     } catch (error) {
-      console.error(error);
+      logger.error({ err: error }, "Unexpected Error");
     }
   });
 
   room.onMessage("changeEnemyInitiative", (client: Client, data: any): void => {
-    if (!authenticateHostAction(client.sessionId, room)) return;
+    logger.info({ client: client.sessionId, data: data }, "Update Enemy Initiative");
+    if (!authenticateHostAction(client.sessionId, room)) {
+      logger.warn({ client: client.sessionId }, "Client is not authorized to perform this action");
+      return;
+    }
+
     try {
       const inputList: ValidationInputType[] = [
         { name: "id", type: "string", PostProcess: undefined },
@@ -212,16 +277,26 @@ export function RegisterEnemyStateHandler(room: StateHandlerRoom): void {
       } = ValidateAllInputs(data, inputList);
 
       const enemy: Enemy | null = room.state.enemies.get(validateParams.id) ?? null;
-      if (enemy === null) return;
+      if (enemy === null) {
+        logger.warn(
+          { client: client.sessionId, enemy: validateParams.id },
+          "Enemy not found in Room",
+        );
+        return;
+      }
 
       enemy.initiative = validateParams.initiative;
     } catch (error) {
-      console.error(error);
+      logger.error({ err: error }, "Unexpected Error");
     }
   });
 
   room.onMessage("enemyHeal", (client: Client, data: any): void => {
-    if (!authenticateHostAction(client.sessionId, room)) return;
+    logger.info({ client: client.sessionId, data: data }, "Enemy Heal");
+    if (!authenticateHostAction(client.sessionId, room)) {
+      logger.warn({ client: client.sessionId }, "Client is not authorized to perform this action");
+      return;
+    }
     try {
       const inputList: ValidationInputType[] = [
         { name: "heal", type: "number", PostProcess: undefined },
@@ -234,15 +309,25 @@ export function RegisterEnemyStateHandler(room: StateHandlerRoom): void {
       } = ValidateAllInputs(data, inputList);
 
       const enemy: Enemy | null = room.state.enemies.get(validateParams.clientToChange) ?? null;
-      if (enemy === null) return;
+      if (enemy === null) {
+        logger.warn(
+          { client: client.sessionId, enemy: validateParams.clientToChange },
+          "Enemy not found in Room",
+        );
+        return;
+      }
 
       enemy.health += Math.abs(validateParams.heal);
     } catch (error) {
-      console.error(error);
+      logger.error({ err: error }, "Unexpected Error");
     }
   });
   room.onMessage("enemyDamage", (client: Client, data: any): void => {
-    if (!authenticateHostAction(client.sessionId, room)) return;
+    logger.info({ client: client.sessionId, data: data }, "Enemy Damage");
+    if (!authenticateHostAction(client.sessionId, room)) {
+      logger.warn({ client: client.sessionId }, "Client is not authorized to perform this action");
+      return;
+    }
     try {
       const inputList: ValidationInputType[] = [
         { name: "damage", type: "number", PostProcess: undefined },
@@ -255,16 +340,26 @@ export function RegisterEnemyStateHandler(room: StateHandlerRoom): void {
       } = ValidateAllInputs(data, inputList);
 
       const enemy: Enemy | null = room.state.enemies.get(validateParams.clientToChange) ?? null;
-      if (enemy === null) return;
+      if (enemy === null) {
+        logger.warn(
+          { client: client.sessionId, enemy: validateParams.clientToChange },
+          "Enemy not found within Room",
+        );
+        return;
+      }
 
       enemy.health -= Math.abs(validateParams.damage);
       if (enemy.health < 0) enemy.health = 0;
     } catch (error) {
-      console.error(error);
+      logger.error({ err: error }, "Unexpected Error");
     }
   });
   room.onMessage("enemyDeathAdd", (client: Client, data: any): void => {
-    if (!authenticateHostAction(client.sessionId, room)) return;
+    logger.info({ client: client.sessionId, data: data }, "Enemy Death Add");
+    if (!authenticateHostAction(client.sessionId, room)) {
+      logger.warn({ client: client.sessionId }, "Client is not authorized to perform this action");
+      return;
+    }
     try {
       const inputList: ValidationInputType[] = [
         { name: "clientToChange", type: "string", PostProcess: undefined },
@@ -275,16 +370,26 @@ export function RegisterEnemyStateHandler(room: StateHandlerRoom): void {
       } = ValidateAllInputs(data, inputList);
 
       const enemy: Enemy | null = room.state.enemies.get(validateParams.clientToChange) ?? null;
-      if (enemy === null) return;
+      if (enemy === null) {
+        logger.warn(
+          { client: client.sessionId, enemy: validateParams.clientToChange },
+          "Enemy cannot be found within Room",
+        );
+        return;
+      }
 
       enemy.deathSaves += 1;
       if (enemy.deathSaves > 3) enemy.deathSaves = 3;
     } catch (error) {
-      console.error(error);
+      logger.error({ err: error }, "Unexpected Error");
     }
   });
   room.onMessage("enemyDeathRemove", (client: Client, data: any): void => {
-    if (!authenticateHostAction(client.sessionId, room)) return;
+    logger.info({ client: client.sessionId, data: data }, "Enemy Death Remove");
+    if (!authenticateHostAction(client.sessionId, room)) {
+      logger.warn({ client: client.sessionId }, "Client is not authorized to perform this action");
+      return;
+    }
     try {
       const inputList: ValidationInputType[] = [
         { name: "clientToChange", type: "string", PostProcess: undefined },
@@ -295,16 +400,26 @@ export function RegisterEnemyStateHandler(room: StateHandlerRoom): void {
       } = ValidateAllInputs(data, inputList);
 
       const enemy: Enemy | null = room.state.enemies.get(validateParams.clientToChange) ?? null;
-      if (enemy === null) return;
+      if (enemy === null) {
+        logger.warn(
+          { client: client.sessionId, enemy: validateParams.clientToChange },
+          "Enemy cannot be found within Room",
+        );
+        return;
+      }
 
       enemy.deathSaves -= 1;
       if (enemy.deathSaves < 0) enemy.deathSaves = 0;
     } catch (error) {
-      console.error(error);
+      logger.error({ err: error }, "Unexpected Error");
     }
   });
   room.onMessage("enemySaveAdd", (client: Client, data: any): void => {
-    if (!authenticateHostAction(client.sessionId, room)) return;
+    logger.info({ client: client.sessionId, data: data }, "Enemy Save Add");
+    if (!authenticateHostAction(client.sessionId, room)) {
+      logger.warn({ client: client.sessionId }, "Client is not authorized to perform this action");
+      return;
+    }
     try {
       const inputList: ValidationInputType[] = [
         { name: "clientToChange", type: "string", PostProcess: undefined },
@@ -315,7 +430,13 @@ export function RegisterEnemyStateHandler(room: StateHandlerRoom): void {
       } = ValidateAllInputs(data, inputList);
 
       const enemy: Enemy | null = room.state.enemies.get(validateParams.clientToChange) ?? null;
-      if (enemy === null) return;
+      if (enemy === null) {
+        logger.warn(
+          { client: client.sessionId, enemy: validateParams.clientToChange },
+          "Enemy cannot be found within Room",
+        );
+        return;
+      }
 
       enemy.lifeSaves += 1;
       if (enemy.lifeSaves >= 3) {
@@ -324,11 +445,15 @@ export function RegisterEnemyStateHandler(room: StateHandlerRoom): void {
         enemy.health = 1;
       }
     } catch (error) {
-      console.error(error);
+      logger.error({ err: error }, "Unexpected Error");
     }
   });
   room.onMessage("enemySaveRemove", (client: Client, data: any): void => {
-    if (!authenticateHostAction(client.sessionId, room)) return;
+    logger.info({ client: client.sessionId, data: data }, "Enemy Save Remove");
+    if (!authenticateHostAction(client.sessionId, room)) {
+      logger.warn({ client: client.sessionId }, "Client is not authorized to perform this action");
+      return;
+    }
     try {
       const inputList: ValidationInputType[] = [
         { name: "clientToChange", type: "string", PostProcess: undefined },
@@ -339,16 +464,26 @@ export function RegisterEnemyStateHandler(room: StateHandlerRoom): void {
       } = ValidateAllInputs(data, inputList);
 
       const enemy: Enemy | null = room.state.enemies.get(validateParams.clientToChange) ?? null;
-      if (enemy === null) return;
+      if (enemy === null) {
+        logger.warn(
+          { client: client.sessionId, enemy: validateParams.clientToChange },
+          "Enemy cannot be found within Room",
+        );
+        return;
+      }
 
       enemy.lifeSaves -= 1;
       if (enemy.lifeSaves < 0) enemy.lifeSaves = 0;
     } catch (error) {
-      console.error(error);
+      logger.error({ err: error }, "Unexpected Error");
     }
   });
   room.onMessage("toggleEnemyVisibility", (client: Client, data: any): void => {
-    if (!authenticateHostAction(client.sessionId, room)) return;
+    logger.info({ client: client.sessionId, data: data }, "Enemy Visibility Toggle");
+    if (!authenticateHostAction(client.sessionId, room)) {
+      logger.warn({ client: client.sessionId }, "Client is not authorized to perform this action");
+      return;
+    }
     try {
       const inputList: ValidationInputType[] = [
         { name: "clientToChange", type: "string", PostProcess: undefined },
@@ -359,16 +494,26 @@ export function RegisterEnemyStateHandler(room: StateHandlerRoom): void {
       } = ValidateAllInputs(data, inputList);
 
       const enemy: Enemy | null = room.state.enemies.get(validateParams.clientToChange) ?? null;
-      if (enemy === null) return;
+      if (enemy === null) {
+        logger.warn(
+          { client: client.sessionId, enemy: validateParams.clientToChange },
+          "Enemy cannot be found within Room",
+        );
+        return;
+      }
 
       enemy.isVisible = !enemy.isVisible;
     } catch (error) {
-      console.error(error);
+      logger.error({ err: error }, "Unexpected Error");
     }
   });
 
   room.onMessage("setEnemyStatuses", (client: Client, data: any): void => {
-    if (!authenticateHostAction(client.sessionId, room)) return;
+    logger.info({ client: client.sessionId, data: data }, "Enemy Statuses");
+    if (!authenticateHostAction(client.sessionId, room)) {
+      logger.warn({ client: client.sessionId }, "Client is not authorized to perform this action");
+      return;
+    }
     try {
       const inputList: ValidationInputType[] = [
         { name: "statuses", type: "array", PostProcess: undefined },
@@ -381,13 +526,19 @@ export function RegisterEnemyStateHandler(room: StateHandlerRoom): void {
       } = ValidateAllInputs(data, inputList);
 
       const enemy: Enemy | null = room.state.enemies.get(validateParams.clientToChange) ?? null;
-      if (enemy === null) return;
+      if (enemy === null) {
+        logger.warn(
+          { client: client.sessionId, enemy: validateParams.clientToChange },
+          "Enemy cannot be found within Room",
+        );
+        return;
+      }
 
       enemy.statuses = validateParams.statuses.map((ele: string): CharacterStatus => {
         return new CharacterStatus(ele);
       });
     } catch (error) {
-      console.error(error);
+      logger.error({ err: error }, "Unexpected Error");
     }
   });
 }

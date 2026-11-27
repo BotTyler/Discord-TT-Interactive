@@ -31,20 +31,31 @@ import {
   ValidationInputType,
 } from "../../Util/Utils";
 import { StateHandlerRoom } from "../StateHandlerRoom";
+import { logger } from "../../logger/logger";
 
 export function RegisterSaveAndLoadStateHandler(room: StateHandlerRoom): void {
-  room.onMessage("getCampaigns", async (client: Client, _data: any): Promise<void> => {
+  room.onMessage("getCampaigns", async (client: Client, data: any): Promise<void> => {
+    logger.info({ client: client.sessionId, data: data }, "Started getCampaigns");
+
     const player: Player | null = room.state.getPlayerBySessionId(client.sessionId);
-    if (player === null) return client.error(666, "You are not Connected");
+    if (player === null) {
+      logger.warn({ client: client.sessionId }, "Player not found in Room");
+      return client.error(666, "You are not Connected");
+    }
+
     const mapList: CampaignsDao[] = await MapDB.getInstance().selectMapByUserId(player.userId);
 
     client.send("CampaignResult", mapList);
   });
 
   room.onMessage("getVersionsByCampaign", async (client: Client, data: any): Promise<void> => {
+    logger.info({ client: client.sessionId, data: data }, "Started getVersionsByCampaign");
     try {
       const player: Player | null = room.state.getPlayerBySessionId(client.sessionId);
-      if (player === null) return client.error(666, "You are not Connected");
+      if (player === null) {
+        logger.warn({ client: client.sessionId }, "Player not found in Room");
+        return client.error(666, "You are not Connected");
+      }
       const inputList: ValidationInputType[] = [
         { name: "campaign_id", type: "number", PostProcess: undefined },
       ];
@@ -60,14 +71,18 @@ export function RegisterSaveAndLoadStateHandler(room: StateHandlerRoom): void {
 
       client.send("CampaignVersionHistoryResult", saveHistoryDao);
     } catch (error) {
-      console.error(error);
+      logger.error({ err: error }, "Unexpected Error");
       client.send("CampaignVersionHistoryResult", []);
     }
   });
 
   // Function that will set all the values of a room based on the chosen save
   room.onMessage("loadMap", async (client: Client, data: any): Promise<void> => {
-    if (!authenticateHostAction(client.sessionId, room)) return;
+    logger.info({ client: client.sessionId, data: data }, "Started loadMap");
+    if (!authenticateHostAction(client.sessionId, room)) {
+      logger.warn({ client: client.sessionId }, "Client Is not authorized for this action");
+      return;
+    }
     try {
       const inputList: ValidationInputType[] = [
         { name: "map_id", type: "number", PostProcess: undefined },
@@ -79,7 +94,10 @@ export function RegisterSaveAndLoadStateHandler(room: StateHandlerRoom): void {
       } = ValidateAllInputs(data, inputList);
 
       const player: Player | null = room.state.getPlayerBySessionId(client.sessionId);
-      if (player === null) return;
+      if (player === null) {
+        logger.warn({ client: client.sessionId }, "Player not found in Room");
+        return;
+      }
 
       const mapPromise = SaveHistoryDB.getInstance().selectByCampaignIdWithMap(
         validateParams.map_id,
@@ -120,7 +138,19 @@ export function RegisterSaveAndLoadStateHandler(room: StateHandlerRoom): void {
       const initiativeSave: InitiativeHistoryDAO = savedHistoryData[3][0];
       const summonsState: ShJoinInterface[] = savedHistoryData[4];
 
+      logger.info(
+        {
+          map: mapInterface,
+          players: playerStates,
+          enemies: enemyStates,
+          initiative: initiativeSave,
+          summons: summonsState,
+        },
+        "Finished loading states from DB",
+      );
+
       // Start from a clean slate
+      logger.info("Resetting Game");
       room.state.RESET_GAME();
 
       // Load the map first.
@@ -204,12 +234,16 @@ export function RegisterSaveAndLoadStateHandler(room: StateHandlerRoom): void {
         room.state.enemies.set(`${insertEnemy.id}`, insertEnemy);
       });
     } catch (error) {
-      console.error(error);
+      logger.error({ err: error }, "Unexpected Error");
     }
   });
 
   room.onMessage("exportMap", (client: Client, data: any): void => {
-    if (!authenticateHostAction(client.sessionId, room)) return;
+    logger.info({ client: client.sessionId, data: data }, "Started exportMap");
+    if (!authenticateHostAction(client.sessionId, room)) {
+      logger.warn({ client: client.sessionId }, "Client Is not authorized for this action");
+      return;
+    }
     try {
       const inputList: ValidationInputType[] = [
         { name: "isAutosave", type: "boolean", PostProcess: undefined },
@@ -224,7 +258,7 @@ export function RegisterSaveAndLoadStateHandler(room: StateHandlerRoom): void {
         saveState(room, client);
       }
     } catch (error) {
-      console.error(error);
+      logger.error({ err: error }, "Unexpected Error");
     }
   });
 }

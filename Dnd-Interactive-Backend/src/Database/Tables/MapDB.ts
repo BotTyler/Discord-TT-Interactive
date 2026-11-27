@@ -2,6 +2,7 @@ import { QueryResult } from "pg";
 import Database from "../Database";
 import { DAO, DatabaseBase } from "../Interface/DatabaseObjectInterface";
 import { CampaignsDao } from "../../shared/LoadDataInterfaces";
+import { logger } from "../../logger/logger";
 
 export class MapDAO extends DAO {
   public readonly id?: number;
@@ -45,29 +46,6 @@ export class MapDB extends DatabaseBase<MapDAO> {
     super("Map");
   }
 
-  // async selectMapById(id: number): Promise<CampaignsDao[]> {
-  //   const query = `SELECT * FROM public."Map" as mm JOIN public."Image_Catalog" as IC on IC.img_catalog_id = mm.image_id where id = $1 ORDER BY id DESC;`;
-  //   console.log(query);
-  //
-  //   const result: QueryResult<CampaignsDao> | null = await Database.getInstance()
-  //     .query(query, [id])
-  //     .catch((e) => {
-  //       console.error(`Could not ***select*** State history (${this.tableName})\n\t${e}`);
-  //       return null;
-  //     });
-  //   const rows: CampaignsDao[] = result === null ? [] : result.rows;
-  //   return rows.map((ele: CampaignsDao): CampaignsDao => {
-  //     return {
-  //       id: +ele.id,
-  //       player_id: ele.player_id,
-  //       name: ele.name,
-  //       image_name: ele.image_name,
-  //       height: +ele.height,
-  //       width: +ele.width,
-  //     };
-  //   });
-  // }
-
   async selectMapByUserId(userId: string): Promise<CampaignsDao[]> {
     const query = `
     SELECT 
@@ -82,12 +60,12 @@ export class MapDB extends DatabaseBase<MapDAO> {
       JOIN Public."Image_Catalog" AS IC on IC.img_catalog_id = MP.image_id 
     WHERE MP.player_id = $1
       AND MP.is_deleted = false;`;
-    console.log(query);
+    logger.debug(query);
 
     const result: QueryResult<CampaignsDao> | null = await Database.getInstance()
       .query(query, [userId])
       .catch((e) => {
-        console.error(`Could not gather map data from the user`, e);
+        logger.error({ table: this.tableName, query: query, err: e }, "Could not ***select***");
         return null;
       });
 
@@ -111,11 +89,11 @@ export class MapDB extends DatabaseBase<MapDAO> {
       SET is_deleted = true
       WHERE id = $1
     `;
-    console.log(query);
+    logger.debug(query);
     const result: QueryResult<any> | null = await Database.getInstance()
       .query(query, [id])
       .catch((e) => {
-        console.error(`Could not delete map`, e);
+        logger.error({ table: this.tableName, query: query, err: e }, "Could not ***update***");
         return null;
       });
 

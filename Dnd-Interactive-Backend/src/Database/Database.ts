@@ -1,4 +1,5 @@
 import { Pool } from "pg";
+import { logger } from "../logger/logger";
 export default class Database {
   private static db: Pool | undefined = undefined;
 
@@ -21,7 +22,7 @@ export default class Database {
       Database.db?.end();
       Database.db = undefined;
     } catch (error) {
-      console.error(error);
+      logger.error({ err: error }, "Unexpected Error");
     }
   }
 }

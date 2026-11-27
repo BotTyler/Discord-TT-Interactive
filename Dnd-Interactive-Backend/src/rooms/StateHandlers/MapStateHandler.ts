@@ -13,10 +13,15 @@ import {
   ValidationInputType,
 } from "../../Util/Utils";
 import { StateHandlerRoom } from "../StateHandlerRoom";
+import { logger } from "../../logger/logger";
 
 export function RegisterMapStateHandler(room: StateHandlerRoom): void {
   room.onMessage("setPlayerSize", (client: Client, data: any): void => {
-    if (!authenticateHostAction(client.sessionId, room)) return;
+    logger.info({ client: client.sessionId, data: data }, "Started setPlayerSize");
+    if (!authenticateHostAction(client.sessionId, room)) {
+      logger.warn({ client: client.sessionId }, "Client Is not authorized for this action");
+      return;
+    }
     try {
       const inputList: ValidationInputType[] = [
         { name: "size", type: "number", PostProcess: undefined },
@@ -26,16 +31,23 @@ export function RegisterMapStateHandler(room: StateHandlerRoom): void {
         size: number;
       } = ValidateAllInputs(data, inputList);
 
-      if (room.state.map === null) return;
+      if (room.state.map === null) {
+        logger.warn({ client: client.sessionId }, "Room map not initialized");
+        return;
+      }
 
       room.state.map.iconHeight = validateParams.size;
     } catch (error) {
-      console.error(error);
+      logger.error({ err: error }, "Unexpected Error");
     }
   });
 
   room.onMessage("setGameMap", async (client: Client, data: any): Promise<void> => {
-    if (!authenticateHostAction(client.sessionId, room)) return;
+    logger.info({ client: client.sessionId, data: data }, "Started setGameMap");
+    if (!authenticateHostAction(client.sessionId, room)) {
+      logger.warn({ client: client.sessionId }, "Client Is not authorized for this action");
+      return;
+    }
     try {
       const inputList: ValidationInputType[] = [
         { name: "mapBase64", type: "string", PostProcess: undefined },
@@ -50,17 +62,27 @@ export function RegisterMapStateHandler(room: StateHandlerRoom): void {
       } = ValidateAllInputs(data, inputList);
 
       const player: Player | null = room.state.getPlayerBySessionId(client.sessionId);
-      if (player === null) return;
+      if (player === null) {
+        logger.warn({ client: client.sessionId }, "Player cannot be found in the Room");
+        return;
+      }
 
       const imageCatalog: ImageCatalogDAO | null =
         await ImageCatalogDB.getInstance().selectByImageSrc(validateParams.mapBase64);
-      if (imageCatalog === null) return;
+      if (imageCatalog === null) {
+        logger.warn(
+          { client: client.sessionId, map: validateParams.mapBase64 },
+          "Map Image cannot be found",
+        );
+        return;
+      }
 
       const mapId: number | null = await MapDB.getInstance().create(
         new MapDAO(imageCatalog.img_catalog_id!, validateParams.name, player.userId),
       );
       if (mapId === null) return;
 
+      logger.info("Resetting Game");
       room.state.RESET_GAME();
       room.state.map = new MapData(
         {
@@ -83,12 +105,16 @@ export function RegisterMapStateHandler(room: StateHandlerRoom): void {
       // Make sure at least one save is made.
       saveState(room);
     } catch (error) {
-      console.error(error);
+      logger.error({ err: error }, "Unexpected Error");
     }
   });
 
   room.onMessage("deleteMap", async (client: Client, data: any): Promise<void> => {
-    if (!authenticateHostAction(client.sessionId, room)) return;
+    logger.info({ client: client.sessionId, data: data }, "Started deleteMap");
+    if (!authenticateHostAction(client.sessionId, room)) {
+      logger.warn({ client: client.sessionId }, "Client Is not authorized for this action");
+      return;
+    }
     try {
       const inputList: ValidationInputType[] = [
         { name: "campaign_id", type: "number", PostProcess: undefined },
@@ -99,7 +125,10 @@ export function RegisterMapStateHandler(room: StateHandlerRoom): void {
       } = ValidateAllInputs(data, inputList);
 
       const player: Player | null = room.state.getPlayerBySessionId(client.sessionId);
-      if (player === null) return;
+      if (player === null) {
+        logger.warn({ client: client.sessionId }, "Player is not found within Room");
+        return;
+      }
 
       // MapDB.getInstance().delete;
       await MapDB.getInstance().deleteMap(validateParams.campaign_id);
@@ -108,26 +137,45 @@ export function RegisterMapStateHandler(room: StateHandlerRoom): void {
       );
       client.send("CampaignResult", resultingList);
     } catch (error) {
-      console.error(error);
+      logger.error({ err: error }, "Unexpected Error");
     }
   });
 
-  room.onMessage("clearMap", (client: Client, _data: any): void => {
-    if (!authenticateHostAction(client.sessionId, room)) return;
+  room.onMessage("clearMap", (client: Client, data: any): void => {
+    logger.info({ client: client.sessionId, data: data }, "Started clearMap");
+    if (!authenticateHostAction(client.sessionId, room)) {
+      logger.warn({ client: client.sessionId }, "Client Is not authorized for this action");
+      return;
+    }
     saveState(room);
+    logger.info("Resetting Game");
     room.state.RESET_GAME();
   });
 
-  room.onMessage("nextInitiativeIndex", (client: Client, _data: any): void => {
-    if (!authenticateHostAction(client.sessionId, room)) return;
-    if (room.state.map === null) return;
+  room.onMessage("nextInitiativeIndex", (client: Client, data: any): void => {
+    logger.info({ client: client.sessionId, data: data }, "Started nextInitiativeIndex");
+    if (!authenticateHostAction(client.sessionId, room)) {
+      logger.warn({ client: client.sessionId }, "Client Is not authorized for this action");
+      return;
+    }
+    if (room.state.map === null) {
+      logger.warn({ client: client.sessionId }, "Room map is not initialized");
+      return;
+    }
     const nInit: number = room.state.map.initiativeIndex + 1;
     const initSize: number = room.state.players.size + room.state.enemies.size;
     room.state.map.initiativeIndex = nInit % initSize;
   });
-  room.onMessage("resetInitiativeIndex", (client: Client, _data: any): void => {
-    if (!authenticateHostAction(client.sessionId, room)) return;
-    if (room.state.map === null) return;
+  room.onMessage("resetInitiativeIndex", (client: Client, data: any): void => {
+    logger.info({ client: client.sessionId, data: data }, "Started resetInitiativeIndex");
+    if (!authenticateHostAction(client.sessionId, room)) {
+      logger.warn({ client: client.sessionId }, "Client Is not authorized for this action");
+      return;
+    }
+    if (room.state.map === null) {
+      logger.warn({ client: client.sessionId }, "Room Map is not initialized");
+      return;
+    }
     room.state.map.initiativeIndex = 0;
   });
 }

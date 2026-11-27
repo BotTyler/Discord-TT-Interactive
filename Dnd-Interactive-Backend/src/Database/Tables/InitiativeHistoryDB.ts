@@ -1,6 +1,7 @@
 import { QueryResult } from "pg";
 import Database from "../Database";
 import { DAO, DatabaseBase } from "../Interface/DatabaseObjectInterface";
+import { logger } from "../../logger/logger";
 
 export class InitiativeHistoryDAO extends DAO {
   public readonly id?: number;
@@ -41,12 +42,12 @@ export class InitiativeHistoryDB extends DatabaseBase<InitiativeHistoryDAO> {
 
   async selectByHistoryId(history_id: number): Promise<InitiativeHistoryDAO[]> {
     const query = `SELECT * FROM public."Initiative_History" where history_id = $1;`;
-    console.log(query);
+    logger.debug(query);
 
     const result: QueryResult<InitiativeHistoryDAO> | null = await Database.getInstance()
       .query(query, [history_id])
       .catch((e) => {
-        console.error(`Could not ***select*** (${this.tableName})\n\t${e}`);
+        logger.error({ table: this.tableName, query: query, err: e }, "Could not ***select***");
         return null;
       });
     const rows: InitiativeHistoryDAO[] = result === null ? [] : result.rows;
